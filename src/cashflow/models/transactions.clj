@@ -21,7 +21,7 @@
   (with-open [rdr (BufferedReader.
                     (FileReader. file))]
     (let [lines (doall (line-seq rdr))]
-      (for [line lines]
+      (for [line (rest lines)]
         (clojure.string/split line #"\t")))))
 
 
