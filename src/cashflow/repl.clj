@@ -3,6 +3,8 @@
         ring.server.standalone
         print.foo
         [ring.middleware file-info file])
+  (:require [clj-time.coerce :as coerce]
+           [clj-time.core :as time])
 
   (:require [cashflow.models.transactions :as trans]))
 
@@ -26,11 +28,11 @@
     (let [port (if port (Integer/parseInt port) 8080)]
       (reset! server
               (serve (get-handler)
-                     {:port port
-                      :init init
+                     {:port         port
+                      :init         init
                       :auto-reload? true
-                      :destroy destroy
-                      :join true}))
+                      :destroy      destroy
+                      :join         true}))
       (println (str "You can view the site at http://localhost:" port))))
 
   (defn stop-server []
@@ -38,12 +40,22 @@
     (reset! server nil)))
 
 
-(def x (trans/parse-file (.getFile (clojure.java.io/resource "test-transactions.csv"))))
+
+#_(def x (trans/parse-file (.getFile (clojure.java.io/resource "test-transactions.csv"))))
+
+(println "BEFORE" @trans/transactions)
+(trans/add-transactions (.getFile (clojure.java.io/resource "test-transactions.csv")))
+(print "AFTER" (count @trans/transactions))
+
+(clojure.pprint/pprint  (trans/transactions-at-date (time/date-time 2009 05 20)))
 
 
 
 
-(println (second (trans/lines->transactions
+#_(trans/add-transactions (.getFile (clojure.java.io/resource "test-transactions.csv")))
+
+
+#_(println (second (trans/lines->transactions
                   [
                     ["06.05.2009" "06.05.2009" "VARER" "05.05 PRINCESS AVD. STENERSGT. 1 OSLO" "-119,00" "17017470066"]
                     ["06.05.2009" "06.05.2009" "VARER" "05.05 MENY OSLO CITY STENERSGT.1 OSLO" "-159,20" "17017532866"]
@@ -55,7 +67,3 @@
                     ["28.04.2009" "28.04.2009" "GIRO" "Nettgiro fra: Odin Hole Standal Betalt: 27.04.09" "2000,00" "50391079152" "3910.28.87488"]
                     ["28.04.2009" "28.04.2009" "L?N" "Betalt: 28.04.09" "-5297,00" "20219991"]
                     ["22.04.2009" "22.04.2009" "GIRO" "Nettgiro fra: Odin Hole Standal Betalt: 21.04.09" "4000,00" "50391019152" "3910.28.87488"]])))
-
-
-
-
