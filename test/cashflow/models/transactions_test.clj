@@ -28,4 +28,12 @@
                           (count @transactions) => 57))
 
 
+(fact "Can find transactions for a day"
+      (transactions-at-date
+        [{:date (t/date-time 2014 05 10) :code "Varer" :description "wrong date" :amount 100}
+         {:date (t/date-time 2014 05 11) :code "Varer" :description "right date" :amount 200}]
+        (t/date-time 2014 05 11))
+      =>
+      [{:date (t/date-time 2014 05 11) :code "Varer" :description "right date" :amount 200}])
+
 ;; TODO create a test for filtering transactions by day

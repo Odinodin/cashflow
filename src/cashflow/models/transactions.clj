@@ -37,6 +37,6 @@
     (t-coerce/to-local-date date2)))
 
 
-(defn transactions-at-date [query-date]
-  (filter #(-> % :date (same-date query-date)) @transactions))
+(defn transactions-at-date [transaction-list query-date]
+  (filter #(-> % :date (same-date query-date)) transaction-list))
 
