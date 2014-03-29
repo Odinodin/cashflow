@@ -33,7 +33,24 @@
         [{:date (t/date-time 2014 05 10) :code "Varer" :description "wrong date" :amount 100}
          {:date (t/date-time 2014 05 11) :code "Varer" :description "right date" :amount 200}]
         (t/date-time 2014 05 11))
-      =>
-      [{:date (t/date-time 2014 05 11) :code "Varer" :description "right date" :amount 200}])
 
-;; TODO create a test for filtering transactions by day
+      => [{:date (t/date-time 2014 05 11) :code "Varer" :description "right date" :amount 200}])
+
+(fact "Can filter transactions for a period"
+      (transactions-in-interval
+        [{:date (t/date-time 2014 5 1) :code "Varer" :description "inside" :amount 1}
+         {:date (t/date-time 2014 5 25) :code "Varer" :description "inside" :amount 3}
+         {:date (t/date-time 2014 6 30) :code "Varer" :description "inside" :amount 2}
+         {:date (t/date-time 2000 1 1) :code "Varer" :description "outside" :amount 4}]
+        (t/interval
+          (t/date-time 2014 5 1)
+          (t/date-time 2014 6 30 23 59 59)))
+
+      =>
+      [{:date (t/date-time 2014 5 1) :code "Varer" :description "inside" :amount 1}
+       {:date (t/date-time 2014 5 25) :code "Varer" :description "inside" :amount 3}
+       {:date (t/date-time 2014 6 30) :code "Varer" :description "inside" :amount 2}])
+
+
+
+

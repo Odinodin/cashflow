@@ -31,12 +31,17 @@
        lines->transactions
        (swap! transactions into)))
 
-(defn- same-date [date1 date2]
+(defn- same-date? [date1 date2]
   (=
     (t-coerce/to-local-date date1)
     (t-coerce/to-local-date date2)))
 
 
 (defn transactions-at-date [transaction-list query-date]
-  (filter #(-> % :date (same-date query-date)) transaction-list))
+  (filter #(-> % :date (same-date? query-date)) transaction-list))
+
+(defn transactions-in-interval [transaction-list interval]
+  (filter #(->> %
+                :date
+                (t/within? interval)) transaction-list))
 

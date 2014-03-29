@@ -43,13 +43,19 @@
 
 #_(def x (trans/parse-file (.getFile (clojure.java.io/resource "test-transactions.csv"))))
 
-(println "BEFORE" @trans/transactions)
+#_(println "BEFORE" @trans/transactions)
 (trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
-(print "AFTER" (count @trans/transactions))
+#_(println "AFTER" (count @trans/transactions))
 
-(clojure.pprint/pprint  (trans/transactions-at-date @trans/transactions (time/date-time 2009 05 19)))
+#_(clojure.pprint/pprint  (trans/transactions-at-date @trans/transactions (time/date-time 2009 05 19)))
 
-
+(println "In interval")
+(clojure.pprint/pprint
+  (trans/transactions-in-interval
+    @trans/transactions
+    (time/interval
+      (time/date-time 2009 05 1)
+      (time/date-time 2009 05 5))))
 
 
 #_(trans/add-transactions (.getFile (clojure.java.io/resource "test-transactions.csv")))
