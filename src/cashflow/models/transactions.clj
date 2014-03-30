@@ -15,8 +15,8 @@
 (defn lines->transactions [lines-as-vectors]
   (for [[date date2 code description amount & dontcare] lines-as-vectors]
     {:date (t-format/parse (t-format/formatter "dd.MM.yyyy") date) :code code :description description :amount (-> amount
-                                                                                                     (clojure.string/replace "," ".")
-                                                                                                     bigdec)}))
+                                                                                                                   (clojure.string/replace "," ".")
+                                                                                                                   bigdec)}))
 (defn parse-file [file]
   {:pre [(not (nil? file))]}
   (with-open [rdr (BufferedReader.
@@ -36,7 +36,7 @@
     (t-coerce/to-local-date date1)
     (t-coerce/to-local-date date2)))
 
-
+;; Queries
 (defn transactions-at-date [transaction-list query-date]
   (filter #(-> % :date (same-date? query-date)) transaction-list))
 
