@@ -3,7 +3,8 @@
 ;; TODO put tag rules in an atom and add functionality for adding and removing rules
 ;; Tags
 (def tagging-rules
-  [{:tag "butikk" :regexes [#"REMA" #"KIWI" #"RIMI"]}
+  [{:tag "butikk" :regexes [#"Rema" #"Kiwi" #"Rimi"]}
+   {:tag "kafe" :regexes [#"Narvesen"]}
    {:tag "lonn" :regexes [#"Kodemaker" #"Ullevål"]}])
 
 (defn match-tag-rules
@@ -19,8 +20,10 @@
   "Run all tag rules over all transactions"
   [transactions tag-rules]
   (map
-    (fn [trans]
-      (assoc trans :tags (->>
-                           (match-tag-rules tag-rules (:description trans))
-                           (map :tag))))
+    #(assoc % :tags (->>
+                         (match-tag-rules tag-rules (:description %))
+                         (map :tag)))
     transactions))
+
+(defn get-tagged-transactions [transactions tag]
+  (filter #(some #{tag} (:tags %)) transactions))

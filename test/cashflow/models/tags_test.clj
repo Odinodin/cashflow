@@ -18,3 +18,13 @@
          {:tag "fish" :regexes [#"Shark"]}])
 
       => [{:description "Monkeys and Sharks" :tags ["animals" "fish"]}])
+
+(fact "can get transactions with tag"
+      (get-tagged-transactions [] "a") => []
+      (get-tagged-transactions [{:tags ["a"]}] "a") => [{:tags ["a"]}]
+
+      (get-tagged-transactions [{:tags ["a" "b"] :description "something"}
+                                {:tags ["c"] :description "something else"}]
+                               "a")
+      => [{:tags ["a" "b"] :description "something"}])
+
