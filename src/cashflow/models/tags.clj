@@ -1,11 +1,15 @@
 (ns cashflow.models.tags)
 
-;; TODO put tag rules in an atom and add functionality for adding and removing rules
-;; Tags
-(def tagging-rules
-  [{:tag "butikk" :regexes [#"Rema" #"Kiwi" #"Rimi"]}
-   {:tag "kafe" :regexes [#"Narvesen"]}
-   {:tag "lonn" :regexes [#"Kodemaker" #"Ullevål"]}])
+
+;; Contains a list of all tags.
+;; A tag is represented as {:tag "name" :regexes [#"list" #"of" #"regexes"]}
+(def tags (atom []))
+
+(defn add-tag! [tag]
+  (swap! tags conj tag))
+
+(defn remove-tag! [tag-name]
+  (swap! tags #(remove (fn [tag] (= (:tag tag) tag-name)) %)))
 
 (defn match-tag-rules
   "Find matching tag rules by returning all rules that

@@ -28,3 +28,14 @@
                                "a")
       => [{:tags ["a" "b"] :description "something"}])
 
+
+(against-background
+  [(before :contents (reset! tags []))]
+  (fact "Can add tags"
+        @tags => empty
+        (add-tag! {:tag "store" :regexes [#"Kiwi"]}) => not-empty
+        (count @tags) => 1)
+  (fact "Can remove tags"
+        (count @tags) => 1
+        (remove-tag! "store") => empty
+        @tags => empty))

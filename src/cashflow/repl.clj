@@ -13,14 +13,9 @@
 #_(trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
 
 
-(def single-day (trans/transactions-at-date @trans/transactions (t/date-time 2009 05 19)))
-(pprint single-day)
+;; Tags
+(def tagging-rules
+  [{:tag "butikk" :regexes [#"Rema" #"Kiwi" #"Rimi"]}
+   {:tag "kafe" :regexes [#"Narvesen"]}
+   {:tag "lonn" :regexes [#"Kodemaker" #"Ullevål"]}])
 
-
-(def tagged (tags/tag-transactions single-day tags/tagging-rules))
-
-(pprint (trans/sum-transactions single-day))
-
-
-
-(pprint (tags/get-tagged-transactions tagged "kafe"))
