@@ -21,11 +21,12 @@
           {:date (t/date-time 2009 05 06) :code "VARER" :description "REMA 1000" :amount -159.20M}])
 
 
-(against-background [(before :contents (reset! transactions []))]
-                    (fact "Can add transactions"
-                          @transactions => empty
-                          (add-transactions! test-file) => not-empty
-                          (count @transactions) => 57))
+(against-background
+  [(before :contents (reset! transactions []))]
+  (fact "Can add transactions"
+        @transactions => empty
+        (add-transactions! test-file) => not-empty
+        (count @transactions) => 57))
 
 
 (fact "Can find transactions for a day"
@@ -52,5 +53,8 @@
        {:date (t/date-time 2014 6 30) :code "Varer" :description "inside" :amount 2}])
 
 
+(fact "Can sum transactions"
+      (sum-transactions [{:amount 10} {:amount 20} {:amount 30}]) => 60
+      (sum-transactions []) => 0)
 
 

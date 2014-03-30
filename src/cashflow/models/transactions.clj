@@ -45,3 +45,7 @@
                 :date
                 (t/within? interval)) transaction-list))
 
+
+;; Operations over transactions
+(defn sum-transactions [transaction-list]
+  (reduce + (map :amount transaction-list)))
