@@ -5,20 +5,31 @@
             [hiccup.middleware :refer [wrap-base-url]]
             [compojure.handler :as handler]
             [compojure.route :as route]
-            [cashflow.routes.home :refer [home-routes]]))
+            [ring.middleware.json :as middleware]
+            [cashflow.encoding :as encoding]
+            [cashflow.routes.home :refer [home-routes]]
+            [cashflow.routes.transactions :refer [transactions-routes]]))
+
+
 
 (defn init []
-  (println "cashflow is starting"))
+  (println "cashflow is starting")
+  (encoding/add-common-json-encoders!))
 
 (defn destroy []
   (println "cashflow is shutting down"))
 
 (defroutes app-routes
-  (route/resources "/")
-  (route/not-found "Not Found"))
+           (route/resources "/")
+           (route/not-found "Not Found"))
 
 (def app
-  (-> (routes home-routes app-routes)
+  (-> (routes
+        home-routes
+        (-> transactions-routes
+            (middleware/wrap-json-body)
+            (middleware/wrap-json-response))
+        app-routes)
       (handler/site)
       (wrap-base-url)))
 

@@ -5,6 +5,8 @@
                  [compojure "1.1.6"]
                  [hiccup "1.0.5"]
                  [ring-server "0.3.1"]
+                 [ring/ring-json "0.3.0"]
+                 [cheshire "5.3.1"]
                  [clj-time "0.6.0"]]
   :plugins [[lein-ring "0.8.10"]]
   :ring {:handler cashflow.handler/app
