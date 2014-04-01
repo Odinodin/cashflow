@@ -2,8 +2,7 @@
   (:require [clojure.java.io :as io]
             [clj-time.core :as t]
             [clj-time.format :as t-format]
-            [clj-time.coerce :as t-coerce]
-            )
+            [clj-time.coerce :as t-coerce])
   (:import [java.io BufferedReader FileReader]))
 
 ;; Contains all transactions.

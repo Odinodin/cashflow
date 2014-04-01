@@ -29,5 +29,8 @@
                          (map :tag)))
     transactions))
 
+(defn tag-and-update-transactions! [transactions tags]
+  (reset! transactions (tag-transactions @transactions @tags)))
+
 (defn get-tagged-transactions [transactions tag]
   (filter #(some #{tag} (:tags %)) transactions))

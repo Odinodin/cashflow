@@ -12,10 +12,11 @@
 
 #_(trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
 
+(tags/add-tag! {:tag "butikk" :regexes [#"Rema" #"Kiwi" #"Rimi"]})
 
-;; Tags
-(def tagging-rules
-  [{:tag "butikk" :regexes [#"Rema" #"Kiwi" #"Rimi"]}
-   {:tag "kafe" :regexes [#"Narvesen"]}
-   {:tag "lonn" :regexes [#"Kodemaker" #"Ullevål"]}])
+(tags/tag-and-update-transactions! trans/transactions tags/tags)
+
+(tags/get-tagged-transactions @trans/transactions "butikk")
+
+
 
