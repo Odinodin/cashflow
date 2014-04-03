@@ -1,5 +1,5 @@
 (ns cashflow.handler
-  (:require [compojure.core :refer [defroutes routes]]
+  (:require [compojure.core :refer [defroutes routes context ANY]]
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.file-info :refer [wrap-file-info]]
             [hiccup.middleware :refer [wrap-base-url]]
@@ -8,9 +8,8 @@
             [ring.middleware.json :as middleware]
             [cashflow.encoding :as encoding]
             [cashflow.routes.home :refer [home-routes]]
-            [cashflow.routes.transactions :refer [transactions-routes]]))
-
-
+            [cashflow.routes.transactions :refer [transactions-routes]]
+            [cashflow.routes.tags :refer [tags-routes]]))
 
 (defn init []
   (println "cashflow is starting")
@@ -23,14 +22,17 @@
            (route/resources "/")
            (route/not-found "Not Found"))
 
+;; TODO Extract routes that need json-body/response middlewares.
 (def app
-  (-> (routes
-        home-routes
-        (-> transactions-routes
-            (middleware/wrap-json-body)
-            (middleware/wrap-json-response))
-        app-routes)
-      (handler/site)
-      (wrap-base-url)))
+  (->
+    (routes
+      home-routes
+      transactions-routes
+      tags-routes
+      app-routes)
+    (handler/site)
+    (wrap-base-url)
+    (middleware/wrap-json-body)
+    (middleware/wrap-json-response)))
 
 

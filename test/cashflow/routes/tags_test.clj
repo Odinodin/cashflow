@@ -1,20 +1,17 @@
-(ns cashflow.routes.transactions-routes-test
+(ns cashflow.routes.tags-test
   (:require [ring.mock.request :as ring-mock]
             [midje.sweet :refer :all]
+            cheshire.core
             [cashflow.handler :as cashflow]
-            [cashflow.models.transactions :as trans]
+            [cashflow.models.tags :as tags]
             [cashflow.json-util :as json-util]))
 
-(fact "can list transactions"
-      (reset! trans/transactions [{:description "ape" :amount 1 :tags ["store"]}])
+(fact "can list tags"
+      (reset! tags/tags [{:tag "store" :regexes [#"Rimi" #"Rema"]}])
       (let [response (->
                        (cashflow/app
-                         (ring-mock/request :get "/transactions"))
+                         (ring-mock/request :get "/tags"))
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
-        (:body response) => [{:description "ape" :amount 1 :tags ["store"]}]))
-
-
-
-
+        (:body response) => [{:tag "store" :regexes ["Rimi" "Rema"]}]))
