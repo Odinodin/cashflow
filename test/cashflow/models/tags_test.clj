@@ -38,4 +38,7 @@
   (fact "Can remove tags"
         (count @tags) => 1
         (remove-tag! "store") => empty
-        @tags => empty))
+        @tags => empty)
+  (fact "Can get tag by name"
+        (add-tag! {:tag "stuff" :regexes []}) => not-empty
+        (tagname->tag "stuff") => {:tag "stuff" :regexes []}))

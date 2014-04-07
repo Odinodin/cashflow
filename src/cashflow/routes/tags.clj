@@ -4,4 +4,5 @@
     [compojure.core :refer :all]))
 
 (defroutes tags-routes
+           (GET "/tags/:tagname" [tagname] {:body (tags/tagname->tag tagname)})
            (GET "/tags" [] {:body @tags/tags}))

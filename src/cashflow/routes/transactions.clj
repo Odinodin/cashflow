@@ -5,7 +5,4 @@
     [ring.middleware.json :as middleware]))
 
 (defroutes transactions-routes
-           (->
-             (GET "/transactions" [] {:body @trans/transactions})
-             (middleware/wrap-json-body)
-             (middleware/wrap-json-response)))
+           (GET "/transactions" [] {:body @trans/transactions}))

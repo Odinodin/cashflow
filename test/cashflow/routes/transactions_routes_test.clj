@@ -14,7 +14,3 @@
 
         response => (contains {:body anything :headers anything :status 200})
         (:body response) => [{:description "ape" :amount 1 :tags ["store"]}]))
-
-
-
-

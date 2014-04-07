@@ -34,3 +34,7 @@
 
 (defn get-tagged-transactions [transactions tag]
   (filter #(some #{tag} (:tags %)) transactions))
+
+(defn tagname->tag [tagname]
+  (println (str "TAGNAME TAG" tagname))
+  (first (filter #(= tagname (:tag %)) @tags)))

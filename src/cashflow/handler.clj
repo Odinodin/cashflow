@@ -27,8 +27,8 @@
   (->
     (routes
       home-routes
-      transactions-routes
       tags-routes
+      transactions-routes
       app-routes)
     (handler/site)
     (wrap-base-url)
