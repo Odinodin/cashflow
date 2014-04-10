@@ -43,7 +43,7 @@
 
 #_(stop-server)
 
-#_(trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
+(trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
 
 #_(tags/add-tag! {:tag "butikk" :regexes [#"Rema" #"Kiwi" #"Rimi"]})
 

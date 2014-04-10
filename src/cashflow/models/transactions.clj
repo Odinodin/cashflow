@@ -9,14 +9,20 @@
 ;; Contains a list of maps with the following keys: [:date :code :description :amount]
 (def transactions (atom []))
 
+(defn- string->date [date]
+  (t-format/parse (t-format/formatter "dd.MM.yyyy") date))
+
+(defn- iso8600string->date [date]
+  (t-format/parse (t-format/formatter "yyyy-MM-dd") date))
+
 ;; Example line:
 ;;  Date                       Code   Description                             Amount    Reference
 ;; ["06.05.2009" "06.05.2009" "VARER" "05.05 PRINCESS AVD. STENERSGT. 1 OSLO" "-119,00" "17017470066"]
 (defn lines->transactions [lines-as-vectors]
   (for [[date date2 code description amount & dontcare] lines-as-vectors]
-    {:date (t-format/parse (t-format/formatter "dd.MM.yyyy") date) :code code :description description :amount (-> amount
-                                                                                                                   (clojure.string/replace "," ".")
-                                                                                                                   bigdec)}))
+    {:date (string->date date) :code code :description description :amount (-> amount
+                                                                               (clojure.string/replace "," ".")
+                                                                               bigdec)}))
 (defn parse-file [file]
   {:pre [(not (nil? file))]}
   (with-open [rdr (BufferedReader.
@@ -38,13 +44,27 @@
 
 ;; Queries
 (defn transactions-at-date [transaction-list query-date]
-  (filter #(-> % :date (same-date? query-date)) transaction-list))
+  (->>
+    (filter #(-> % :date (same-date? query-date)) transaction-list)
+    (sort-by :date)))
+
 
 (defn transactions-in-interval [transaction-list interval]
-  (filter #(->> %
-                :date
-                (t/within? interval)) transaction-list))
+  (->>
+    (filter #(->>
+              %
+              :date
+              (t/within? interval)) transaction-list)
+    (sort-by :date)))
 
+(defn transactions-in [start-date end-date]
+  (transactions-in-interval
+    @transactions
+    (t/interval (iso8600string->date start-date)
+                (iso8600string->date end-date))))
+
+(defn transactions-at [query-date]
+  (transactions-at-date @transactions (iso8600string->date query-date)))
 
 ;; Operations over transactions
 (defn sum-transactions [transaction-list]
