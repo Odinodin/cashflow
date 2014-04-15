@@ -28,3 +28,12 @@
                        json-util/json-parse-body)]
         response => (contains {:body anything :headers anything :status 200})
         (:body response) => {:tag "power" :regexes ["Pwr"]}))
+
+(fact "can delete tags"
+      (reset! tags/tags [{:tag "power" :regexes [#"Pwr"]}])
+      (let [response (->
+                       (cashflow/app
+                         (ring-mock/request :delete "/tags/power"))
+                       json-util/json-parse-body)]
+        response => (contains {:body anything :headers anything :status 200})
+        (count @tags/tags) => 0))

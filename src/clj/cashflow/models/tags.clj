@@ -36,5 +36,7 @@
   (filter #(some #{tag} (:tags %)) transactions))
 
 (defn tagname->tag [tagname]
-  (println (str "TAGNAME TAG" tagname))
   (first (filter #(= tagname (:tag %)) @tags)))
+
+(defn delete [tagname]
+  (swap! tags #(remove (fn [tag-rule] (= (:tag tag-rule) tagname)))))

@@ -10,7 +10,6 @@
   (:require [cashflow.models.transactions :as trans]
             [cashflow.models.tags :as tags]))
 
-
 (defonce server (atom nil))
 
 (defn get-handler []
@@ -43,7 +42,7 @@
 
 #_(stop-server)
 
-(trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
+#_(trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
 
 #_(tags/add-tag! {:tag "butikk" :regexes [#"Rema" #"Kiwi" #"Rimi"]})
 
