@@ -1,4 +1,4 @@
-(ns acme.xhr
+(ns cashflow.xhr
   (:require [goog.events :as events]))
 
 (def ^:private meths
