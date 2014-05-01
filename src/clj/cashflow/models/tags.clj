@@ -39,4 +39,4 @@
   (first (filter #(= tagname (:tag %)) @tags)))
 
 (defn delete [tagname]
-  (swap! tags #(remove (fn [tag-rule] (= (:tag tag-rule) tagname)))))
+  (swap! tags #(remove (fn [tag-rule] (= (:tag tag-rule) tagname)) %)))

@@ -1,0 +1,14 @@
+=========
+TODO
+=========
+
+Trekke ut atoms ut i en map som sendes inn overalt ?
+
+
+tagge
+    oppdatere transactions med tags ved import
+    kunne oppdatere tags i transactions
+
+- eksponere REST-grensesnitt
+
+- GUI

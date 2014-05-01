@@ -10,6 +10,7 @@
                  [ring/ring-json "0.3.0"]
                  [cheshire "5.3.1"]
                  [clj-time "0.6.0"]
+                 [org.clojure/tools.nrepl "0.2.3"]
 
                  ;; Clojurescript
                  [org.clojure/clojurescript "0.0-2173"]

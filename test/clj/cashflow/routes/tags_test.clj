@@ -13,7 +13,7 @@
       (reset! tags/tags [{:tag "store" :regexes [#"Rimi" #"Rema"]}])
       (let [response (->
                        (cashflow/app
-                         (ring-mock/request :get "/tags"))
+                         (ring-mock/request :get "/api/tags"))
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
@@ -24,7 +24,7 @@
                          {:tag "stuff" :regexes [#"stuff"]}])
       (let [response (->
                        (cashflow/app
-                         (ring-mock/request :get "/tags/power"))
+                         (ring-mock/request :get "/api/tags/power"))
                        json-util/json-parse-body)]
         response => (contains {:body anything :headers anything :status 200})
         (:body response) => {:tag "power" :regexes ["Pwr"]}))
@@ -33,7 +33,7 @@
       (reset! tags/tags [{:tag "power" :regexes [#"Pwr"]}])
       (let [response (->
                        (cashflow/app
-                         (ring-mock/request :delete "/tags/power"))
+                         (ring-mock/request :delete "/api/tags/power"))
                        json-util/json-parse-body)]
         response => (contains {:body anything :headers anything :status 200})
         (count @tags/tags) => 0))

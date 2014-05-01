@@ -9,7 +9,7 @@
       (reset! trans/transactions [{:description "ape" :amount 1 :tags ["store"]}])
       (let [response (->
                        (cashflow/app
-                         (ring-mock/request :get "/transactions"))
+                         (ring-mock/request :get "/api/transactions"))
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})

@@ -5,6 +5,7 @@
             [hiccup.middleware :refer [wrap-base-url]]
             [compojure.handler :as handler]
             [compojure.route :as route]
+            clojure.tools.nrepl.server
             [ring.middleware.json :as middleware]
             [cashflow.encoding :as encoding]
             [cashflow.routes.home :refer [home-routes]]
@@ -13,7 +14,9 @@
 
 (defn init []
   (println "cashflow is starting")
-  (encoding/add-common-json-encoders!))
+  (encoding/add-common-json-encoders!)
+  (let [repl (clojure.tools.nrepl.server/start-server :port 0 :bind "127.0.0.1")]
+    (println "Repl started at" (:port repl))))
 
 (defn destroy []
   (println "cashflow is shutting down"))
@@ -26,9 +29,10 @@
 (def app
   (->
     (routes
+      (context "/api" []
+               tags-routes
+               transactions-routes)
       home-routes
-      tags-routes
-      transactions-routes
       app-routes)
     (handler/site)
     (wrap-base-url)
