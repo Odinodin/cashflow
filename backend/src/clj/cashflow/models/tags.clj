@@ -25,7 +25,8 @@
   (map
     #(assoc % :tags (->>
                          (match-tag-rules tag-rules (:description %))
-                         (map :name)))
+                         (map :name)
+                         (vec)))
     transactions))
 
 (defn tag-and-update-transactions! [transactions tags]

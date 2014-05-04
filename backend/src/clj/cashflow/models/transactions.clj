@@ -6,7 +6,7 @@
   (:import [java.io BufferedReader FileReader]))
 
 ;; Contains all transactions.
-;; Contains a list of maps with the following keys: [:date :code :description :amount]
+;; Contains a list of maps with the following keys: [:date :code :description :amount :tags]
 (def transactions (atom []))
 
 (defn- string->date [date]

@@ -1,8 +1,31 @@
 {% extends "public/templates/base.html" %}
 
 {% block content %}
-  {% for entry in entries %}
-        <h2>{{entry.name}}</h2>
+<table>
+  <thead>
+  <tr>
+    <th>Date</th>
+    <th>Code</th>
+    <th>Amount</th>
+    <th>Description</th>
+    <th>Tags</th>
+  </tr>
+  </thead>
+  {% for trans in transactions %}
+  <tbody>
+  <tr>
+    <td>{{trans.date}}</td>
+    <td>{{trans.code}}</td>
+    <td>{{trans.amount}}</td>
+    <td>{{trans.description}}</td>
+    <td>{{trans.tags}}</td>
+  </tr>
+  </tbody>
   {% endfor %}
+</table>
+
+
+
+
 
 {% endblock }
