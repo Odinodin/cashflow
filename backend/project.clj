@@ -11,7 +11,11 @@
                  [ring-cors "0.1.1"]
                  [cheshire "5.3.1"]
                  [clj-time "0.6.0"]
-                 [org.clojure/tools.nrepl "0.2.3"]]
+                 [org.clojure/tools.nrepl "0.2.3"]
+
+                 ;; GUI
+                 [selmer "0.6.6"]
+                 ]
   :plugins [[lein-ring "0.8.10"]
             [lein-cljsbuild "1.0.2"]
             [lein-pdo "0.1.1"]]

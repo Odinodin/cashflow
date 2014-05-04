@@ -6,7 +6,7 @@
       (tag-transactions
         [{:description "Bananas for ever"}
          {:description "Acme Industries"}]
-        [{:tag "food" :regexes [#"Bananas"]}])
+        [{:name "food" :regexes [#"Bananas"]}])
 
       => [{:description "Bananas for ever" :tags ["food"]}
           {:description "Acme Industries" :tags []}])
@@ -14,8 +14,8 @@
 (fact "can match multiple tags"
       (tag-transactions
         [{:description "Monkeys and Sharks"}]
-        [{:tag "animals" :regexes [#"Monkey"]}
-         {:tag "fish" :regexes [#"Shark"]}])
+        [{:name "animals" :regexes [#"Monkey"]}
+         {:name "fish" :regexes [#"Shark"]}])
 
       => [{:description "Monkeys and Sharks" :tags ["animals" "fish"]}])
 
@@ -33,12 +33,12 @@
   [(before :contents (reset! tags []))]
   (fact "Can add tags"
         @tags => empty
-        (add-tag! {:tag "store" :regexes [#"Kiwi"]}) => not-empty
+        (add-tag! {:name "store" :regexes [#"Kiwi"]}) => not-empty
         (count @tags) => 1)
   (fact "Can remove tags"
         (count @tags) => 1
         (remove-tag! "store") => empty
         @tags => empty)
   (fact "Can get tag by name"
-        (add-tag! {:tag "stuff" :regexes []}) => not-empty
-        (tagname->tag "stuff") => {:tag "stuff" :regexes []}))
+        (add-tag! {:name "stuff" :regexes []}) => not-empty
+        (tagname->tag "stuff") => {:name "stuff" :regexes []}))

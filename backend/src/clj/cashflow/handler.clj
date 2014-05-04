@@ -23,7 +23,7 @@
 
 (defroutes app-routes
            (route/resources "/")
-           (route/not-found "Not Foundzz"))
+           (route/not-found "Not Found"))
 
 ;; TODO Extract routes that need json-body/response middlewares.
 (def app

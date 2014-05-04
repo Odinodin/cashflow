@@ -1,0 +1,53 @@
+{% extends "public/templates/base.html" %}
+
+{% block content %}
+
+<script type="text/javascript">
+
+  var deleteTag = function (tagName) {
+
+    var client = new XMLHttpRequest();
+
+    client.open("DELETE", "/tags/"  + tagName, false);
+    client.send();
+
+    if (client.status == 200)
+      location.reload();
+    else
+      alert("The request did not succeed!\n\nThe response status was: " + client.status + " " + client.statusText + ".");
+  }
+</script>
+
+<h2>Tags</h2>
+
+<h3>Add tag</h3>
+<form action="/tags" method="POST">
+  <label>Name: </label>
+  <input name="name" type="text"/>
+  <label>Regexes: </label>
+  <input name="regexes" type="text"/>
+  <input type="submit" value="Add"/>
+</form>
+
+
+<table>
+  <thead>
+  <tr>
+    <th>Delete</th>
+    <th>Tag</th>
+    <th>Regexes</th>
+  </tr>
+  </thead>
+  {% for tag in tags %}
+  <tbody>
+  <tr>
+    <td>
+      <button onclick="deleteTag('{{tag.name}}')"></button>
+    </td>
+    <td>{{tag.name}}</td>
+    <td>{{tag.regexes}}</td>
+  </tr>
+  </tbody>
+  {% endfor %}
+</table>
+{% endblock }

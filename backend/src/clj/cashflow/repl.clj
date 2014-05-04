@@ -4,6 +4,7 @@
         print.foo
         [ring.middleware file-info file])
   (:require [clj-time.coerce :as t-coerce]
+            [selmer.parser :as selmer]
             [clj-time.core :as t]
             [clojure.pprint :refer [pprint]])
 
@@ -40,12 +41,15 @@
   (.stop @server)
   (reset! server nil))
 
+
+
 #_(stop-server)
+
 
 #_(trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
 
 
-#_(tags/add-tag! {:tag "butikk" :regexes [#"Rema" #"Kiwi" #"Rimi"]})
+#_(tags/add-tag! {:name "butikk" :regexes [#"Rema" #"Kiwi" #"Rimi"]})
 
 #_(tags/tag-and-update-transactions! trans/transactions tags/tags)
 
