@@ -24,5 +24,10 @@
            (POST "/tags" [name regexes] (do (tags/add-tag! {:name name :regexes (strings->regexes regexes)})
                                             (tags/tag-and-update-transactions! transactions/transactions tags/tags)
                                             (show-tags)))
-           (GET "/transactions" [] (render-file "public/templates/transactions.html" {:transactions @transactions/transactions})))
+           (GET "/transactions" [] (render-file "public/templates/transactions.html" {:transactions @transactions/transactions}))
+           (GET "/transactions/:year/:month-index" [year month-index]
+                (render-file
+                  "public/templates/transactions.html"
+                  {:transactions (transactions/transactions-in-month @transactions/transactions (. Integer parseInt year) (. Integer parseInt month-index))})))
+
 

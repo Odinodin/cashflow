@@ -37,17 +37,26 @@
        lines->transactions
        (swap! transactions into)))
 
+;; Date helpers
 (defn- same-date? [date1 date2]
-  (=
-    (t-coerce/to-local-date date1)
-    (t-coerce/to-local-date date2)))
+  (= (t-coerce/to-local-date date1)
+     (t-coerce/to-local-date date2)))
+
+(defn- same-year-month? [date year month]
+  (and (= (clj-time.core/year date) year)
+       (= (clj-time.core/month date) month)))
 
 ;; Queries
+;; TODO Add test + submit patch to clj-time (same-year?, same-year-month?)
+(defn transactions-in-month [transaction-list year month-index]
+  (->>
+    (filter #(-> % :date (same-year-month? year month-index)) transaction-list)
+    (sort-by :date)))
+
 (defn transactions-at-date [transaction-list query-date]
   (->>
     (filter #(-> % :date (same-date? query-date)) transaction-list)
     (sort-by :date)))
-
 
 (defn transactions-in-interval [transaction-list interval]
   (->>

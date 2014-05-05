@@ -12,3 +12,6 @@ tagge
 - eksponere REST-grensesnitt
 
 - GUI
+
+
+- unngå at man poste samme tag flere ganger
