@@ -7,7 +7,7 @@
   }
 </script>
 
-<div id="filter">
+<div id="time_filter">
   <div id="year">
     2009
   </div>
@@ -27,6 +27,24 @@
   </div>
 </div>
 
+<div>
+  <table>
+    <thead>
+    <tr>
+      <th>Tag</th>
+      <th>Amount</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for tagsum in sum-by-tag %}
+    <tr>
+      <td>{{tagsum.tagname}}</td>
+      <td>{{tagsum.sum}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
 
 <table>
   <thead>
