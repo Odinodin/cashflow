@@ -78,3 +78,20 @@
 ;; Operations over transactions
 (defn sum-transactions [transaction-list]
   (reduce + (map :amount transaction-list)))
+
+
+(defn sum-transactions-pr-tag [transaction-list]
+  (let [unique-tagnames (distinct (flatten (map :tags transaction-list)))]
+    (for [tagname unique-tagnames]
+      {:tagname      tagname
+       :sum          (sum-transactions (filter #(some #{tagname} (:tags %)) transaction-list))})))
+
+
+
+
+#_(let [tagnames (map :name @tags/tags)
+      tagnames-transactions (for [tagname tagnames]
+                              {:tagname      tagname
+                               :sum          (trans/sum-transactions (filter #(some #{tagname} (:tags %)) (tags/tag-transactions @trans/transactions @tags/tags)))})]
+
+  tagnames-transactions)

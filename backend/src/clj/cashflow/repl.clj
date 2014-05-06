@@ -42,6 +42,25 @@
   (reset! server nil))
 
 
+#_(tags/add-tag! {:name "tog" :regexes [#"NSB"]})
+#_(tags/add-tag! {:name "butikk" :regexes [#"Rema" #"Kiwi" #"Rimi"]})
+
+#_(trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
+
+#_(def transactions @trans/transactions)
+(trans/sum-transactions transactions)
+
+
+@tags/tags
+
+;; {:tagname "stuff" :transactions [..]}
+(let [tagnames (map :name @tags/tags)
+      tagnames-transactions (for [tagname tagnames]
+                              {:tagname      tagname
+                               :sum          (trans/sum-transactions (filter #(some #{tagname} (:tags %)) (tags/tag-transactions @trans/transactions @tags/tags)))})]
+
+  tagnames-transactions)
+
 
 #_(stop-server)
 
@@ -50,6 +69,7 @@
 
 
 #_(tags/add-tag! {:name "butikk" :regexes [#"Rema" #"Kiwi" #"Rimi"]})
+#_(tags/add-tag! {:name "tog" :regexes [#"NSB"]})
 
 #_(tags/tag-and-update-transactions! trans/transactions tags/tags)
 

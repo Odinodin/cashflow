@@ -39,22 +39,43 @@
 
 (fact "Can filter transactions for a period"
       (transactions-in-interval
-        [{:date (t/date-time 2014 5 1) :code "Varer" :description "inside" :amount 1}
-         {:date (t/date-time 2014 5 25) :code "Varer" :description "inside" :amount 3}
-         {:date (t/date-time 2014 6 30) :code "Varer" :description "inside" :amount 2}
-         {:date (t/date-time 2000 1 1) :code "Varer" :description "outside" :amount 4}]
+        [{:date (t/date-time 2014 5 1) :description "inside" :amount 1}
+         {:date (t/date-time 2014 5 25) :description "inside" :amount 3}
+         {:date (t/date-time 2014 6 30) :description "inside" :amount 2}
+         {:date (t/date-time 2000 1 1) :description "outside" :amount 4}]
         (t/interval
           (t/date-time 2014 5 1)
           (t/date-time 2014 6 30 23 59 59)))
 
       =>
-      [{:date (t/date-time 2014 5 1) :code "Varer" :description "inside" :amount 1}
-       {:date (t/date-time 2014 5 25) :code "Varer" :description "inside" :amount 3}
-       {:date (t/date-time 2014 6 30) :code "Varer" :description "inside" :amount 2}])
+      [{:date (t/date-time 2014 5 1) :description "inside" :amount 1}
+       {:date (t/date-time 2014 5 25) :description "inside" :amount 3}
+       {:date (t/date-time 2014 6 30) :description "inside" :amount 2}])
 
+
+(fact "Can filter transactions by year and month"
+      (transactions-in-month
+        [{:date (t/date-time 2014 5 1) :description "inside" :amount 1}
+         {:date (t/date-time 2014 5 25) :description "inside" :amount 3}
+         {:date (t/date-time 2014 6 30) :description "outside" :amount 2}
+         {:date (t/date-time 2000 1 1) :description "outside" :amount 4}]
+        2014
+        5)
+
+      =>
+      [{:date (t/date-time 2014 5 1) :description "inside" :amount 1}
+       {:date (t/date-time 2014 5 25) :description "inside" :amount 3}])
 
 (fact "Can sum transactions"
       (sum-transactions [{:amount 10} {:amount 20} {:amount 30}]) => 60
       (sum-transactions []) => 0)
 
+(fact "Can sum transactions for each tag"
+      (sum-transactions-pr-tag
+        [{:tags ["a" "b"] :amount 1} {:tags ["a"] :amount 2}
+                                {:tags ["c" "d"] :amount 3} {:tags ["c"] :amount 4}])
 
+      => [{:tagname "a" :sum 3}
+          {:tagname "b" :sum 1}
+          {:tagname "c" :sum 7}
+          {:tagname "d" :sum 3}])
