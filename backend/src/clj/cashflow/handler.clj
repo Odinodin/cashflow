@@ -12,9 +12,11 @@
             [cashflow.routes.transactions :refer [transactions-routes]]
             [cashflow.routes.tags :refer [tags-routes]]))
 
+(encoding/add-common-json-encoders!)
+
 (defn init []
   (println "cashflow is starting")
-  (encoding/add-common-json-encoders!)
+
   #_(let [repl (clojure.tools.nrepl.server/start-server :port 0 :bind "127.0.0.1")]
     (println "Repl started at" (:port repl))))
 

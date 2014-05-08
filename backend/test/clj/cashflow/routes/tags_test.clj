@@ -6,9 +6,6 @@
             [cashflow.models.tags :as tags]
             [cashflow.json-util :as json-util]))
 
-;; Required for initializing the application
-(background (before :facts (cashflow/init)))
-
 (fact "can list tags"
       (reset! tags/tags [{:name "store" :regexes [#"Rimi" #"Rema"]}])
       (let [response (->
