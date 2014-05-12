@@ -42,6 +42,19 @@
   (reset! server nil))
 
 
+(defn bootstrap-testdata []
+  (reset! tags/tags [])
+  (reset! trans/transactions [])
+  (trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
+  (tags/add-tag! {:name "butikk" :regexes [#"Rema" #"Kiwi" #"Rimi" #"KIWI" #"Coop" #"REMA"]})
+  (tags/add-tag! {:name "Reise" :regexes [#"NSB" #"Jet"]})
+  (tags/add-tag! {:name "Barnehage" :regexes [#"Barnehage"]})
+  (tags/add-tag! {:name "Hus" :regexes [#"Housing", #"Kommunen" #"Husleie"]})
+  (tags/add-tag! {:name "Møbler" :regexes [#"Ikea", #"Plantasjon" #"Maxbo"]})
+  (tags/add-tag! {:name "Lommepenger" :regexes [#"Kantine" #"Narvesen" #"Botanisk" #"Baker"]})
+  (tags/add-tag! {:name "Mobil" :regexes [#"Mobil"]})
+  (tags/tag-and-update-transactions! trans/transactions tags/tags))
+
 #_(trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
 
 

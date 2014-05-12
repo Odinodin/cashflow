@@ -32,6 +32,15 @@
                   (render-file
                     "public/templates/transactions.html"
                     {:transactions transactions-in-month
-                     :sum-by-tag   (transactions/sum-transactions-pr-tag transactions-in-month)}))))
+                     :sum-by-tag   (transactions/sum-transactions-pr-tag transactions-in-month)})))
+           (GET "/graphs" [] (render-file "public/templates/graphs.html"
+                                                {:sum-by-tag  (vec (transactions/sum-transactions-pr-tag @transactions/transactions))}))
+
+           (GET "/graphs/:year/:month-index" [year month-index]
+                (let [transactions-in-month (transactions/transactions-in-month @transactions/transactions (. Integer parseInt year) (. Integer parseInt month-index))]
+                  (render-file
+                    "public/templates/graphs.html"
+                    {:sum-by-tag (vec (transactions/sum-transactions-pr-tag transactions-in-month))})))
+           )
 
 
