@@ -10,8 +10,8 @@
            (render-file "public/templates/graph_sum_by_tag.html"
                         {:sum-by-tag  (vec (transactions/sum-transactions-pr-tag @transactions/transactions))}))
 ;; TOOD implement in / out function in transactions
-(defmethod graph :in-out [_]
-  (render-file "public/templates/graph_in_out.html"
+(defmethod graph :net-income [_]
+  (render-file "public/templates/graph_net_income.html"
                {:sum-by-tag  (vec (transactions/sum-transactions-pr-tag @transactions/transactions))}))
 
 
@@ -24,12 +24,11 @@
       {:sum-by-tag (vec (transactions/sum-transactions-pr-tag transactions-in-month))})))
 
 ;; TODO Implement in / out funciton in transactions
-(defmethod graph-at-time :in-out [_ year month-idx]
+(defmethod graph-at-time :net-income [_ year month-idx]
   (let [transactions-in-month (transactions/transactions-in-month @transactions/transactions year month-idx)]
     (render-file
-      "public/templates/graph_in_out.html"
-      {:sum-by-tag (vec (transactions/sum-transactions-pr-tag transactions-in-month))}))
-  )
+      "public/templates/graph_net_income.html"
+      {:sum-by-tag (vec (transactions/sum-transactions-pr-tag transactions-in-month))})))
 
 
 

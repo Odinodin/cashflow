@@ -5,10 +5,9 @@
 {% include "public/templates/time_filter.html" with route="/graphs/in-out/" %}
 
 <div id="graph_type">
-  <button onclick="">Tags</button><
-  <button onclick="">Totals</button>
-  <button onclick=""></button>
-  </div>
+  <button onclick="window.location.href = '/graphs/net-income';">Net income</button>
+  <button onclick="window.location.href = '/graphs/sum-by-tag';">Spending by tag</button>
+</div>
 </div>
 
 <div id="graph" style="width:100%; height:400px;"></div>
