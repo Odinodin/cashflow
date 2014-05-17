@@ -2,6 +2,7 @@
   (:use cashflow.handler
         ring.server.standalone
         print.foo
+        clojure.repl
         [ring.middleware file-info file])
   (:require [clj-time.coerce :as t-coerce]
             [selmer.parser :as selmer]
