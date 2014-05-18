@@ -3,7 +3,7 @@ body {font: 16px Helvetica, arial, freesans, clean, sans-serif;}
 
 .container {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
 }
 
 .item {
@@ -50,9 +50,35 @@ body {font: 16px Helvetica, arial, freesans, clean, sans-serif;}
     color: #fff;
 }
 
-.flat-button:hover, flat-button.selected {
+.flat-button:hover, .flat-button.selected {
     background-color: #0e83a1;
 }
 .flat-button:active {
     box-shadow: 0px 1px 0px 0px #3293ba;
+}
+
+/* Navigation bar */
+.navbar {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+}
+
+.navbar .title {
+    font-size: 2em;
+}
+
+.navbar a {
+    text-decoration: none;
+    padding: 1em;
+}
+
+.navbar li {
+    list-style-type: none;
+    align-self: center;
+}
+
+.nav-item  {
+    align-self: auto;
+
 }

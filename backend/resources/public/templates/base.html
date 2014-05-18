@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Cashflaw</title>
-  <link rel="stylesheet" type="text/css" href="/css/cashflow.css"/>
+  <title>Cashflow</title>
+  <link href="/css/cashflow.css" type="text/css" rel="stylesheet"/>
 </head>
 <body>
 <div id="main">
-  <h1>Cashflow</h1>
 
-  <div id="menu">
-    <a href="/tags">Tags</a>
-    <a href="/transactions">Transactions</a>
-    <a href="/graphs">Graphs</a>
-  </div>
+    <ul class="navbar">
+      <li><div class="title">Cashflow</div></li>
+      <li><a class="nav-item" href="/tags">Tags</a></li>
+      <li><a class="nav-item" href="/transactions">Transactions</a></li>
+      <li><a class="nav-item" href="/graphs">Graphs</a></li>
+    </ul>
+
 
   {% block content %}{% endblock }
 </div>

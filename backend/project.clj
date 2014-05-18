@@ -30,7 +30,8 @@
    :dev {:dependencies [[ring-mock "0.1.5"]
                         [ring/ring-devel "1.2.1"]
                         [midje "1.6.3"]
-                        [print-foo "0.5.0"]]
+                        [print-foo "0.5.0"]
+                        [org.clojure/tools.namespace "0.2.4"]]
          :plugins [[lein-midje "3.1.3"]]
          :test-paths ["test"]
          :resource-paths ["test-resources"]}})

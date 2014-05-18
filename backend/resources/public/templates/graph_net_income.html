@@ -2,13 +2,13 @@
 
 {% block content %}
 
-{% include "public/templates/time_filter.html" with route="/graphs/net-income/" %}
-
 <div>
   <div id="graph_type" class="container">
-    <button class="flat-button " onclick="window.location.href = '/graphs/net-income';">Net income</button>
+    <button class="flat-button selected" onclick="window.location.href = '/graphs/net-income';">Net income</button>
     <button class="flat-button" onclick="window.location.href = '/graphs/sum-by-tag';">Spending by tag</button>
   </div>
+
+  {% include "public/templates/time_filter.html" with route="/graphs/net-income/" %}
 
   <div id="graph" style="width:100%; height:400px;"></div>
 </div>

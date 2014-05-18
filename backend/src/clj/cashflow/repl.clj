@@ -7,9 +7,10 @@
   (:require [clj-time.coerce :as t-coerce]
             [selmer.parser :as selmer]
             [clj-time.core :as t]
-            [clojure.pprint :refer [pprint]])
+            [clojure.pprint :refer [pprint]]
+            [clojure.tools.namespace.repl :refer [refresh]]
 
-  (:require [cashflow.models.transactions :as trans]
+            [cashflow.models.transactions :as trans]
             [cashflow.models.tags :as tags]))
 
 (defonce server (atom nil))

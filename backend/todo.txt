@@ -9,3 +9,4 @@ Trekke ut atoms ut i en map som sendes inn overalt ?
 
 - unngå at man poste samme tag flere ganger
 - kunne oppdatere tags
+- fikse dato-output i transactions-tabell ..
