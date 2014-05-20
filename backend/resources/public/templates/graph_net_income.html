@@ -8,8 +8,6 @@
     <button class="flat-button" onclick="window.location.href = '/graphs/sum-by-tag';">Spending by tag</button>
   </div>
 
-  {% include "public/templates/time_filter.html" with route="/graphs/net-income/" %}
-
   <div id="graph" style="width:100%; height:400px;"></div>
 </div>
 
@@ -41,7 +39,8 @@
           color: "#000000"
         }
       }
-    ]
+    ],
+    title: null
   });
 
 </script>
