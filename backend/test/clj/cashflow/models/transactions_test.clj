@@ -91,5 +91,5 @@
          {:date (t/date-time 2013 6 3) :amount -4}])
 
       =>
-      [{{:year 2014 :month 5} {:income 3 :expense -30}}
-       {{:year 2013 :month 6} {:income 2 :expense -4}}])
+      [{:time "2013-6" :income 2 :expense -4}
+       {:time "2014-5" :income 3 :expense -30}])

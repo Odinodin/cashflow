@@ -14,12 +14,18 @@
 <script src="/public/js/highcharts-custom.js" type="text/javascript"></script>
 <script src="/public/js/cull.js" type="text/javascript"></script>
 <script type="text/javascript">
-  var sumByTagJson = '{{sum-by-tag|json|safe}}';
+  var netIncomeByMonthJson = JSON.parse('{{net-income-by-month|json|safe}}');
 
-  var jsonToSumByTag = function (json) {
-    return cull.map(function (tagWithSum) {
-      return [tagWithSum.tagname, tagWithSum.sum * -1];
-    }, JSON.parse(json));
+  var jsonToExpenses = function (json) {
+    return cull.map(function (obj) {
+         return [obj.time, obj.expense * -1];
+    }, json);
+  };
+
+  var jsonToIncome = function (json) {
+    return cull.map(function (obj) {
+      return [obj.time, obj.income];
+    }, json);
   };
 
   var chart = new Highcharts.Chart({
@@ -32,13 +38,25 @@
     },
     series: [
       {
-        name: 'Tags',
-        data: jsonToSumByTag(sumByTagJson),
+        name: 'Income',
+        data: jsonToIncome(netIncomeByMonthJson),
         dataLabels: {
           enabled: true,
           color: "#000000"
-        }
+        },
+        color: "#00FF00"
+      },
+      {
+        name: 'Expenses',
+        data: jsonToExpenses(netIncomeByMonthJson),
+        dataLabels: {
+          enabled: true,
+          color: "#000000"
+        },
+        color: "#FF0000"
+
       }
+
     ],
     title: null
   });

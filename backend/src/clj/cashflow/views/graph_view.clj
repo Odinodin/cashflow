@@ -12,7 +12,7 @@
 
 (defmethod graph :net-income [_]
   (render-file "public/templates/graph_net_income.html"
-               {:sum-by-tag  (vec (transactions/sum-transactions-pr-tag @transactions/transactions))}))
+               {:net-income-by-month (vec (transactions/net-income-by-month @transactions/transactions))}))
 
 ;; Graphing by time
 (defmulti graph-at-time (fn [graph-type _ _] graph-type))

@@ -117,6 +117,10 @@
     (reduce #(+ (:amount %2) %1) 0)))
 
 (defn net-income-by-month [transactions]
-  (for [[k v] (group-by #(dt->year-month-map (:date %)) transactions)]
-    {k {:income  (transactions->income v)
-        :expense (transactions->expense v)}}))
+  (let [grouped-by-month (group-by #(dt->year-month-map (:date %)) transactions)
+        sorted (sort-by
+                 (fn [[k _]] ((juxt :year :month) k)) grouped-by-month)]
+    (for [[k v] sorted]
+      {:time    (str (:year k) "-" (:month k))
+       :income  (transactions->income v)
+       :expense (transactions->expense v)})))

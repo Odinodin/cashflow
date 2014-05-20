@@ -16,7 +16,7 @@
 <script src="/public/js/highcharts-custom.js" type="text/javascript"></script>
 <script src="/public/js/cull.js" type="text/javascript"></script>
 <script type="text/javascript">
-  var sumByTagJson = '{{sum-by-tag|json|safe}}';
+  var sumByTagJson = JSON.parse('{{sum-by-tag|json|safe}}');
 
   var jsonToSumByTag = function (json) {
     return cull.map(function (tagWithSum) {
