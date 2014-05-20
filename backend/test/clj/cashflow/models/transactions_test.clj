@@ -79,3 +79,17 @@
           {:tagname "b" :sum 1}
           {:tagname "c" :sum 7}
           {:tagname "d" :sum 3}])
+
+(fact "Can calculate income and expenses by month for a list of transactions"
+      (net-income-by-month
+        [{:date (t/date-time 2014 5 1) :amount 1}
+         {:date (t/date-time 2014 5 2) :amount 2}
+         {:date (t/date-time 2014 5 2) :amount -10}
+         {:date (t/date-time 2014 5 3) :amount -20}
+         {:date (t/date-time 2013 6 1) :amount 1}
+         {:date (t/date-time 2013 6 2) :amount 1}
+         {:date (t/date-time 2013 6 3) :amount -4}])
+
+      =>
+      [{{:year 2014 :month 5} {:income 3 :expense -30}}
+       {{:year 2013 :month 6} {:income 2 :expense -4}}])

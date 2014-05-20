@@ -87,3 +87,36 @@
     (for [tagname unique-tagnames]
       {:tagname      tagname
        :sum          (sum-transactions (filter #(some #{tagname} (:tags %)) transaction-list))})))
+
+(defn sum-transactions-pr-tag [transaction-list]
+  (let [unique-tagnames (-> (map :tags transaction-list)
+                            flatten
+                            distinct)]
+    (for [tagname unique-tagnames]
+      {:tagname      tagname
+       :sum          (sum-transactions (filter #(some #{tagname} (:tags %)) transaction-list))})))
+
+
+(defn- dt->year-month-map [dt]
+  {:year (. dt getYear) :month (. dt getMonthOfYear)})
+
+;; Takes a list of transactions and outputs the income sum
+;; [ {:amount -11} {:amount 2} {:amount -1}] -> -12
+(defn- transactions->income [transactions]
+  (->>
+    transactions
+    (filter #(-> % :amount pos?))
+    (reduce #(+ (:amount %2) %1) 0)))
+
+;; Takes a list of transactions and outputs the expense sum
+;; [ {:amount -11} {:amount 2} {:amount -1}] -> 2
+(defn- transactions->expense [transactions]
+  (->>
+    transactions
+    (filter #(-> % :amount neg?))
+    (reduce #(+ (:amount %2) %1) 0)))
+
+(defn net-income-by-month [transactions]
+  (for [[k v] (group-by #(dt->year-month-map (:date %)) transactions)]
+    {k {:income  (transactions->income v)
+        :expense (transactions->expense v)}}))

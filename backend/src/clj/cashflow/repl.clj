@@ -66,3 +66,41 @@
 #_(tags/tag-and-update-transactions! trans/transactions tags/tags)
 
 #_(tags/get-tagged-transactions @trans/transactions "butikk")
+
+#_(. (t/date-time 2014 5 1) getYear)
+#_(. (t/date-time 2014 5 1) getMonthOfYear)
+
+
+(defn dt->year-month-map [dt]
+  {:year (. dt getYear) :month (. dt getMonthOfYear)})
+
+#_(dt->year-month-map (t/date-time 2014 5 1))
+
+;; Takes a list of transactions and outputs the income sum
+;; [ {:amount -11} {:amount 2} {:amount -1}] -> -12
+(defn transactions->income [transactions]
+  (->>
+    transactions
+    (filter #(-> % :amount pos?))
+    (reduce #(+ (:amount %2) %1) 0)))
+
+;; Takes a list of transactions and outputs the expense sum
+;; [ {:amount -11} {:amount 2} {:amount -1}] -> 2
+(defn transactions->expense [transactions]
+  (->>
+    transactions
+    (filter #(-> % :amount neg?))
+    (reduce #(+ (:amount %2) %1) 0)))
+
+
+(defn monthly-net-income [transactions]
+  (for [[k v] (group-by #(dt->year-month-map (:date %)) transactions)]
+    {k {:income  (transactions->income v)
+        :expense (transactions->expense v)}}))
+
+
+#_(group-by #(dt->year-month-map (:date %)) trans)
+
+
+#_(transactions->income [{:amount 1} {:amount -1}])
+

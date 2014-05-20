@@ -9,11 +9,10 @@
 (defmethod graph :sum-by-tag [_]
            (render-file "public/templates/graph_sum_by_tag.html"
                         {:sum-by-tag  (vec (transactions/sum-transactions-pr-tag @transactions/transactions))}))
-;; TOOD implement in / out function in transactions
+
 (defmethod graph :net-income [_]
   (render-file "public/templates/graph_net_income.html"
                {:sum-by-tag  (vec (transactions/sum-transactions-pr-tag @transactions/transactions))}))
-
 
 ;; Graphing by time
 (defmulti graph-at-time (fn [graph-type _ _] graph-type))
