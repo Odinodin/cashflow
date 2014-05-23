@@ -40,4 +40,6 @@
            (GET "/graphs/:graph-type" [graph-type]
                 (graph-view/graph (keyword graph-type)))
            (GET "/graphs/:graph-type/:year/:month-idx" [graph-type year month-idx]
-                (graph-view/graph-at-time (keyword graph-type) (. Integer parseInt year) (. Integer parseInt month-idx))))
+                (graph-view/graph-month (keyword graph-type) (. Integer parseInt year) (. Integer parseInt month-idx)))
+           (GET "/graphs/:graph-type/:year" [graph-type year]
+                (graph-view/graph-year (keyword graph-type) (. Integer parseInt year))))

@@ -1,0 +1,14 @@
+
+<script type="text/javascript">
+  var filterByYear = function (year) {
+    window.location.href = '{{route}}' + year;
+  };
+</script>
+
+<div id="time_filter" >
+  <div id="years" class="container">
+    {% for year in years %}
+    <div class="item"><button class="flat-button {% ifequal current-year year %} selected {% endifequal %}" onclick="filterByYear({{year}})">{{year}}</button></div>
+    {% endfor %}
+  </div>
+</div>

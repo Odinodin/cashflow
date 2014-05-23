@@ -21,7 +21,7 @@
   var jsonToSumByTag = function (json) {
     return cull.map(function (tagWithSum) {
       return [tagWithSum.tagname, tagWithSum.sum * -1];
-    }, JSON.parse(json));
+    }, json);
   };
 
   var chart = new Highcharts.Chart({

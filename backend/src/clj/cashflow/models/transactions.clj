@@ -46,11 +46,19 @@
   (and (= (clj-time.core/year date) year)
        (= (clj-time.core/month date) month)))
 
+(defn- same-year? [date year]
+  (= (clj-time.core/year date) year))
+
 ;; Queries
 ;; TODO Add test + submit patch to clj-time (same-year?, same-year-month?)
 (defn transactions-in-month [transaction-list year month-index]
   (->>
     (filter #(-> % :date (same-year-month? year month-index)) transaction-list)
+    (sort-by :date)))
+
+(defn transactions-in-year [transaction-list year]
+  (->>
+    (filter #(-> % :date (same-year? year)) transaction-list)
     (sort-by :date)))
 
 (defn transactions-at-date [transaction-list query-date]
@@ -75,6 +83,14 @@
 (defn transactions-at [query-date]
   (transactions-at-date @transactions (iso8600string->date query-date)))
 
+(defn unique-years [transaction-list]
+  (->>
+    transaction-list
+    (map #(-> % :date t/year))
+    distinct
+    vec
+    sort))
+
 ;; Operations over transactions
 (defn sum-transactions [transaction-list]
   (reduce + (map :amount transaction-list)))
@@ -85,16 +101,16 @@
                             flatten
                             distinct)]
     (for [tagname unique-tagnames]
-      {:tagname      tagname
-       :sum          (sum-transactions (filter #(some #{tagname} (:tags %)) transaction-list))})))
+      {:tagname tagname
+       :sum     (sum-transactions (filter #(some #{tagname} (:tags %)) transaction-list))})))
 
 (defn sum-transactions-pr-tag [transaction-list]
   (let [unique-tagnames (-> (map :tags transaction-list)
                             flatten
                             distinct)]
     (for [tagname unique-tagnames]
-      {:tagname      tagname
-       :sum          (sum-transactions (filter #(some #{tagname} (:tags %)) transaction-list))})))
+      {:tagname tagname
+       :sum     (sum-transactions (filter #(some #{tagname} (:tags %)) transaction-list))})))
 
 
 (defn- dt->year-month-map [dt]
@@ -116,6 +132,7 @@
     (filter #(-> % :amount neg?))
     (reduce #(+ (:amount %2) %1) 0)))
 
+;; Takes a list of transactions and outputs a list of {:time "2009-10" :income 121 :expense -233}
 (defn net-income-by-month [transactions]
   (let [grouped-by-month (group-by #(dt->year-month-map (:date %)) transactions)
         sorted (sort-by

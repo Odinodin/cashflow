@@ -6,12 +6,12 @@
 (def test-file (.getFile (clojure.java.io/resource "test-transactions.csv")))
 
 (fact "Can parse file"
-      (count (parse-file (.getFile (clojure.java.io/resource "test-transactions.csv")))) => 57)
+      (count (parse-file (.getFile (clojure.java.io/resource "test-transactions.csv")))) => 62)
 
 (fact "Can transform parsed file to list of transaction maps"
       (let [parsed-file (parse-file test-file)
             model (lines->transactions parsed-file)]
-        (count model) => 57))
+        (count model) => 62))
 
 (fact "Can transform lines to model"
       (lines->transactions
@@ -26,7 +26,7 @@
   (fact "Can add transactions"
         @transactions => empty
         (add-transactions! test-file) => not-empty
-        (count @transactions) => 57))
+        (count @transactions) => 62))
 
 
 (fact "Can find transactions for a day"
@@ -93,3 +93,12 @@
       =>
       [{:time "2013-6" :income 2 :expense -4}
        {:time "2014-5" :income 3 :expense -30}])
+
+(fact "Can find all years in transactions"
+      (unique-years
+        [{:date (t/date-time 2014 5 1)}
+         {:date (t/date-time 2014 5 25)}
+         {:date (t/date-time 2011 6 30)}
+         {:date (t/date-time 2000 1 1)}])
+
+      => [2000 2011 2014])

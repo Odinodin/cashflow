@@ -12,22 +12,25 @@
 
 (defmethod graph :net-income [_]
   (render-file "public/templates/graph_net_income.html"
-               {:net-income-by-month (vec (transactions/net-income-by-month @transactions/transactions))}))
+               {:net-income-by-month (vec (transactions/net-income-by-month @transactions/transactions))
+                :years (transactions/unique-years @transactions/transactions)}))
 
 ;; Graphing by time
-(defmulti graph-at-time (fn [graph-type _ _] graph-type))
-(defmethod graph-at-time :sum-by-tag [_ year month-idx]
+(defmulti graph-month (fn [graph-type _ _] graph-type))
+(defmethod graph-month :sum-by-tag [_ year month-idx]
   (let [transactions-in-month (transactions/transactions-in-month @transactions/transactions year month-idx)]
     (render-file
       "public/templates/graph_sum_by_tag.html"
       {:sum-by-tag (vec (transactions/sum-transactions-pr-tag transactions-in-month))})))
 
-;; TODO Implement in / out funciton in transactions
-(defmethod graph-at-time :net-income [_ year month-idx]
-  (let [transactions-in-month (transactions/transactions-in-month @transactions/transactions year month-idx)]
+(defmulti graph-year (fn [graph-type _] graph-type))
+(defmethod graph-year :net-income [_ year]
+  (let [transactions-in-all-months-of-year (transactions/transactions-in-year @transactions/transactions year)]
     (render-file
       "public/templates/graph_net_income.html"
-      {:sum-by-tag (vec (transactions/sum-transactions-pr-tag transactions-in-month))})))
+      {:net-income-by-month (vec (transactions/net-income-by-month transactions-in-all-months-of-year))
+       :years (transactions/unique-years @transactions/transactions)
+       :current-year year})))
 
 
 
