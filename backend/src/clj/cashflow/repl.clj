@@ -5,8 +5,9 @@
         clojure.repl
         [ring.middleware file-info file])
   (:require [clj-time.coerce :as t-coerce]
-            [selmer.parser :as selmer]
+            [clj-time.format :as t-format]
             [clj-time.core :as t]
+            [selmer.parser :as selmer]
             [clojure.pprint :refer [pprint]]
             [clojure.tools.namespace.repl :refer [refresh]]
 
@@ -48,7 +49,7 @@
   (reset! tags/tags [])
   (reset! trans/transactions [])
   (trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
-  (tags/add-tag! {:name "butikk" :regexes [#"Rema" #"Kiwi" #"Rimi" #"KIWI" #"Coop" #"REMA"]})
+  (tags/add-tag! {:name "Butikk" :regexes [#"Rema" #"Kiwi" #"Rimi" #"KIWI" #"Coop" #"REMA"]})
   (tags/add-tag! {:name "Reise" :regexes [#"NSB" #"Jet"]})
   (tags/add-tag! {:name "Barnehage" :regexes [#"Barnehage"]})
   (tags/add-tag! {:name "Hus" :regexes [#"Housing", #"Kommunen" #"Husleie"]})

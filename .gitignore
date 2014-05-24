@@ -11,3 +11,5 @@ pom.xml
 .lein-env
 .DS_Store
 .nrepl-port
+scrap.clj
+scrap.cljs
