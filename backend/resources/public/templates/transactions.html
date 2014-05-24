@@ -40,7 +40,10 @@
     <td>{{trans.code}}</td>
     <td>{{trans.amount}}</td>
     <td>{{trans.description}}</td>
-    <td>{{trans.tags}}</td>
+    <td>{% for tag in trans.tags %}
+        <div class="tag">{{tag}}</div>
+       {% endfor %}
+    </td>
   </tr>
   </tbody>
   {% endfor %}

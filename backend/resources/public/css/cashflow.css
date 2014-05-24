@@ -1,5 +1,16 @@
-body {font: 16px Helvetica, arial, freesans, clean, sans-serif;}
-#main {max-width: 960px; margin: 0 auto;}
+body {
+    font: 16px Helvetica, arial, freesans, clean, sans-serif;
+    color: #c0c0c0;
+    background-color: #1a1a1a;
+}
+
+#main {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-content: space-between;
+}
 
 .container {
     display: flex;
@@ -20,7 +31,7 @@ body {font: 16px Helvetica, arial, freesans, clean, sans-serif;}
     line-height: 100%;
     text-shadow: 0 1px rgba(0, 0, 0, 0.4);
     color: #fff;
-    display:inline-block;
+    display: inline-block;
     vertical-align: middle;
     text-align: center;
     cursor: pointer;
@@ -40,10 +51,12 @@ body {font: 16px Helvetica, arial, freesans, clean, sans-serif;}
     background-color: #3fb8e8;
     box-shadow: 0px 3px 0px 0px #3293ba;
 }
+
 .flat-button:active {
     padding-top: 15px;
     margin-bottom: -1px;
 }
+
 .flat-button, .flat-button:hover, .flat-button:active {
     outline: 0 none;
     text-decoration: none;
@@ -53,6 +66,7 @@ body {font: 16px Helvetica, arial, freesans, clean, sans-serif;}
 .flat-button:hover, .flat-button.selected {
     background-color: #0e83a1;
 }
+
 .flat-button:active {
     box-shadow: 0px 1px 0px 0px #3293ba;
 }
@@ -62,23 +76,73 @@ body {font: 16px Helvetica, arial, freesans, clean, sans-serif;}
     display: flex;
     flex-flow: row wrap;
     justify-content: flex-start;
+    padding-left: 0;
+    align-items: stretch;
+    height: 3em;
 }
 
 .navbar .title {
+    flex-basis: auto;
     font-size: 2em;
+    background-color: #ff7472;
+    align-content: center;
+    line-height: 2em;
+    text-align: center;
+    padding-left: 1em;
+    padding-right: 1em;
+    color: black;
 }
 
 .navbar a {
     text-decoration: none;
     padding: 1em;
+    line-height: 2em;
+    color: #c0c0c0;
+    align-content: center;
 }
 
 .navbar li {
+    display: flex;
     list-style-type: none;
-    align-self: center;
+    align-self: stretch;
+    padding-left: 3px;
+    padding-right: 3px;
 }
 
-.nav-item  {
-    align-self: auto;
+.nav-item {
+    align-self: center;
+    background-color: #2a2a2a;
+    transition: background-color 0.5s ease;
+}
 
+.nav-item:hover {
+    background-color: #747474;
+}
+
+.bg-box {
+    background-color: #2a2a2a;
+    margin-top: 6px;
+    width: 100%;
+}
+
+.container-box {
+    display: flex;
+    padding-top: 20px;
+}
+
+.tag {
+    border-radius: 4px;
+    background-color: #ff7472;
+    color: #ffffff;
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-block;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    overflow: hidden;
+    line-height: 10px;
+    padding: 6px 10px 8px 10px;
+    position: relative;
+    vertical-align: middle;
+    transition: 0.25s linear;
 }

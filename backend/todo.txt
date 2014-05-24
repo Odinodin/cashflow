@@ -5,7 +5,7 @@ TODO
 Trekke ut atoms ut i en map som sendes inn overalt ?
 
 
-- unngå at man poste samme tag flere ganger
+- unngå at man kan poste samme tag flere ganger
 - kunne oppdatere tags
 - identifisere og fjerne interne overføringer mellom konti
 

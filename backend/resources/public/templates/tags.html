@@ -8,7 +8,7 @@
 
     var client = new XMLHttpRequest();
 
-    client.open("DELETE", "/tags/"  + tagName, false);
+    client.open("DELETE", "/tags/" + tagName, false);
     client.send();
 
     if (client.status == 200)
@@ -18,19 +18,19 @@
   }
 </script>
 
-<h2>Tags</h2>
+<div class="container-box bg-box">
+  <h3>Add tag</h3>
 
-<h3>Add tag</h3>
-<form action="/tags" method="POST">
-  <label>Name: </label>
-  <input name="name" type="text"/>
-  <label>Regexes: </label>
-  <input name="regexes" type="text"/>
-  <input type="submit" value="Add"/>
-</form>
+  <form action="/tags" method="POST">
+    <label>Tag name: </label>
+    <input name="name" type="text"/>
+    <label>Regexes: </label>
+    <input name="regexes" type="text"/>
+    <input type="submit" value="Add"/>
+  </form>
+</div>
 
-
-<table>
+<table class="bg-box">
   <thead>
   <tr>
     <th>Delete</th>
@@ -44,10 +44,13 @@
     <td>
       <button onclick="deleteTag('{{tag.name}}')">x</button>
     </td>
-    <td>{{tag.name}}</td>
+    <td>
+      <div class="tag">{{tag.name}}</div>
+    </td>
     <td>{{tag.regexes}}</td>
   </tr>
   </tbody>
   {% endfor %}
 </table>
+
 {% endblock }
