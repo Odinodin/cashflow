@@ -18,17 +18,17 @@
   }
 </script>
 
-<div class="container-box bg-box">
-  <form action="/tags" method="POST">
-    <label>Tag name: </label>
-    <input name="name" type="text"/>
-    <label>Regexes: </label>
-    <input name="regexes" type="text"/>
-    <button type="submit">Add tag</button>
+<div class="bg-box">
+  <form action="/tags" method="POST" class="padded">
+    <input name="name" type="text" placeholder="Tag name" class="form-control"/>
+    <input name="regexes" type="text" placeholder="Regexes" class="form-control"/>
+    <button class="flat-button" type="submit">Add tag</button>
+    {% if error %}<label class="error">{{error}}</label>{% endif %}
   </form>
+
 </div>
 
-<table class="bg-box">
+<table class="bg-box padded">
   <thead>
   <tr>
     <th></th>

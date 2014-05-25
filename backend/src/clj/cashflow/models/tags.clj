@@ -40,3 +40,7 @@
 
 (defn delete [tagname]
   (swap! tags #(remove (fn [tag-rule] (= (:name tag-rule) tagname)) %)))
+
+
+(defn tag-exists? [name]
+  (some #(= (:name %) name) @tags))
