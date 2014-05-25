@@ -9,7 +9,7 @@
             [cashflow.views.graph-view :as graph-view]))
 
 (defn- date-time->date-string [transactions]
-  (map (fn [trans] (update-in trans [:date] #(t-format/unparse (t-format/formatters :date) %)) ) transactions))
+  (map (fn [trans] (update-in trans [:date] #(t-format/unparse (t-format/formatters :date) %))) transactions))
 
 (defroutes home-routes
            (GET "/" [] (render-file "public/templates/home.html" {}))
@@ -20,19 +20,31 @@
            (POST "/tags" [name regexes] (tag-view/create-tag name regexes))
 
            ;; Transactions
-           (GET "/transactions" [] (render-file "public/templates/transactions.html"
-                                                {:transactions (date-time->date-string @transactions/transactions)
-                                                 :sum-by-tag   (transactions/sum-transactions-pr-tag @transactions/transactions)}))
+           ;; TODO Extract out into own namespace
+           (GET "/transactions" []
+                (let [year (first (transactions/unique-years @transactions/transactions))]
+                  (redirect (str "/transactions/" year))))
+
+           (GET "/transactions/:year" [year]
+                (let [transactions-in-year (transactions/transactions-in-year @transactions/transactions (. Integer parseInt year))]
+                  (render-file "public/templates/transactions.html"
+                               {:transactions (date-time->date-string transactions-in-year)
+                                :sum-by-tag   (transactions/sum-transactions-pr-tag transactions-in-year)
+                                :years        (transactions/unique-years @transactions/transactions)
+                                :current-year year})))
            (GET "/transactions/:year/:month-index" [year month-index]
                 (let [transactions-in-month (transactions/transactions-in-month @transactions/transactions (. Integer parseInt year) (. Integer parseInt month-index))]
                   (render-file
                     "public/templates/transactions.html"
                     {:transactions (date-time->date-string transactions-in-month)
-                     :sum-by-tag   (transactions/sum-transactions-pr-tag transactions-in-month)})))
+                     :sum-by-tag   (transactions/sum-transactions-pr-tag transactions-in-month)
+                     :years        (transactions/unique-years @transactions/transactions)
+                     :current-year year
+                     :current-month month-index})))
 
            ;; Graphs
            (GET "/graphs" []
-                (redirect "/graphs/sum-by-tag")) ; default graph
+                (redirect "/graphs/sum-by-tag"))            ; default graph
            (GET "/graphs/:graph-type" [graph-type]
                 (graph-view/graph (keyword graph-type)))
            (GET "/graphs/:graph-type/:year/:month-idx" [graph-type year month-idx]

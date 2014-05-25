@@ -6,7 +6,7 @@
 </script>
 
 <div id="time_filter" class="bg-box">
-  <div id="years" class="container">
+  <div id="years" class="container padded">
     {% for year in years %}
     <div class="item"><button class="flat-button {% ifequal current-year year %} selected {% endifequal %}" onclick="filterByYear({{year}})">{{year}}</button></div>
     {% endfor %}
