@@ -19,21 +19,19 @@
 </script>
 
 <div class="container-box bg-box">
-  <h3>Add tag</h3>
-
   <form action="/tags" method="POST">
     <label>Tag name: </label>
     <input name="name" type="text"/>
     <label>Regexes: </label>
     <input name="regexes" type="text"/>
-    <input type="submit" value="Add"/>
+    <button type="submit">Add tag</button>
   </form>
 </div>
 
 <table class="bg-box">
   <thead>
   <tr>
-    <th>Delete</th>
+    <th></th>
     <th>Tag</th>
     <th>Regexes</th>
   </tr>
@@ -42,12 +40,14 @@
   <tbody>
   <tr>
     <td>
-      <button onclick="deleteTag('{{tag.name}}')">x</button>
+      <button class="delete" onclick="deleteTag('{{tag.name}}')">&#10006;</button>
     </td>
     <td>
       <div class="tag">{{tag.name}}</div>
     </td>
-    <td>{{tag.regexes}}</td>
+    <td style="display: flex;">{% for regex in tag.regexes %}
+      <div style="">{{regex}} &nbsp;</div>
+      {% endfor %}</td>
   </tr>
   </tbody>
   {% endfor %}

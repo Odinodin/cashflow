@@ -58,6 +58,10 @@
   (tags/add-tag! {:name "Mobil" :regexes [#"Mobil"]})
   (tags/tag-and-update-transactions! trans/transactions tags/tags))
 
+(defn start-and-bootstrap []
+  (start-server)
+  (bootstrap-testdata))
+
 #_(trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
 
 
