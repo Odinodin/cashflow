@@ -29,16 +29,13 @@
       => [{:tags ["a" "b"] :description "something"}])
 
 
-(against-background
-  [(before :contents (reset! tags []))]
-  (fact "Can add tags"
-        @tags => empty
-        (add-tag! {:name "store" :regexes [#"Kiwi"]}) => not-empty
-        (count @tags) => 1)
-  (fact "Can remove tags"
-        (count @tags) => 1
-        (remove-tag! "store") => empty
-        @tags => empty)
-  (fact "Can get tag by name"
-        (add-tag! {:name "stuff" :regexes []}) => not-empty
-        (tagname->tag "stuff") => {:name "stuff" :regexes []}))
+(fact "Can add tags"
+      (add-tag! (atom []) {:name "store" :regexes [#"Kiwi"]}) => not-empty)
+
+(fact "Can remove tags"
+      (remove-tag! (atom ["store"]) "store") => empty)
+
+(fact "Can get tag by name"
+      (let [tags (atom [])]
+        (add-tag! tags {:name "stuff" :regexes []}) => not-empty
+        (tagname->tag @tags "stuff") => {:name "stuff" :regexes []}))

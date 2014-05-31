@@ -32,7 +32,7 @@
         (clojure.string/split line #"\t")))))
 
 
-(defn add-transactions! [file]
+(defn add-transactions! [transactions file]
   (->> (parse-file file)
        lines->transactions
        (swap! transactions into)))

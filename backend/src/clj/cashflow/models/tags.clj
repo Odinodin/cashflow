@@ -1,13 +1,9 @@
 (ns cashflow.models.tags)
 
-;; Contains a list of all tags.
-;; A tag is represented as {:name "tagname" :regexes [#"list" #"of" #"regexes"]}
-(def tags (atom []))
-
-(defn add-tag! [tag]
+(defn add-tag! [tags tag]
   (swap! tags conj tag))
 
-(defn remove-tag! [tag-name]
+(defn remove-tag! [tags tag-name]
   (swap! tags #(remove (fn [tag] (= (:name tag) tag-name)) %)))
 
 (defn match-tag-rules
@@ -35,12 +31,12 @@
 (defn get-tagged-transactions [transactions tag]
   (filter #(some #{tag} (:tags %)) transactions))
 
-(defn tagname->tag [tagname]
-  (first (filter #(= tagname (:name %)) @tags)))
+(defn tagname->tag [tags tagname]
+  (first (filter #(= tagname (:name %)) tags)))
 
-(defn delete [tagname]
+(defn delete [tags tagname]
   (swap! tags #(remove (fn [tag-rule] (= (:name tag-rule) tagname)) %)))
 
 
-(defn tag-exists? [name]
-  (some #(= (:name %) name) @tags))
+(defn tag-exists? [tags name]
+  (some #(= (:name %) name) tags))

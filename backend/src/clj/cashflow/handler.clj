@@ -14,9 +14,16 @@
 
 (encoding/add-common-json-encoders!)
 
-(defn init []
-  (println "cashflow is starting")
+;; Contains all mutants.
+;; :transactions are lists of maps with these keys:   {:date :code :description :amount :tags}
+;; :tags are lists of                                 {:name "tagname" :regexes [#"list" #"of" #"regexes"]}
+(declare mutants)
 
+(defn init []
+  (println "cashflow is starting..")
+  (def mutants
+    {:transactions (atom [])
+     :tags (atom [])})
   #_(let [repl (clojure.tools.nrepl.server/start-server :port 0 :bind "127.0.0.1")]
     (println "Repl started at" (:port repl))))
 
@@ -27,7 +34,6 @@
            (route/resources "/")
            (route/not-found "Not Found"))
 
-;; TODO Extract routes that need json-body/response middlewares.
 (def app
   (->
     (routes
@@ -41,4 +47,10 @@
     (middleware/wrap-json-body)
     (middleware/wrap-json-response)))
 
+(defn test-app-handler
+  [testmutants request]
+  (app (assoc request :mutants testmutants)))
 
+(defn lein-app-handler
+  [request]
+  (app (assoc request :mutants mutants)))

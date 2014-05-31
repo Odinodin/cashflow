@@ -11,18 +11,19 @@
     (vec)))
 
 
-(defn show-tags [& error]
+(defn show-tags [{tags :tags} & error]
   (render-file "public/templates/tags.html" (->
-                                              {:tags @tags/tags}
+                                              {:tags @tags}
                                               (cond-> error (assoc :error (first error))))))
 
-(defn delete-tag [tagname]
-  (do (tags/remove-tag! tagname)
-      (show-tags)))
+(defn delete-tag [mutants tagname]
+  (do (tags/remove-tag! (:tags mutants) tagname)
+      (tags/tag-and-update-transactions! (:transactions mutants) (:tags mutants))
+      (show-tags mutants)))
 
-(defn create-tag [name regexes]
-  (if (tags/tag-exists? name)
-    (show-tags (str "Tag '" name "' already exists.."))
-    (do (tags/add-tag! {:name name :regexes (strings->regexes regexes)})
-        (tags/tag-and-update-transactions! transactions/transactions tags/tags)
-        (show-tags))))
+(defn create-tag [{:keys [tags transactions] :as mutants} name regexes]
+  (if (tags/tag-exists? @tags name)
+    (show-tags @tags (str "Tag '" name "' already exists.."))
+    (do (tags/add-tag! tags {:name name :regexes (strings->regexes regexes)})
+        (tags/tag-and-update-transactions! transactions tags)
+        (show-tags mutants))))

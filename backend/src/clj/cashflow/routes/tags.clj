@@ -4,6 +4,6 @@
     [compojure.core :refer :all]))
 
 (defroutes tags-routes
-           (GET "/tags" [] {:body @tags/tags})
-           (GET "/tags/:tagname" [tagname] {:body (tags/tagname->tag tagname)})
-           (DELETE "/tags/:tagname" [tagname] {:body (tags/delete tagname)}))
+           (GET "/tags" {{:keys [tags]} :mutants} {:body @tags})
+           (GET "/tags/:tagname" [tagname :as {{:keys [tags]} :mutants}] {:body (tags/tagname->tag @tags tagname)})
+           (DELETE "/tags/:tagname" [tagname :as {{:keys [tags]} :mutants}] {:body (tags/delete tags tagname)}))

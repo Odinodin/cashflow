@@ -11,6 +11,7 @@
             [clojure.pprint :refer [pprint]]
             [clojure.tools.namespace.repl :refer [refresh]]
 
+            [cashflow.handler :as handler]
             [cashflow.models.transactions :as trans]
             [cashflow.models.tags :as tags]))
 
@@ -21,7 +22,7 @@
   ;; the server is forced to re-resolve the symbol in the var
   ;; rather than having its own copy. When the root binding
   ;; changes, the server picks it up without having to restart.
-  (-> #'app
+  (-> #'lein-app-handler
       ; Makes static assets in $PROJECT_DIR/resources/public/ available.
       (wrap-file "resources")
       ; Content-Type, Content-Length, and Last Modified headers for files in body7
@@ -46,17 +47,19 @@
 
 
 (defn bootstrap-testdata []
-  (reset! tags/tags [])
-  (reset! trans/transactions [])
-  (trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
-  (tags/add-tag! {:name "Butikk" :regexes [#"Rema" #"Kiwi" #"Rimi" #"KIWI" #"Coop" #"REMA"]})
-  (tags/add-tag! {:name "Reise" :regexes [#"NSB" #"Jet"]})
-  (tags/add-tag! {:name "Barnehage" :regexes [#"Barnehage"]})
-  (tags/add-tag! {:name "Hus" :regexes [#"Housing", #"Kommunen" #"Husleie"]})
-  (tags/add-tag! {:name "Møbler" :regexes [#"Ikea", #"Plantasjon" #"Maxbo"]})
-  (tags/add-tag! {:name "Lommepenger" :regexes [#"Kantine" #"Narvesen" #"Botanisk" #"Baker"]})
-  (tags/add-tag! {:name "Mobil" :regexes [#"Mobil"]})
-  (tags/tag-and-update-transactions! trans/transactions tags/tags))
+  (let [tags (:tags handler/mutants)
+        transactions (:transactions handler/mutants)]
+    (reset! tags [])
+    (reset! transactions [])
+    (trans/add-transactions! transactions (.getFile (clojure.java.io/resource "test-transactions.csv")))
+    (tags/add-tag! tags {:name "Butikk" :regexes [#"Rema" #"Kiwi" #"Rimi" #"KIWI" #"Coop" #"REMA"]})
+    (tags/add-tag! tags {:name "Reise" :regexes [#"NSB" #"Jet"]})
+    (tags/add-tag! tags {:name "Barnehage" :regexes [#"Barnehage"]})
+    (tags/add-tag! tags {:name "Hus" :regexes [#"Housing", #"Kommunen" #"Husleie"]})
+    (tags/add-tag! tags {:name "Møbler" :regexes [#"Ikea", #"Plantasjon" #"Maxbo"]})
+    (tags/add-tag! tags {:name "Lommepenger" :regexes [#"Kantine" #"Narvesen" #"Botanisk" #"Baker"]})
+    (tags/add-tag! tags {:name "Mobil" :regexes [#"Mobil"]})
+    (tags/tag-and-update-transactions! transactions tags)))
 
 (defn start-and-bootstrap []
   (start-server)
@@ -74,5 +77,7 @@
 
 #_(. (t/date-time 2014 5 1) getYear)
 #_(. (t/date-time 2014 5 1) getMonthOfYear)
+
+
 
 

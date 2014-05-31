@@ -9,9 +9,24 @@ Trekke ut atoms ut i en map som sendes inn overalt ?
 
 - innføre "Not-tagged" tag
 
+- funk for å slurpe inn alle filer i en katalog
+
+- database?
+- datomic ..
+- bytte til enlive
+- bytte til om
+- bytte til EDN
+
+
 GUI
     - fjerne CODE i transaksjons-tabell.
     - indikere hvilke transaksjoner som ikke er tagga
+    - venstrejustere amount
+    - graph som viser alle tags over alle månedene i et år
+    - når der er ingen transactions så har vi ikke noe som håndterer /transactions - routen ...
+
+
+- velge farge på tags?
 
 
 

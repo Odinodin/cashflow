@@ -21,13 +21,10 @@
           {:date (t/date-time 2009 05 06) :code "VARER" :description "REMA 1000" :amount -159.20M}])
 
 
-(against-background
-  [(before :contents (reset! transactions []))]
-  (fact "Can add transactions"
-        @transactions => empty
-        (add-transactions! test-file) => not-empty
+(fact "Can add transactions"
+      (let [transactions (atom [])]
+        (add-transactions! transactions test-file) => not-empty
         (count @transactions) => 62))
-
 
 (fact "Can find transactions for a day"
       (transactions-at-date
@@ -73,7 +70,7 @@
 (fact "Can sum transactions for each tag"
       (sum-transactions-pr-tag
         [{:tags ["a" "b"] :amount 1} {:tags ["a"] :amount 2}
-                                {:tags ["c" "d"] :amount 3} {:tags ["c"] :amount 4}])
+         {:tags ["c" "d"] :amount 3} {:tags ["c"] :amount 4}])
 
       => [{:tagname "a" :sum 3}
           {:tagname "b" :sum 1}

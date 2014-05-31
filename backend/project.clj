@@ -19,7 +19,7 @@
   :plugins [[lein-ring "0.8.10"]
             [lein-cljsbuild "1.0.2"]
             [lein-pdo "0.1.1"]]
-  :ring {:handler cashflow.handler/app
+  :ring {:handler cashflow.handler/lein-app-handler
          :init cashflow.handler/init
          :destroy cashflow.handler/destroy}
   :aot :all
