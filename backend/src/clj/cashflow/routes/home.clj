@@ -28,8 +28,11 @@
            ;; Transactions
            ;; TODO Extract out into own namespace
            (GET "/transactions" {{:keys [transactions]} :mutants}
-                (let [year (first (transactions/unique-years @transactions))]
-                  (redirect (str "/transactions/" year))))
+                (if-let [year (first (transactions/unique-years @transactions))]
+                  (redirect (str "/transactions/" year))
+                  (render-file "public/templates/transactions.html" {:transactions []
+                                                                     :sum-by-tag   []
+                                                                     :years        []})))
 
            (GET "/transactions/:year" [year :as {{:keys [transactions tags]} :mutants}]
                 (let [transactions-in-year (transactions/transactions-in-year @transactions (. Integer parseInt year))]

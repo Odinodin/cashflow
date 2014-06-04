@@ -28,8 +28,8 @@
   <tr>
     <th>Date</th>
     <th>Code</th>
-    <th>Amount</th>
     <th>Description</th>
+    <th>Amount</th>
     <th>Tags</th>
   </tr>
   </thead>
@@ -38,8 +38,8 @@
   <tr>
     <td>{{trans.date}}</td>
     <td>{{trans.code}}</td>
-    <td>{{trans.amount}}</td>
     <td>{{trans.description}}</td>
+    <td class="rightalign">{{trans.amount}}</td>
     <td>{% for tag in trans.tags %}
       <div class="tag">{{tag}}</div>
       {% endfor %}

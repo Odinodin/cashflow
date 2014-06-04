@@ -65,19 +65,4 @@
   (start-server)
   (bootstrap-testdata))
 
-#_(trans/add-transactions! (.getFile (clojure.java.io/resource "test-transactions.csv")))
-
-
-#_(tags/add-tag! {:name "butikk" :regexes [#"Rema" #"Kiwi" #"Rimi"]})
-#_(tags/add-tag! {:name "tog" :regexes [#"NSB"]})
-
-#_(tags/tag-and-update-transactions! trans/transactions tags/tags)
-
-#_(tags/get-tagged-transactions @trans/transactions "butikk")
-
-#_(. (t/date-time 2014 5 1) getYear)
-#_(. (t/date-time 2014 5 1) getMonthOfYear)
-
-
-
 

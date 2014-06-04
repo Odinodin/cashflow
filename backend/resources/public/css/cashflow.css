@@ -152,3 +152,7 @@ button.delete:hover {
 .error {
     color: #ff7472;
 }
+
+.rightalign {
+    text-align: right;
+}
