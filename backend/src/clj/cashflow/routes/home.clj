@@ -3,19 +3,13 @@
             [cashflow.views.layout :as layout]
             [ring.util.response :refer [resource-response response redirect]]
             [selmer.parser :refer [render-file]]
-            [clj-time.format :as t-format]
-            [cashflow.models.transactions :as transactions]
             [cashflow.views.tag-view :as tag-view]
-            [cashflow.views.graph-view :as graph-view]))
+            [cashflow.views.graph-view :as graph-view]
+            [cashflow.views.transactions-views :as transactions-views]))
 
-(defn- date-time->date-string [transactions]
-  (map (fn [trans] (update-in trans [:date] #(t-format/unparse (t-format/formatters :date) %))) transactions))
 
 (defroutes home-routes
            (GET "/" {{:keys [transactions tags]} :mutants}
-
-                (println (str "TRANS:" transactions))
-                (println (str "tags:" tags))
                 (render-file "public/templates/home.html" {}))
 
            ;; Tags
@@ -26,30 +20,12 @@
                  (tag-view/create-tag mutants name regexes))
 
            ;; Transactions
-           ;; TODO Extract out into own namespace
            (GET "/transactions" {{:keys [transactions]} :mutants}
-                (if-let [year (first (transactions/unique-years @transactions))]
-                  (redirect (str "/transactions/" year))
-                  (render-file "public/templates/transactions.html" {:transactions []
-                                                                     :sum-by-tag   []
-                                                                     :years        []})))
-
-           (GET "/transactions/:year" [year :as {{:keys [transactions tags]} :mutants}]
-                (let [transactions-in-year (transactions/transactions-in-year @transactions (. Integer parseInt year))]
-                  (render-file "public/templates/transactions.html"
-                               {:transactions (date-time->date-string transactions-in-year)
-                                :sum-by-tag   (transactions/sum-transactions-pr-tag transactions-in-year)
-                                :years        (transactions/unique-years @transactions)
-                                :current-year year})))
+                (transactions-views/all-transactions transactions))
+           (GET "/transactions/:year" [year :as {{:keys [transactions]} :mutants}]
+                (transactions-views/transactions-in-year transactions year))
            (GET "/transactions/:year/:month-index" [year month-index :as {{:keys [transactions]} :mutants}]
-                (let [transactions-in-month (transactions/transactions-in-month @transactions (. Integer parseInt year) (. Integer parseInt month-index))]
-                  (render-file
-                    "public/templates/transactions.html"
-                    {:transactions (date-time->date-string transactions-in-month)
-                     :sum-by-tag   (transactions/sum-transactions-pr-tag transactions-in-month)
-                     :years        (transactions/unique-years @transactions)
-                     :current-year year
-                     :current-month month-index})))
+                (transactions-views/transactions-in-month transactions year month-index))
 
            ;; Graphs
            (GET "/graphs" []

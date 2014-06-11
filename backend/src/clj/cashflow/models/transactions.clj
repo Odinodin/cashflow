@@ -70,14 +70,14 @@
               (t/within? interval)) transaction-list)
     (sort-by :date)))
 
-(defn transactions-in [start-date end-date]
+(defn transactions-in [transactions start-date end-date]
   (transactions-in-interval
-    @transactions
+    transactions
     (t/interval (iso8600string->date start-date)
                 (iso8600string->date end-date))))
 
-(defn transactions-at [query-date]
-  (transactions-at-date @transactions (iso8600string->date query-date)))
+(defn transactions-at [transactions query-date]
+  (transactions-at-date transactions (iso8600string->date query-date)))
 
 (defn unique-years [transaction-list]
   (->>
