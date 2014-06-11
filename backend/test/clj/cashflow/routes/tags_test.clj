@@ -26,7 +26,7 @@
 
 (fact "can delete tags"
       (let [mutants {:tags (atom [{:name "power" :regexes [#"Pwr"]}])}
-             response (->
+            response (->
                        mutants
                        (cashflow/test-app-handler (ring-mock/request :delete "/api/tags/power"))
                        json-util/json-parse-body)]
