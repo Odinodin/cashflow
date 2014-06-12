@@ -2,8 +2,6 @@
 TODO
 =========
 
-Trekke ut atoms ut i en map som sendes inn overalt
-
 - kunne oppdatere tags
 - identifisere og fjerne interne overføringer mellom konti
 
@@ -22,9 +20,7 @@ Trekke ut atoms ut i en map som sendes inn overalt
 GUI
     - fjerne CODE i transaksjons-tabell.
     - indikere hvilke transaksjoner som ikke er tagga
-    - venstrejustere amount
     - graph som viser alle tags over alle månedene i et år
-    - når der er ingen transactions så har vi ikke noe som håndterer /transactions - routen ...
 
 
 - velge farge på tags?
