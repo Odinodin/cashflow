@@ -13,3 +13,4 @@ pom.xml
 .nrepl-port
 scrap.clj
 scrap.cljs
+odin*.*
