@@ -20,11 +20,18 @@
       => [{:date (t/date-time 2009 05 06) :code "VARER" :description "NARVESEN" :amount -119.00M}
           {:date (t/date-time 2009 05 06) :code "VARER" :description "REMA 1000" :amount -159.20M}])
 
-
-(fact "Can add transactions"
+(fact "Can add transactions in file"
       (let [transactions (atom [])]
-        (add-transactions! transactions test-file) => not-empty
-        (count @transactions) => 62))
+        (add-transactions-in-file! transactions test-file) => not-empty
+        (count @transactions) => 56))
+
+(fact "Internal transfers are filtered out when adding transactions"
+      (to-transactions [["06.05.2009" "06.05.2009" "VARER" "NARVESEN" "-119,00" "17017470066"]
+                        ["06.05.2009" "06.05.2009" "OVFNETTB" "Internal transfer, filter me" "-159,20" "17017532866"]
+                        ["06.05.2009" "06.05.2009" "VARER" "REMA 1000" "-159,20" "17017532866"]
+                        ["06.05.2009" "06.05.2009" "MOB.B.OVF" "Internal transfer, filter me" "-159,20" "17017532866"]])
+      => [{:date (t/date-time 2009 05 06) :code "VARER" :description "NARVESEN" :amount -119.00M}
+          {:date (t/date-time 2009 05 06) :code "VARER" :description "REMA 1000" :amount -159.20M}])
 
 (fact "Can find transactions for a day"
       (transactions-at-date

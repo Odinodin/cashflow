@@ -7,7 +7,7 @@
 
 
 (defn all-transactions [transactions]
-  (if-let [year (first (trans/unique-years @transactions))]
+  (if-let [year (last (trans/unique-years @transactions))]
     (redirect (str "/transactions/" year))
     (render-file "public/templates/transactions.html" {:transactions []
                                                        :sum-by-tag   []
@@ -18,7 +18,6 @@
 
 
 (defn transactions-in-year [transactions year]
-
   (let [transactions-in-year (trans/transactions-in-year @transactions (. Integer parseInt year))]
     (render-file "public/templates/transactions.html"
                  {:transactions (date-time->date-string transactions-in-year)

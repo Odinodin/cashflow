@@ -27,10 +27,15 @@
       (for [line (rest lines)]
         (clojure.string/split line #"\t")))))
 
+(defn to-transactions [lines]
+  (->>
+    lines
+    lines->transactions
+    (remove (comp #{"OVFNETTB" "MOB.B.OVF"} :code))))
 
-(defn add-transactions! [transactions file]
+(defn add-transactions-in-file! [transactions file]
   (->> (parse-file file)
-       lines->transactions
+       to-transactions
        (swap! transactions into)))
 
 ;; Date helpers

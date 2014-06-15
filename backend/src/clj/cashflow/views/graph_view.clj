@@ -12,7 +12,7 @@
     (render-file "public/templates/graph_sum_by_tag.html"
                  {:sum-by-tag   (vec (transactions/sum-transactions-pr-tag @transactions))
                   :years        years
-                  :current-year (first years)})))
+                  :current-year (last years)})))
 
 (defmethod graph :net-income [_ mutants]
   (render-file "public/templates/graph_net_income.html"

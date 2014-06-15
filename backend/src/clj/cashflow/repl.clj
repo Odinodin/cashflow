@@ -51,7 +51,7 @@
         transactions (:transactions handler/mutants)]
     (reset! tags [])
     (reset! transactions [])
-    (trans/add-transactions! transactions (.getFile (clojure.java.io/resource "test-transactions.csv")))
+    (trans/add-transactions-in-file! transactions (.getFile (clojure.java.io/resource "test-transactions.csv")))
     (tags/add-tag! tags {:name "Butikk" :regexes [#"Rema" #"Kiwi" #"Rimi" #"KIWI" #"Coop" #"REMA"]})
     (tags/add-tag! tags {:name "Reise" :regexes [#"NSB" #"Jet"]})
     (tags/add-tag! tags {:name "Barnehage" :regexes [#"Barnehage"]})
