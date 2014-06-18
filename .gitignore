@@ -14,3 +14,5 @@ pom.xml
 scrap.clj
 scrap.cljs
 odin*.*
+
+/out

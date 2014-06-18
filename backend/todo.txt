@@ -3,8 +3,6 @@ TODO
 =========
 
 - kunne oppdatere tags
-- identifisere og fjerne interne overføringer mellom konti
-
 - innføre "Not-tagged" tag
 
 - database?
@@ -13,16 +11,9 @@ TODO
 - bytte til om
 - bytte til EDN
 
-
 GUI
     - fjerne CODE i transaksjons-tabell.
     - indikere hvilke transaksjoner som ikke er tagga
     - graph som viser alle tags over alle månedene i et år
     - graph som viser, per konto, cashflow
     - velge farge på tags?
-
-
-- Grafer/Transaksjoner default velge inneværende måned, ikke første år
-
-
-

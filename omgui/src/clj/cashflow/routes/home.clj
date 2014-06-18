@@ -9,4 +9,4 @@
 (defroutes home-routes
            #_(GET "/" [] (home))
            (GET "/" [] (resource-response "index.html" {:root "public"}))
-           (GET "/tagz" [] (resource-response "tags.html" {:root "public"})))
+           (GET "/tags" [] (resource-response "tags.html" {:root "public"})))

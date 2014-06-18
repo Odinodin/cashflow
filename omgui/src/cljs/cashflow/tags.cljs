@@ -28,7 +28,7 @@
     (will-mount [_]
       (xhr/json-xhr
         {:method :get
-         :url "localhost:8080/api/tags"
+         :url "/api/tags"
          :on-complete #_(print %) #(om/transact! app :tags (fn [_] %))}))
     ;; Render the transactions
     om/IRender
