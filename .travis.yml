@@ -3,8 +3,8 @@ lein: lein2
 before_script: cd backend
 script: lein2 midje
 notifications:
-  recipients:
-    - odin@odinodin.com
+	email: 
+  	  - odin@odinodin.com
 jdk:
   - openjdk7
   - oraclejdk7
