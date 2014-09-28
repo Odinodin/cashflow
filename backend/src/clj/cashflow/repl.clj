@@ -1,7 +1,6 @@
 (ns cashflow.repl
   (:use cashflow.handler
         ring.server.standalone
-        print.foo
         clojure.repl
         [ring.middleware file-info file])
   (:require [clj-time.coerce :as t-coerce]
@@ -64,5 +63,3 @@
 (defn start-and-bootstrap []
   (start-server)
   (bootstrap-testdata))
-
-

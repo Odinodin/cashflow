@@ -4,18 +4,22 @@
   :source-paths ["src/clj"]
   :test-paths ["test/clj"]
   :dependencies [[org.clojure/clojure "1.6.0"]
+                 [clj-time "0.6.0"]
+                 [cheshire "5.3.1"]
                  [compojure "1.1.6"]
                  [hiccup "1.0.5"]
                  [ring-server "0.3.1"]
                  [ring/ring-json "0.3.0"]
                  [ring-cors "0.1.1"]
-                 [cheshire "5.3.1"]
-                 [clj-time "0.6.0"]
-                 [org.clojure/tools.nrepl "0.2.3"]
+
+                 [prismatic/schema "0.2.6"]
 
                  ;; GUI
                  [selmer "0.6.6"]
-                 ]
+
+                 ;; Support
+                 [prone "0.6.0"]
+                 [org.clojure/tools.nrepl "0.2.3"]]
   :plugins [[lein-ring "0.8.10"]
             [lein-cljsbuild "1.0.2"]
             [lein-pdo "0.1.1"]]

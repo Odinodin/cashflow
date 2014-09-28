@@ -3,6 +3,7 @@
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.file-info :refer [wrap-file-info]]
             [hiccup.middleware :refer [wrap-base-url]]
+            [prone.middleware :as prone]
             [compojure.handler :as handler]
             [compojure.route :as route]
             clojure.tools.nrepl.server
@@ -45,7 +46,8 @@
     (handler/site)
     (wrap-base-url)
     (middleware/wrap-json-body)
-    (middleware/wrap-json-response)))
+    (middleware/wrap-json-response)
+    (prone/wrap-exceptions)))
 
 (defn test-app-handler
   [testmutants request]

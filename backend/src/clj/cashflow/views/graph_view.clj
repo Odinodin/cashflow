@@ -48,7 +48,3 @@
       {:sum-by-tag   (vec (transactions/sum-transactions-pr-tag transactions-in-month))
        :years        (transactions/unique-years @transactions)
        :current-year year})))
-
-
-
-

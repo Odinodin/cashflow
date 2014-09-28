@@ -7,7 +7,6 @@
             [cashflow.views.graph-view :as graph-view]
             [cashflow.views.transactions-views :as transactions-views]))
 
-
 (defroutes home-routes
            (GET "/" {{:keys [transactions tags]} :mutants}
                 (render-file "public/templates/home.html" {}))
