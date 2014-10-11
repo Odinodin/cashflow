@@ -1,8 +1,7 @@
 (ns cashflow.routes.transactions
   (:require
     [cashflow.models.transactions :as trans]
-    [compojure.core :refer :all]
-    [ring.middleware.json :as middleware]))
+    [compojure.core :refer :all]))
 
 (defroutes transactions-routes
            (GET "/transactions" [start-date end-date :as {{:keys [transactions]} :mutants}]

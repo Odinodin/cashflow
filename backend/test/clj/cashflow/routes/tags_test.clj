@@ -1,10 +1,23 @@
 (ns cashflow.routes.tags-test
+  (:import java.io.ByteArrayInputStream)
   (:require [ring.mock.request :as ring-mock]
             [midje.sweet :refer :all]
-            cheshire.core
+            [cheshire.core :as json]
             [cashflow.handler :as cashflow]
             [cashflow.models.tags :as tags]
             [cashflow.json-util :as json-util]))
+
+(fact "can create tag"
+      (let [response (->
+                       {:tags (atom [])}
+                       (cashflow/test-app-handler {:request-method :post
+                                                   :uri            "/api/tags"
+                                                   :body           (java.io.ByteArrayInputStream. (.getBytes (json/generate-string {:name "test" :regexes ["a" "b"]}))) ;; extract this into a function
+                                                   :content-type   "application/json"})
+                       json-util/json-parse-body)]
+
+        response => (contains {:body anything :headers anything :status 201})
+        (:body response) => [{:name "test" :regexes ["a" "b"]}]))
 
 (fact "can list tags"
       (let [response (->

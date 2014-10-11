@@ -7,11 +7,12 @@
             [compojure.handler :as handler]
             [compojure.route :as route]
             clojure.tools.nrepl.server
-            [ring.middleware.json :as middleware]
+            [ring.middleware.format :as middleware]
             [cashflow.encoding :as encoding]
             [cashflow.routes.home :refer [home-routes]]
             [cashflow.routes.transactions :refer [transactions-routes]]
-            [cashflow.routes.tags :refer [tags-routes]]))
+            [cashflow.routes.tags :refer [tags-routes]]
+            [cashflow.wrapper]))
 
 (encoding/add-common-json-encoders!)
 
@@ -44,10 +45,8 @@
       home-routes
       app-routes)
     (handler/site)
-    (wrap-base-url)
-    (middleware/wrap-json-body)
-    (middleware/wrap-json-response)
-    (prone/wrap-exceptions)))
+    (middleware/wrap-restful-format :formats [:json-kw])
+    #_(prone/wrap-exceptions)))
 
 (defn test-app-handler
   [testmutants request]

@@ -8,9 +8,9 @@
                  [cheshire "5.3.1"]
                  [compojure "1.1.6"]
                  [hiccup "1.0.5"]
+                 [ring-middleware-format "0.4.0"]
+                 [ring "1.3.1"]
                  [ring-server "0.3.1"]
-                 [ring/ring-json "0.3.0"]
-                 [ring-cors "0.1.1"]
 
                  [prismatic/schema "0.2.6"]
 
@@ -20,14 +20,12 @@
                  ;; Support
                  [prone "0.6.0"]
                  [org.clojure/tools.nrepl "0.2.3"]]
-  :plugins [[lein-ring "0.8.10"]
-            [lein-cljsbuild "1.0.2"]
-            [lein-pdo "0.1.1"]]
+  :plugins [[lein-ring "0.8.12"]]
   :ring {:handler cashflow.handler/lein-app-handler
          :init cashflow.handler/init
          :destroy cashflow.handler/destroy}
   :aot :all
-  :aliases {"up" ["pdo" "cljsbuild" "auto" "dev," "ring" "server-headless"]}
+  :jvm-opts ["-Xmx768M"]
   :profiles
   {:production {:ring
                 {:open-browser? false, :stacktraces? false, :auto-reload? false}}

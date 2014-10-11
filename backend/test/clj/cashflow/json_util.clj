@@ -4,4 +4,4 @@
 (defn json-parse-body
   "JSON-parses body into a Clojure datastructure"
   [response]
-  (assoc response :body (cheshire.core/parse-string (:body response) true)))
+  (assoc response :body (cheshire.core/parse-string (-> response :body slurp) true)))
