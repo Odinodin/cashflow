@@ -14,16 +14,15 @@
 
 (defn api-proxy
   [req]
-  (println "API PROXY!")
   (let [url (str "http://localhost:8080/api"
                  (get-in req [:route-params :*]))
         api-req {:url url
                  :method (req :request-method)
                  :body (log-and-return-body req)
-                 :headers (req :headers)
+                 :headers (dissoc (req :headers) "content-length")
                  :throw-exceptions false
                  :follow-redirects false}]
-    (println (str "API req " api-req))
+    (clojure.pprint/pprint (str "API req: " api-req))
     (clj-http.client/request api-req)))
 
 (defroutes api-proxy-routes

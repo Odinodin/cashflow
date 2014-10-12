@@ -13,8 +13,16 @@ var TagEditor = React.createClass({
             return;
         }
 
-        // TODO post data to server
-        atomic.post("/api/tags", {})
+        superagent.post("/api/tags")
+            .send({name: name, regexes: regexes.split(' ')})
+            .set('Accept', 'application/json')
+            .end(function(res){
+                if (res.ok) {
+                    this.props.onTagCreate(res.body);
+                } else {
+                    alert('Oh no! error ' + res.text);
+                }
+            }.bind(this));
 
         // Clear form
         this.refs.name.getDOMNode().value = '';
@@ -29,7 +37,6 @@ var TagEditor = React.createClass({
                     R.input({name: "name", type: "text", placeholder: "Tag name", className: "form-control", ref: "name"}),
                     R.input({name: "regexes", type: "text", placeholder: "Regexes", className: "form-control", ref: "regexes"}),
                     R.button({className: "flat-button", type: "submit"}, "Add tag")
-                    // {% if error %}<label class="error">{{error}}</label>{% endif %}
                 ]
             )
         )
@@ -38,28 +45,6 @@ var TagEditor = React.createClass({
 
 /* Tag table */
 var TagTable = React.createClass({
-
-        getInitialState: function () {
-            return {
-                tags: [
-                    {name: "X", regexes: ["a", "b"]},
-                    {name: "Y", regexes: ["c", "d"]}
-                ]
-            }
-        },
-
-        componentDidMount: function () {
-            // Retrieve tags from API
-            atomic.get('/api/tags')
-                .success(function (tags){
-                    this.setState({
-                        tags: tags
-                    });
-                }.bind(this))
-                .error(function(error) {
-                    console.log("Faile to get /api/tags: " + error)
-                });
-        },
 
         render: function () {
             return R.table({className: "bg-box padded"}, [
@@ -70,7 +55,7 @@ var TagTable = React.createClass({
                         R.th({}, "Regexes")
                     ])),
                 R.tbody({},
-                    this.state.tags.map(function (tag) {
+                    this.props.tags.map(function (tag) {
                         return R.tr({}, [
                             R.td({}, R.button({className: "delete"}, "\u2716")),
                             R.td({}, tag.name),
@@ -94,12 +79,34 @@ var Menu = React.createClass({
 });
 
 var TagsPage = React.createClass({
+
+    onTagCreate: function(tagCreateResult) {
+        // Just load all tags from server again
+        this.loadTagsFromServer();
+    },
+
+    // Retrieve tags from API
+    loadTagsFromServer: function() {
+        superagent.get('/api/tags')
+            .end(function(res) {
+                this.setState({tags: res.body});
+            }.bind(this));
+    },
+
+    getInitialState: function () {
+        return { tags: []};
+    },
+
+    componentDidMount: function(){
+        this.loadTagsFromServer();
+    },
+
     render: function () {
         return R.div({id: "main"},
             [
                 Menu(),
-                TagEditor(),
-                TagTable()
+                TagEditor({onTagCreate: this.onTagCreate}),
+                TagTable({tags: this.state.tags})
             ]);
     }
 });
