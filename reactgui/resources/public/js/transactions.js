@@ -8,14 +8,14 @@ var TransactionSummaryTable = React.createClass({
                 R.thead({},
                     R.tr({},
                         [
-                            R.th({}, "Tag"),
+                            R.th({}, "Category"),
                             R.th({}, "Amount")
                         ])
                 ),
                 R.tbody({},
                     R.tr({},
                         [
-                            R.td({}, R.div({className: "tag"}, "Hardcoded tagname")),
+                            R.td({}, R.div({className: "tag"}, "Hardcoded category")),
                             R.td({}, R.div({}, "134"))]
                     )
                 )
@@ -34,7 +34,7 @@ var TransactionsTable = React.createClass({
                             R.th({}, "Code"),
                             R.th({}, "Description"),
                             R.th({}, "Amount"),
-                            R.th({}, "Tags")
+                            R.th({}, "Category")
                         ])),
                     R.tbody({},
                         this.props.transactions.map(function (trans) {
@@ -43,7 +43,7 @@ var TransactionsTable = React.createClass({
                                     R.td({}, trans.code),
                                     R.td({}, trans.description),
                                     R.td({}, trans.amount),
-                                    R.td({}, trans.tags.join(", "))
+                                    R.td({}, trans.tags)
                                 ]
                             )
                         }.bind(this))
