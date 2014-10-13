@@ -11,8 +11,7 @@
             [cashflow.encoding :as encoding]
             [cashflow.routes.home :refer [home-routes]]
             [cashflow.routes.transactions :refer [transactions-routes]]
-            [cashflow.routes.tags :refer [tags-routes]]
-            [cashflow.wrapper]))
+            [cashflow.routes.tags :refer [tags-routes]]))
 
 (encoding/add-common-json-encoders!)
 
