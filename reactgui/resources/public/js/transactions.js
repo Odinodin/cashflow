@@ -26,6 +26,7 @@ var TransactionSummaryTable = React.createClass({
 
 var TransactionsTable = React.createClass({
         render: function () {
+            console.log("transactions: ", this.props);
             return R.table({className: "bg-box padded"}, [
                     R.thead({},
                         R.tr({}, [
@@ -36,14 +37,16 @@ var TransactionsTable = React.createClass({
                             R.th({}, "Tags")
                         ])),
                     R.tbody({},
-                        R.tr({}, [
-                                R.td({}, "some date"),
-                                R.td({}, "Code"),
-                                R.td({}, "Something somthing"),
-                                R.td({}, "1234"),
-                                R.td({}, "Hardcoded tagname")
-                            ]
-                        )
+                        this.props.transactions.map(function (trans) {
+                            return R.tr({}, [
+                                    R.td({}, trans.date),
+                                    R.td({}, trans.code),
+                                    R.td({}, trans.description),
+                                    R.td({}, trans.amount),
+                                    R.td({}, trans.tags.join(", "))
+                                ]
+                            )
+                        }.bind(this))
                     )
                 ]
             )
@@ -51,14 +54,31 @@ var TransactionsTable = React.createClass({
     }
 );
 
-
 var TransactionPage = React.createClass({
+
+    getInitialState: function() {
+        return {transactions: []};
+    },
+
+    componentDidMount: function(){
+        this.loadTransactionsFromServer();
+    },
+
+    // Retrieve transations from API
+    loadTransactionsFromServer: function () {
+        superagent.get('/api/transactions')
+            .end(function (res) {
+                console.log("TRANS: ", res.body);
+                this.setState({transactions: res.body});
+            }.bind(this));
+    },
+
     render: function () {
         return R.div({id: "main"},
             [
                 Menu(),
                 TransactionSummaryTable(),
-                TransactionsTable()
+                TransactionsTable({transactions: this.state.transactions})
             ]);
     }
 });
