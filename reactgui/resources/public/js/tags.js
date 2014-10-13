@@ -3,7 +3,7 @@ var R = React.DOM;
 /* Tags */
 var TagEditor = React.createClass({
 
-    handleSubmit: function(e) {
+    handleSubmit: function (e) {
         e.preventDefault();
 
         // Get data from the form
@@ -57,10 +57,11 @@ var TagTable = React.createClass({
                 R.tbody({},
                     this.props.tags.map(function (tag) {
                         return R.tr({}, [
-                            R.td({}, R.button({className: "delete"}, "\u2716")),
-                            R.td({}, tag.name),
-                            R.td({}, tag.regexes.join(", "))]);
-                    }))
+                            R.td({}, R.button({onClick: function() {this.props.onTagDelete(tag.name)}.bind(this),
+                                className: "delete"}, "\u2716")),
+                            R.td({key: "name"}, tag.name),
+                            R.td({key: "regexes"}, tag.regexes.join(", "))]);
+                    }.bind(this)))
             ])
         }
     }
@@ -80,15 +81,23 @@ var Menu = React.createClass({
 
 var TagsPage = React.createClass({
 
-    onTagCreate: function(tagCreateResult) {
+    onTagCreate: function (tagCreateResult) {
         // Just load all tags from server again
         this.loadTagsFromServer();
     },
 
-    // Retrieve tags from API
-    loadTagsFromServer: function() {
-        superagent.get('/api/tags')
+    onTagDelete: function(tagName) {
+        superagent.del('/api/tags/' + tagName)
             .end(function(res) {
+                // Just load all tags from server again
+                this.loadTagsFromServer();
+            }.bind(this))
+    },
+
+    // Retrieve tags from API
+    loadTagsFromServer: function () {
+        superagent.get('/api/tags')
+            .end(function (res) {
                 this.setState({tags: res.body});
             }.bind(this));
     },
@@ -106,7 +115,7 @@ var TagsPage = React.createClass({
             [
                 Menu(),
                 TagEditor({onTagCreate: this.onTagCreate}),
-                TagTable({tags: this.state.tags})
+                TagTable({tags: this.state.tags, onTagDelete: this.onTagDelete})
             ]);
     }
 });
