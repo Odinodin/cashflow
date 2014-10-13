@@ -12,7 +12,7 @@ var CategoryEditor = React.createClass({
             return;
         }
 
-        superagent.post("/api/tags")
+        superagent.post("/api/categories")
             .send({name: name, regexes: regexes.split(' ')})
             .set('Accept', 'application/json')
             .end(function(res){
@@ -74,7 +74,7 @@ var CategoriesPage = React.createClass({
     },
 
     onCategoryDelete: function(categoryName) {
-        superagent.del('/api/tags/' + categoryName)
+        superagent.del('/api/categories/' + categoryName)
             .end(function(res) {
                 // Just load list from server again
                 this.loadCategoriesFromServer();
@@ -83,7 +83,7 @@ var CategoriesPage = React.createClass({
 
     // Retrieve list from API
     loadCategoriesFromServer: function () {
-        superagent.get('/api/tags')
+        superagent.get('/api/categories')
             .end(function (res) {
                 this.setState({categories: res.body});
             }.bind(this));

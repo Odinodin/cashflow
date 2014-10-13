@@ -43,7 +43,7 @@ var TransactionsTable = React.createClass({
                                     R.td({}, trans.code),
                                     R.td({}, trans.description),
                                     R.td({}, trans.amount),
-                                    R.td({}, trans.tags)
+                                    (trans.category) ? R.td({className: "tag"}, trans.category) : null
                                 ]
                             )
                         }.bind(this))

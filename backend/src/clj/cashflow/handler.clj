@@ -11,20 +11,20 @@
             [cashflow.encoding :as encoding]
             [cashflow.routes.home :refer [home-routes]]
             [cashflow.routes.transactions :refer [transactions-routes]]
-            [cashflow.routes.tags :refer [tags-routes]]))
+            [cashflow.routes.categories :refer [category-routes]]))
 
 (encoding/add-common-json-encoders!)
 
 ;; Contains all mutants.
-;; :transactions are lists of maps with these keys:   {:date :code :description :amount :tags}
-;; :tags are lists of                                 {:name "tagname" :regexes [#"list" #"of" #"regexes"]}
+;; :transactions are lists of maps with these keys:   {:date :code :description :amount :category}
+;; :categories are lists of                                 {:name "categoryname" :regexes [#"list" #"of" #"regexes"]}
 (declare mutants)
 
 (defn init []
   (println "cashflow is starting..")
   (def mutants
     {:transactions (atom [])
-     :tags (atom [])})
+     :categories (atom [])})
   #_(let [repl (clojure.tools.nrepl.server/start-server :port 0 :bind "127.0.0.1")]
     (println "Repl started at" (:port repl))))
 
@@ -39,7 +39,7 @@
   (->
     (routes
       (context "/api" []
-               tags-routes
+               category-routes
                transactions-routes)
       home-routes
       app-routes)

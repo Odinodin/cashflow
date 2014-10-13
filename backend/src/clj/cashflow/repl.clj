@@ -12,7 +12,7 @@
 
             [cashflow.handler :as handler]
             [cashflow.models.transactions :as trans]
-            [cashflow.models.tags :as tags]))
+            [cashflow.models.categories :as categories]))
 
 (defonce server (atom nil))
 
@@ -46,19 +46,19 @@
 
 
 (defn bootstrap-testdata []
-  (let [tags (:tags handler/mutants)
+  (let [categories (:categories handler/mutants)
         transactions (:transactions handler/mutants)]
-    (reset! tags [])
+    (reset! categories [])
     (reset! transactions [])
     (trans/add-transactions-in-file! transactions (.getFile (clojure.java.io/resource "test-transactions.csv")))
-    (tags/add-tag! tags {:name "Butikk" :regexes [#"Rema" #"Kiwi" #"Rimi" #"KIWI" #"Coop" #"REMA"]})
-    (tags/add-tag! tags {:name "Reise" :regexes [#"NSB" #"Jet"]})
-    (tags/add-tag! tags {:name "Barnehage" :regexes [#"Barnehage"]})
-    (tags/add-tag! tags {:name "Hus" :regexes [#"Housing", #"Kommunen" #"Husleie"]})
-    (tags/add-tag! tags {:name "Møbler" :regexes [#"Ikea", #"Plantasjon" #"Maxbo"]})
-    (tags/add-tag! tags {:name "Lommepenger" :regexes [#"Kantine" #"Narvesen" #"Botanisk" #"Baker"]})
-    (tags/add-tag! tags {:name "Mobil" :regexes [#"Mobil"]})
-    (tags/tag-and-update-transactions! transactions tags)))
+    (categories/add-category! categories {:name "Butikk" :regexes [#"Rema" #"Kiwi" #"Rimi" #"KIWI" #"Coop" #"REMA"]})
+    (categories/add-category! categories {:name "Reise" :regexes [#"NSB" #"Jet"]})
+    (categories/add-category! categories {:name "Barnehage" :regexes [#"Barnehage"]})
+    (categories/add-category! categories {:name "Hus" :regexes [#"Housing", #"Kommunen" #"Husleie"]})
+    (categories/add-category! categories {:name "Møbler" :regexes [#"Ikea", #"Plantasjon" #"Maxbo"]})
+    (categories/add-category! categories {:name "Lommepenger" :regexes [#"Kantine" #"Narvesen" #"Botanisk" #"Baker"]})
+    (categories/add-category! categories {:name "Mobil" :regexes [#"Mobil"]})
+    (categories/tag-and-update-transactions! transactions categories)))
 
 (defn start-and-bootstrap []
   (start-server)
