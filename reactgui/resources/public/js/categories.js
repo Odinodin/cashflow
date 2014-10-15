@@ -100,7 +100,7 @@ var CategoriesPage = React.createClass({
     render: function () {
         return R.div({id: "main"},
             [
-                Menu(),
+                commonComponents.Menu(),
                 CategoryEditor({onCategoryCreate: this.onCategoryCreate}),
                 CategoryTable({categories: this.state.categories, onCategoryDelete: this.onCategoryDelete})
             ]);
