@@ -1,6 +1,7 @@
 (ns cashflow.encoding
   (:require [cheshire.generate :as generate]
-            [clj-time.coerce :as coerce])
+            [clj-time.coerce :as coerce]
+            [clj-time.format :as format])
   (:import org.joda.time.DateTime
            java.util.regex.Pattern))
 
@@ -15,4 +16,4 @@
   (generate/add-encoder
     DateTime
     (fn [data jsonGenerator]
-      (.writeString jsonGenerator (coerce/to-string data)))))
+      (.writeString jsonGenerator (format/unparse (format/formatters :date) data)))))

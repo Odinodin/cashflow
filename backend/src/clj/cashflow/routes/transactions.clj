@@ -10,4 +10,7 @@
                       start-date
                       {:body (trans/transactions-at @transactions start-date)}
                       :else
-                      {:body @transactions})))
+                      {:body @transactions}))
+
+           (GET "/transactions/:year" [year :as {{:keys [transactions]} :mutants}]
+                {:body (trans/transactions-in-year @transactions (. Integer parseInt year))}))
