@@ -28,29 +28,68 @@ var R = React.DOM;
 // TODO Extract in to common; parameterize callbacks, years, selected year, month
 var TimeFilter = React.createClass({
 
-    months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    months: [
+        {index: 1, name: "Jan"},
+        {index: 2, name: "Feb"},
+        {index: 3, name: "Mar"},
+        {index: 4, name: "Apr"},
+        {index: 5, name: "May"},
+        {index: 6, name: "Jun"},
+        {index: 7, name: "Jul"},
+        {index: 8, name: "Aug"},
+        {index: 9, name: "Sep"},
+        {index: 10, name: "Oct"},
+        {index: 11, name: "Nov"},
+        {index: 12, name: "Dec"}
+    ],
 
-    getInitialState: function() {
-        return {years: [2012, 2013, 2014]};
+    // Called when year filter changes. Invoke callback if value actually changed
+    onYearChange: function (newYear) {
+        if (this.props.timeFilter.year != newYear) {
+            this.props.onFilterChange({year: newYear,
+                month: this.props.timeFilter.month})
+        }
     },
 
-    render: function(){
+    // Called when month filter changes. Invoke callback if value actually changed
+    onMonthChange: function (newMonth) {
+        if (this.props.timeFilter.month != newMonth) {
+            this.props.onFilterChange({
+                year: this.props.timeFilter.year,
+                month: newMonth})
+        }
+    },
+
+    render: function () {
         return R.div({className: "bg-box padded"},
             [
                 R.div({className: "container"},
-                    this.state.years.map(function(year) {
+                    this.props.years.map(function (year) {
+                        // Check if selected
+                        var buttonClasses = (this.props.timeFilter.year == year) ? "flat-button selected" : "flat-button";
+
                         return R.div({className: "item"},
-                            // TODO handle selected year
-                            // TODO add click handler
-                            R.button({className: "flat-button"}, year)
+                            R.button({
+                                className: buttonClasses,
+                                onClick: function () {
+                                    this.onYearChange(year)
+                                }.bind(this)
+                            }, year)
                         )
-                    })
+                    }, this)
                 ),
                 R.div({className: "container"},
-                    this.months.map(function(month) {
+                    this.months.map(function (month) {
+                        var buttonClasses = (this.props.timeFilter.month == month.index) ? "flat-button selected" : "flat-button";
+
                         return R.div({className: "item"},
-                            R.button({className: "flat-button"}, month));
-                    })
+                            R.button({
+                                className: buttonClasses,
+                                onClick: function () {
+                                    this.onMonthChange(month.index)
+                                }.bind(this)
+                            }, month.name));
+                    }, this)
                 )
             ]
         )
@@ -113,11 +152,15 @@ var TransactionsTable = React.createClass({
 
 var TransactionPage = React.createClass({
 
-    getInitialState: function() {
-        return {transactions: []};
+    getInitialState: function () {
+        return {
+            transactions: [],
+            years: [2012, 2013, 2014],
+            timeFilter: {year: 2014, month: 1}
+        };
     },
 
-    componentDidMount: function(){
+    componentDidMount: function () {
         this.loadTransactionsFromServer();
     },
 
@@ -129,11 +172,18 @@ var TransactionPage = React.createClass({
             }.bind(this));
     },
 
+    onTimeFilterChange: function (timeFilter) {
+        this.setState({timeFilter: timeFilter});
+    },
+
     render: function () {
         return R.div({id: "main"},
             [
                 Menu(),
-                TimeFilter(),
+                TimeFilter({
+                    years: this.state.years,
+                    timeFilter: this.state.timeFilter,
+                    onFilterChange: this.onTimeFilterChange}),
                 TransactionSummaryTable(),
                 TransactionsTable({transactions: this.state.transactions})
             ]);
