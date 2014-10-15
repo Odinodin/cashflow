@@ -61,18 +61,21 @@ var TransactionPage = React.createClass({
     getInitialState: function () {
         return {
             transactions: [],
-            years: [2012, 2013, 2014],
-            timeFilter: {year: 2014, month: 1}
+            years: [2009, 2010, 2012],
+            timeFilter: {year: 2009, month: null}
         };
     },
 
     componentDidMount: function () {
-        this.loadTransactionsFromServer();
+        this.loadTransactionsFromServer(this.state.timeFilter);
     },
 
     // Retrieve transations from API
-    loadTransactionsFromServer: function () {
-        superagent.get('/api/transactions')
+    loadTransactionsFromServer: function (timeFilter) {
+        var route = '/api/transactions/' + timeFilter.year;
+        if (timeFilter.month) route += '/' + timeFilter.month;
+
+        superagent.get(route)
             .end(function (res) {
                 this.setState({transactions: res.body});
             }.bind(this));
@@ -80,6 +83,7 @@ var TransactionPage = React.createClass({
 
     onTimeFilterChange: function (timeFilter) {
         this.setState({timeFilter: timeFilter});
+        this.loadTransactionsFromServer(timeFilter);
     },
 
     render: function () {
