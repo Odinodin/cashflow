@@ -26,3 +26,15 @@
 
         response => (contains {:body anything :headers anything :status 200})
         (:body response) => [{:date "2013-05-11" :description "right date" :amount 200}]))
+
+(fact "can filter transactions by month"
+      (let [response (->
+                       {:transactions
+                         (atom [{:date (t/date-time 2012 5 10) :description "right date" :amount 100}
+                                {:date (t/date-time 2012 9 12) :description "wrong date" :amount 100}
+                                {:date (t/date-time 2013 5 11) :description "wrong date" :amount 200}])}
+                       (cashflow/test-app-handler (ring-mock/request :get "/api/transactions/2012/5"))
+                       json-util/json-parse-body)]
+
+        response => (contains {:body anything :headers anything :status 200})
+        (:body response) => [{:date "2012-05-10" :description "right date" :amount 100}]))

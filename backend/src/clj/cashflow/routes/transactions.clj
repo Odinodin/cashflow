@@ -13,4 +13,10 @@
                       {:body @transactions}))
 
            (GET "/transactions/:year" [year :as {{:keys [transactions]} :mutants}]
-                {:body (trans/transactions-in-year @transactions (. Integer parseInt year))}))
+                {:body (trans/transactions-in-year @transactions (. Integer parseInt year))})
+
+           (GET "/transactions/:year/:month" [year month :as {{:keys [transactions]} :mutants}]
+                {:body (trans/transactions-in-month
+                         @transactions
+                         (. Integer parseInt year)
+                         (. Integer parseInt month))}))

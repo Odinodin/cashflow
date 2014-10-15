@@ -1,4 +1,7 @@
-target
+
+backend/target
+target/
+.idea/
 /lib
 /classes
 /checkouts
