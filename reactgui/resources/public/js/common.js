@@ -1,7 +1,7 @@
 /* Menu */
 
 
-var commonComponents = (function() {
+var commonComponents = (function () {
     var Menu = React.createClass({
         render: function () {
             return R.ul({className: "navbar"},
@@ -34,10 +34,9 @@ var commonComponents = (function() {
 
         // Called when year filter changes. Invoke callback if value actually changed
         onYearChange: function (newYear) {
-            if (this.props.timeFilter.year != newYear) {
-                this.props.onFilterChange({year: newYear,
-                    month: this.props.timeFilter.month})
-            }
+            this.props.onFilterChange({
+                year: newYear,
+                month: null});
         },
 
         // Called when month filter changes. Invoke callback if value actually changed
