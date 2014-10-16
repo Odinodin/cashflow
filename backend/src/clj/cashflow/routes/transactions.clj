@@ -12,6 +12,10 @@
                       :else
                       {:body @transactions}))
 
+           (GET "/transactions/years" {{:keys [transactions]} :mutants}
+                {:body {:years (trans/unique-years
+                                 @transactions)}})
+
            (GET "/transactions/:year" [year :as {{:keys [transactions]} :mutants}]
                 {:body (trans/transactions-in-year @transactions (. Integer parseInt year))})
 

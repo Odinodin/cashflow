@@ -38,3 +38,15 @@
 
         response => (contains {:body anything :headers anything :status 200})
         (:body response) => [{:date "2012-05-10" :description "right date" :amount 100}]))
+
+(fact "can get the list of years of transaction data"
+      (let [response (->
+                       {:transactions
+                         (atom [{:date (t/date-time 2010 1 1)}
+                                {:date (t/date-time 2011 1 1)}
+                                {:date (t/date-time 2013 1 1)}])}
+                       (cashflow/test-app-handler (ring-mock/request :get "/api/transactions/years"))
+                       json-util/json-parse-body)]
+
+        response => (contains {:body anything :headers anything :status 200})
+        (:body response) => {:years [2010 2011 2013]}))
