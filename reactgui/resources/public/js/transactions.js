@@ -61,13 +61,22 @@ var TransactionPage = React.createClass({
     getInitialState: function () {
         return {
             transactions: [],
-            years: [2009, 2010, 2012],
+            years: [],
             timeFilter: {year: 2009, month: null}
         };
     },
 
     componentDidMount: function () {
+        this.loadAvailableYears();
         this.loadTransactionsFromServer(this.state.timeFilter);
+    },
+
+    loadAvailableYears: function() {
+
+        superagent.get("/api/transactions/years")
+            .end(function (res) {
+                this.setState({years: res.body.years});
+            }.bind(this));
     },
 
     // Retrieve transations from API
