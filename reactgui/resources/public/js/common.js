@@ -17,6 +17,13 @@ var commonComponents = (function () {
     /* Time filter */
     var TimeFilter = React.createClass({
 
+        // Validation
+        propTypes: {
+            onFilterChange: React.PropTypes.func.isRequired,
+            timeFilter: React.PropTypes.object.isRequired,
+            years: React.PropTypes.array.isRequired
+        },
+
         months: [
             {index: 1, name: "Jan"},
             {index: 2, name: "Feb"},
