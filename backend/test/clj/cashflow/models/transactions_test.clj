@@ -26,12 +26,12 @@
         (count @transactions) => 56))
 
 (fact "Internal transfers are filtered out when adding transactions"
-      (to-transactions [["06.05.2009" "06.05.2009" "VARER" "NARVESEN" "-119,00" "17017470066"]
-                        ["06.05.2009" "06.05.2009" "OVFNETTB" "Internal transfer, filter me" "-159,20" "17017532866"]
-                        ["06.05.2009" "06.05.2009" "VARER" "REMA 1000" "-159,20" "17017532866"]
-                        ["06.05.2009" "06.05.2009" "MOB.B.OVF" "Internal transfer, filter me" "-159,20" "17017532866"]])
-      => [{:date (t/date-time 2009 05 06) :code "VARER" :description "NARVESEN" :amount -119.00M}
-          {:date (t/date-time 2009 05 06) :code "VARER" :description "REMA 1000" :amount -159.20M}])
+      (to-transactions (atom 0) [["06.05.2009" "06.05.2009" "VARER" "NARVESEN" "-119,00" "17017470066"]
+                                 ["06.05.2009" "06.05.2009" "OVFNETTB" "Internal transfer, filter me" "-159,20" "17017532866"]
+                                 ["06.05.2009" "06.05.2009" "VARER" "REMA 1000" "-159,20" "17017532866"]
+                                 ["06.05.2009" "06.05.2009" "MOB.B.OVF" "Internal transfer, filter me" "-159,20" "17017532866"]])
+      => [{:id 1 :date (t/date-time 2009 05 06) :code "VARER" :description "NARVESEN" :amount -119.00M}
+          {:id 2 :date (t/date-time 2009 05 06) :code "VARER" :description "REMA 1000" :amount -159.20M}])
 
 (fact "Can find transactions for a day"
       (transactions-at-date
@@ -106,3 +106,16 @@
          {:date (t/date-time 2000 1 1)}])
 
       => [2000 2011 2014])
+
+(fact "can change transaction category"
+      (change-transaction
+        (atom [{:id 1 :date (t/date-time 2014 5 1) :amount 1 :category "store"}])
+        {:id 1 :category "coffee"})
+
+      =>
+      [{:id 1 :date (t/date-time 2014 5 1) :amount 1 :category "coffee"}])
+
+(fact "Can find transaction with id"
+      (find-transaction [{:id 1 :amount 123} {:id 2 :amount 2}] 1)
+
+      => {:id 1 :amount 123})

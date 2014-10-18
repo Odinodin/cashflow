@@ -78,7 +78,7 @@ var TransactionPage = React.createClass({
 
     loadAvailableYears: function() {
 
-        superagent.get("/api/transactions/years")
+        superagent.get("/api/transactions/time/years")
             .end(function (res) {
                 this.setState({years: res.body.years});
             }.bind(this));
@@ -86,7 +86,7 @@ var TransactionPage = React.createClass({
 
     // Retrieve transations from API
     loadTransactionsFromServer: function (timeFilter) {
-        var route = '/api/transactions/' + timeFilter.year;
+        var route = '/api/transactions/time/' + timeFilter.year;
         if (timeFilter.month) route += '/' + timeFilter.month;
 
         superagent.get(route)

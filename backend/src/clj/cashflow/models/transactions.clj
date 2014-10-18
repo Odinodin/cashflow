@@ -11,14 +11,18 @@
 (defn- iso8600string->date [date]
   (t-format/parse (t-format/formatter "yyyy-MM-dd") date))
 
+(def transaction-id-sequence (atom 0))
+
 ;; Example line:
 ;;  Date                       Code   Description                             Amount    Reference
 ;; ["06.05.2009" "06.05.2009" "VARER" "05.05 PRINCESS AVD. STENERSGT. 1 OSLO" "-119,00" "17017470066"]
 (defn lines->transactions [lines-as-vectors]
   (for [[date date2 code description amount & dontcare] lines-as-vectors]
-    {:date (string->date date) :code code :description description :amount (-> amount
-                                                                               (clojure.string/replace "," ".")
-                                                                               bigdec)}))
+    {:date        (string->date date)
+     :code        code
+     :description description :amount (-> amount
+                                          (clojure.string/replace "," ".")
+                                          bigdec)}))
 (defn parse-file [file]
   {:pre [(not (nil? file))]}
   (with-open [rdr (BufferedReader.
@@ -27,15 +31,16 @@
       (for [line (rest lines)]
         (clojure.string/split line #"\t")))))
 
-(defn to-transactions [lines]
+(defn to-transactions [id-atom lines]
   (->>
     lines
     lines->transactions
-    (remove (comp #{"OVFNETTB" "MOB.B.OVF"} :code))))
+    (remove (comp #{"OVFNETTB" "MOB.B.OVF"} :code))
+    (map #(assoc %1 :id (swap! id-atom inc)))))
 
 (defn add-transactions-in-file! [transactions file]
   (->> (parse-file file)
-       to-transactions
+       (to-transactions transaction-id-sequence)
        (swap! transactions into)))
 
 ;; Date helpers
@@ -49,6 +54,19 @@
 
 (defn- same-year? [date year]
   (= (clj-time.core/year date) year))
+
+
+(defn find-transaction [transactions id]
+  (->> transactions
+      (filter #(= id (:id %1)))
+      first))
+
+(defn change-transaction [transactions mutation]
+  (swap! transactions
+         (fn [trans]
+           (map #(if (= (:id mutation) (:id %)) (merge % mutation) %)
+                trans))))
+
 
 ;; Queries
 ;; TODO Add test + submit patch to clj-time (same-year?, same-year-month?)
