@@ -1,6 +1,7 @@
 var R = React.DOM;
 
 var CategoryEditor = React.createClass({
+    displayName: "CategoryEditor",
 
     handleSubmit: function (e) {
         e.preventDefault();
@@ -44,6 +45,7 @@ var CategoryEditor = React.createClass({
 
 
 var CategoryTable = React.createClass({
+        displayName: "CategoryTable",
 
         render: function () {
             return R.table({className: "bg-box padded"}, [
@@ -67,6 +69,7 @@ var CategoryTable = React.createClass({
 );
 
 var CategoriesPage = React.createClass({
+    displayName: "CategoriesPage",
 
     onCategoryCreate: function (createResult) {
         // Just load all from server again

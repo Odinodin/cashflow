@@ -3,6 +3,8 @@
 
 var commonComponents = (function () {
     var Menu = React.createClass({
+        displayName: "Menu",
+
         render: function () {
             return R.ul({className: "navbar"},
                 [R.li({className: "title"}, "Cashflow"),
@@ -16,6 +18,7 @@ var commonComponents = (function () {
 
     /* Time filter */
     var TimeFilter = React.createClass({
+        displayName: "TimeFilter",
 
         // Validation
         propTypes: {

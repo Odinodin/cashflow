@@ -5,6 +5,8 @@ var R = React.DOM;
 
 /* Transactions */
 var TransactionSummaryTable = React.createClass({
+    displayName: "TransactionSummaryTable",
+
     render: function () {
         return R.table({className: "bg-box padded"},
             [
@@ -28,6 +30,8 @@ var TransactionSummaryTable = React.createClass({
 });
 
 var TransactionsTable = React.createClass({
+        displayName: "TransactionsTable",
+
         render: function () {
             return R.table({className: "bg-box padded"}, [
                     R.thead({},
@@ -57,6 +61,7 @@ var TransactionsTable = React.createClass({
 );
 
 var TransactionPage = React.createClass({
+    displayName: "TransactionPage",
 
     getInitialState: function () {
         return {
