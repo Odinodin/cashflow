@@ -1,8 +1,6 @@
 var R = React.DOM;
 
 
-
-
 /* Transactions */
 var TransactionSummaryTable = React.createClass({
     displayName: "TransactionSummaryTable",
@@ -29,6 +27,23 @@ var TransactionSummaryTable = React.createClass({
     }
 });
 
+
+var TransactionRow = React.createClass({
+    displayName: "TransactionRow",
+
+    render: function() {
+        return R.tr({}, [
+                R.td({}, this.props.transaction.date),
+                R.td({}, this.props.transaction.code),
+                R.td({}, this.props.transaction.description),
+                R.td({}, this.props.transaction.amount),
+                (this.props.transaction.category) ? R.td({className: "tag"}, this.props.transaction.category) : null
+            ]
+        )
+
+    }
+});
+
 var TransactionsTable = React.createClass({
         displayName: "TransactionsTable",
 
@@ -43,15 +58,8 @@ var TransactionsTable = React.createClass({
                             R.th({}, "Category")
                         ])),
                     R.tbody({},
-                        this.props.transactions.map(function (trans) {
-                            return R.tr({}, [
-                                    R.td({}, trans.date),
-                                    R.td({}, trans.code),
-                                    R.td({}, trans.description),
-                                    R.td({}, trans.amount),
-                                    (trans.category) ? R.td({className: "tag"}, trans.category) : null
-                                ]
-                            )
+                        this.props.transactions.map(function (transaction) {
+                            return TransactionRow({transaction: transaction});
                         }.bind(this))
                     )
                 ]
