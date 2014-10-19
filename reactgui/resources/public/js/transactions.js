@@ -1,6 +1,5 @@
 var R = React.DOM;
 
-
 /* Transactions */
 var TransactionSummaryTable = React.createClass({
     displayName: "TransactionSummaryTable",
@@ -27,25 +26,57 @@ var TransactionSummaryTable = React.createClass({
     }
 });
 
-
 var TransactionRow = React.createClass({
     displayName: "TransactionRow",
 
-    render: function() {
+    propTypes: {
+        transaction: React.PropTypes.object.isRequired,
+        categories: React.PropTypes.array.isRequired,
+        onEditTransaction: React.PropTypes.func.isRequired,
+        transactionBeingEdited: React.PropTypes.number,
+        onChangeTransactionCategory: React.PropTypes.func.isRequired
+    },
+
+    categoryComponent: function (trans, transactionBeingEdited) {
+        if (transactionBeingEdited === trans.id) {
+            return this.props.categories.map(function (category){
+
+                return R.td({
+                    className: "tag",
+                    onClick: function() {this.props.onChangeTransactionCategory(trans.id, category.name)}.bind(this)
+                }, category.name);
+
+            }, this);
+
+        }
+
+        if (trans.category) {
+            return R.td({className: "tag", onClick: function() {this.props.onEditTransaction(trans.id)}.bind(this)}, trans.category)
+        }
+
+        // TODO change color
+        return R.td({className: "tag", onClick: function() {this.props.onEditTransaction(trans.id)}.bind(this)}, "?");
+    },
+
+    render: function () {
         return R.tr({}, [
                 R.td({}, this.props.transaction.date),
                 R.td({}, this.props.transaction.code),
                 R.td({}, this.props.transaction.description),
                 R.td({}, this.props.transaction.amount),
-                (this.props.transaction.category) ? R.td({className: "tag"}, this.props.transaction.category) : null
+                this.categoryComponent(this.props.transaction, this.props.transactionBeingEdited)
             ]
         )
-
     }
 });
 
 var TransactionsTable = React.createClass({
         displayName: "TransactionsTable",
+
+        propTypes: {
+            onChangeTransactionCategory: React.PropTypes.func.isRequired,
+            categories: React.PropTypes.array.isRequired
+        },
 
         render: function () {
             return R.table({className: "bg-box padded"}, [
@@ -59,7 +90,13 @@ var TransactionsTable = React.createClass({
                         ])),
                     R.tbody({},
                         this.props.transactions.map(function (transaction) {
-                            return TransactionRow({transaction: transaction});
+                            return TransactionRow({
+                                transaction: transaction,
+                                categories: this.props.categories,
+                                transactionBeingEdited: this.props.transactionBeingEdited,
+                                onChangeTransactionCategory: this.props.onChangeTransactionCategory,
+                                onEditTransaction: this.props.onEditTransaction
+                            });
                         }.bind(this))
                     )
                 ]
@@ -74,6 +111,7 @@ var TransactionPage = React.createClass({
     getInitialState: function () {
         return {
             transactions: [],
+            categories: [],
             years: [],
             timeFilter: {year: 2009, month: null}
         };
@@ -84,28 +122,55 @@ var TransactionPage = React.createClass({
         this.loadTransactionsFromServer(this.state.timeFilter);
     },
 
-    loadAvailableYears: function() {
-
+    loadAvailableYears: function () {
         superagent.get("/api/transactions/time/years")
             .end(function (res) {
                 this.setState({years: res.body.years});
             }.bind(this));
     },
 
+    loadCategoriesFromServer: function() {
+        superagent.get("/api/categories")
+            .end(function (res) {
+                this.setState({categories: res.body});
+            }.bind(this));
+    },
+
     // Retrieve transations from API
     loadTransactionsFromServer: function (timeFilter) {
-        var route = '/api/transactions/time/' + timeFilter.year;
+            var route = '/api/transactions/time/' + timeFilter.year;
         if (timeFilter.month) route += '/' + timeFilter.month;
-
         superagent.get(route)
             .end(function (res) {
-                this.setState({transactions: res.body});
+                // Update transaction list and clear edit-state
+                this.setState({
+                    transactions: res.body,
+                    transactionBeingEdited: -1});
             }.bind(this));
     },
 
     onTimeFilterChange: function (timeFilter) {
         this.setState({timeFilter: timeFilter});
         this.loadTransactionsFromServer(timeFilter);
+    },
+
+    onEditTransaction: function (transactionId) {
+        this.loadCategoriesFromServer();
+        this.setState({transactionBeingEdited: transactionId});
+    },
+
+    onChangeTransactionCategory: function (transactionId, category) {
+        // A transaction has changed category; post the change to the backend and refresh state
+        superagent.post("/api/transactions/" + transactionId)
+            .send({id: transactionId, category: category})
+            .set('Accept', 'application/json')
+            .end(function(res){
+                if (res.ok) {
+                    this.loadTransactionsFromServer(this.state.timeFilter);
+                } else {
+                    alert('Oh no! error ' + res.text);
+                }
+            }.bind(this));
     },
 
     render: function () {
@@ -117,7 +182,13 @@ var TransactionPage = React.createClass({
                     timeFilter: this.state.timeFilter,
                     onFilterChange: this.onTimeFilterChange}),
                 TransactionSummaryTable(),
-                TransactionsTable({transactions: this.state.transactions})
+                TransactionsTable({
+                    transactions: this.state.transactions,
+                    categories: this.state.categories,
+                    transactionBeingEdited: this.state.transactionBeingEdited,
+                    onChangeTransactionCategory: this.onChangeTransactionCategory,
+                    onEditTransaction: this.onEditTransaction
+                })
             ]);
     }
 });
