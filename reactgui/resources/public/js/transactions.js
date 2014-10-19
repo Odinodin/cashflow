@@ -42,7 +42,7 @@ var TransactionRow = React.createClass({
             return this.props.categories.map(function (category){
 
                 return R.td({
-                    className: "tag",
+                    className: "tag category-candidate",
                     onClick: function() {this.props.onChangeTransactionCategory(trans.id, category.name)}.bind(this)
                 }, category.name);
 
@@ -54,8 +54,7 @@ var TransactionRow = React.createClass({
             return R.td({className: "tag", onClick: function() {this.props.onEditTransaction(trans.id)}.bind(this)}, trans.category)
         }
 
-        // TODO change color
-        return R.td({className: "tag", onClick: function() {this.props.onEditTransaction(trans.id)}.bind(this)}, "?");
+        return R.td({className: "tag category-missing", onClick: function() {this.props.onEditTransaction(trans.id)}.bind(this)}, "?");
     },
 
     render: function () {
