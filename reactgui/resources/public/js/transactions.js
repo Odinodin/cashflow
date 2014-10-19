@@ -4,6 +4,10 @@ var R = React.DOM;
 var TransactionSummaryTable = React.createClass({
     displayName: "TransactionSummaryTable",
 
+    propTypes: {
+        transactionSums: React.PropTypes.array.isRequired
+    },
+
     render: function () {
         return R.table({className: "bg-box padded"},
             [
@@ -15,12 +19,13 @@ var TransactionSummaryTable = React.createClass({
                         ])
                 ),
                 R.tbody({},
-                    R.tr({},
-                        [
-                            R.td({}, R.div({className: "tag"}, "Hardcoded category")),
-                            R.td({}, R.div({}, "134"))]
-                    )
+                    this.props.transactionSums.map(function (sum) {
+                        return R.tr({}, [
+                            R.td({}, R.div({className: "tag"}, sum.category)),
+                            R.td({}, R.div({}, sum.sum))])
+                    }.bind(this))
                 )
+
             ]
         )
     }
@@ -39,11 +44,13 @@ var TransactionRow = React.createClass({
 
     categoryComponent: function (trans, transactionBeingEdited) {
         if (transactionBeingEdited === trans.id) {
-            return this.props.categories.map(function (category){
+            return this.props.categories.map(function (category) {
 
                 return R.td({
                     className: "tag category-candidate",
-                    onClick: function() {this.props.onChangeTransactionCategory(trans.id, category.name)}.bind(this)
+                    onClick: function () {
+                        this.props.onChangeTransactionCategory(trans.id, category.name)
+                    }.bind(this)
                 }, category.name);
 
             }, this);
@@ -51,10 +58,14 @@ var TransactionRow = React.createClass({
         }
 
         if (trans.category) {
-            return R.td({className: "tag", onClick: function() {this.props.onEditTransaction(trans.id)}.bind(this)}, trans.category)
+            return R.td({className: "tag", onClick: function () {
+                this.props.onEditTransaction(trans.id)
+            }.bind(this)}, trans.category)
         }
 
-        return R.td({className: "tag category-missing", onClick: function() {this.props.onEditTransaction(trans.id)}.bind(this)}, "?");
+        return R.td({className: "tag category-missing", onClick: function () {
+            this.props.onEditTransaction(trans.id)
+        }.bind(this)}, "?");
     },
 
     render: function () {
@@ -110,6 +121,7 @@ var TransactionPage = React.createClass({
     getInitialState: function () {
         return {
             transactions: [],
+            transactionSums: [],
             categories: [],
             years: [],
             timeFilter: {year: 2009, month: null}
@@ -128,16 +140,28 @@ var TransactionPage = React.createClass({
             }.bind(this));
     },
 
-    loadCategoriesFromServer: function() {
+    loadCategoriesFromServer: function () {
         superagent.get("/api/categories")
             .end(function (res) {
                 this.setState({categories: res.body});
             }.bind(this));
     },
 
+    loadTransactionSumsFromServer: function (timeFilter) {
+        var route = '/api/transactions/sum/' + timeFilter.year;
+        if (timeFilter.month) route += '/' + timeFilter.month;
+        superagent.get(route)
+            .end(function (res) {
+                // Update transaction list and clear edit-state
+                this.setState({
+                    transactionSums: res.body});
+            }.bind(this));
+
+    },
+
     // Retrieve transations from API
     loadTransactionsFromServer: function (timeFilter) {
-            var route = '/api/transactions/time/' + timeFilter.year;
+        var route = '/api/transactions/time/' + timeFilter.year;
         if (timeFilter.month) route += '/' + timeFilter.month;
         superagent.get(route)
             .end(function (res) {
@@ -146,6 +170,8 @@ var TransactionPage = React.createClass({
                     transactions: res.body,
                     transactionBeingEdited: -1});
             }.bind(this));
+
+        this.loadTransactionSumsFromServer(timeFilter);
     },
 
     onTimeFilterChange: function (timeFilter) {
@@ -163,7 +189,7 @@ var TransactionPage = React.createClass({
         superagent.post("/api/transactions/" + transactionId)
             .send({id: transactionId, category: category})
             .set('Accept', 'application/json')
-            .end(function(res){
+            .end(function (res) {
                 if (res.ok) {
                     this.loadTransactionsFromServer(this.state.timeFilter);
                 } else {
@@ -180,7 +206,9 @@ var TransactionPage = React.createClass({
                     years: this.state.years,
                     timeFilter: this.state.timeFilter,
                     onFilterChange: this.onTimeFilterChange}),
-                TransactionSummaryTable(),
+                TransactionSummaryTable({
+                    transactionSums: this.state.transactionSums
+                }),
                 TransactionsTable({
                     transactions: this.state.transactions,
                     categories: this.state.categories,
