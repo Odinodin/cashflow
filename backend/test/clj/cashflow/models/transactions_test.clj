@@ -74,15 +74,20 @@
       (sum-transactions [{:amount 10} {:amount 20} {:amount 30}]) => 60
       (sum-transactions []) => 0)
 
-(fact "Can sum transactions for each tag"
-      (sum-transactions-pr-tag
-        [{:tags ["a" "b"] :amount 1} {:tags ["a"] :amount 2}
-         {:tags ["c" "d"] :amount 3} {:tags ["c"] :amount 4}])
+(fact "Can sum transactions for each category"
+      (sum-transactions-pr-category
+        [{:category "a" :amount 1}
+         {:category "a" :amount 2}
+         {:category "b" :amount 3}
+         {:category "b" :amount 3}
+         {:category "c" :amount 4}])
 
-      => [{:tagname "a" :sum 3}
-          {:tagname "b" :sum 1}
-          {:tagname "c" :sum 7}
-          {:tagname "d" :sum 3}])
+      => [{:category "a" :sum 3}
+          {:category "b" :sum 6}
+          {:category "c" :sum 4}])
+
+(fact "Can sum transactions for each category without transactions"
+      (sum-transactions-pr-category []) => [])
 
 (fact "Can calculate income and expenses by month for a list of transactions"
       (net-income-by-month

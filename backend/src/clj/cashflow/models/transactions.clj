@@ -114,23 +114,12 @@
 (defn sum-transactions [transaction-list]
   (reduce + (map :amount transaction-list)))
 
-
-(defn sum-transactions-pr-tag [transaction-list]
-  (let [unique-tagnames (-> (map :tags transaction-list)
-                            flatten
+(defn sum-transactions-pr-category [transaction-list]
+  (let [unique-categorynames (-> (map :category transaction-list)
                             distinct)]
-    (for [tagname unique-tagnames]
-      {:tagname tagname
-       :sum     (sum-transactions (filter #(some #{tagname} (:tags %)) transaction-list))})))
-
-(defn sum-transactions-pr-tag [transaction-list]
-  (let [unique-tagnames (-> (map :tags transaction-list)
-                            flatten
-                            distinct)]
-    (for [tagname unique-tagnames]
-      {:tagname tagname
-       :sum     (sum-transactions (filter #(some #{tagname} (:tags %)) transaction-list))})))
-
+    (for [categoryname unique-categorynames]
+      {:category categoryname
+       :sum     (sum-transactions (filter #(= categoryname (:category %)) transaction-list))})))
 
 (defn- dt->year-month-map [dt]
   {:year (. dt getYear) :month (. dt getMonthOfYear)})

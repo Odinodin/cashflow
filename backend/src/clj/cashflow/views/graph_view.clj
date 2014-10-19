@@ -10,7 +10,7 @@
   (let [transactions (:transactions mutants)
          years (transactions/unique-years @transactions)]
     (render-file "public/templates/graph_sum_by_tag.html"
-                 {:sum-by-tag   (vec (transactions/sum-transactions-pr-tag @transactions))
+                 {:sum-by-tag   (vec (transactions/sum-transactions-pr-category @transactions))
                   :years        years
                   :current-year (last years)})))
 
@@ -26,7 +26,7 @@
          transactions-in-month (transactions/transactions-in-month @transactions year month-idx)]
     (render-file
       "public/templates/graph_sum_by_tag.html"
-      {:sum-by-tag    (vec (transactions/sum-transactions-pr-tag transactions-in-month))
+      {:sum-by-tag    (vec (transactions/sum-transactions-pr-category transactions-in-month))
        :years         (transactions/unique-years @transactions)
        :current-year  year
        :current-month month-idx})))
@@ -45,6 +45,6 @@
          transactions-in-month (transactions/transactions-in-year @transactions year)]
     (render-file
       "public/templates/graph_sum_by_tag.html"
-      {:sum-by-tag   (vec (transactions/sum-transactions-pr-tag transactions-in-month))
+      {:sum-by-tag   (vec (transactions/sum-transactions-pr-category transactions-in-month))
        :years        (transactions/unique-years @transactions)
        :current-year year})))

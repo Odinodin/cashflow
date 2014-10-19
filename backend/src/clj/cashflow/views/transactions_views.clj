@@ -21,7 +21,7 @@
   (let [transactions-in-year (trans/transactions-in-year @transactions (. Integer parseInt year))]
     (render-file "public/templates/transactions.html"
                  {:transactions (date-time->date-string transactions-in-year)
-                  :sum-by-tag   (trans/sum-transactions-pr-tag transactions-in-year)
+                  :sum-by-tag   (trans/sum-transactions-pr-category transactions-in-year)
                   :years        (trans/unique-years @transactions)
                   :current-year year})))
 
@@ -31,7 +31,7 @@
     (render-file
       "public/templates/transactions.html"
       {:transactions (date-time->date-string transactions-in-month)
-       :sum-by-tag   (trans/sum-transactions-pr-tag transactions-in-month)
+       :sum-by-tag   (trans/sum-transactions-pr-category transactions-in-month)
        :years        (trans/unique-years @transactions)
        :current-year year
        :current-month month-index})))
