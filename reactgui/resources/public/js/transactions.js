@@ -43,29 +43,39 @@ var TransactionRow = React.createClass({
     },
 
     categoryComponent: function (trans, transactionBeingEdited) {
-        if (transactionBeingEdited === trans.id) {
-            return this.props.categories.map(function (category) {
+        var comp = [];
+        if (trans.category) {
+            var td = R.div({
+                className: "tag",
+                onClick: function () {
+                    this.props.onEditTransaction(trans.id)
+                }.bind(this)}, trans.category)
+            comp.push(td);
+        } else {
+            var td = R.div({
+                className: "tag category-missing",
+                onClick: function () {
+                    this.props.onEditTransaction(trans.id)
+                }.bind(this)}, "?");
+            comp.push(td);
+        }
 
-                return R.td({
-                    className: "tag category-candidate",
+        var isThisRowBeingEdited = (transactionBeingEdited === trans.id);
+        if (isThisRowBeingEdited) {
+            var cells = this.props.categories.map(function (category) {
+                return R.div({
+                    className: "tag category-candidate fade-in",
                     onClick: function () {
                         this.props.onChangeTransactionCategory(trans.id, category.name)
                     }.bind(this)
                 }, category.name);
 
             }, this);
-
+            comp.push(cells);
         }
 
-        if (trans.category) {
-            return R.td({className: "tag", onClick: function () {
-                this.props.onEditTransaction(trans.id)
-            }.bind(this)}, trans.category)
-        }
+        return R.td({className: "wide50"}, comp);
 
-        return R.td({className: "tag category-missing", onClick: function () {
-            this.props.onEditTransaction(trans.id)
-        }.bind(this)}, "?");
     },
 
     render: function () {
