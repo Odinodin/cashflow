@@ -10,11 +10,10 @@ var commonComponents = (function () {
                 [R.li({className: "title"}, "Cashflow"),
                     R.li({className: "nav-item"}, R.a({"href": "categories.html"}, "Categories")),
                     R.li({className: "nav-item"}, R.a({"href": "index.html"}, "Transactions")),
-                    R.li({className: "nav-item"}, R.a({"href": "/graphs"}, "Graphs"))]
+                    R.li({className: "nav-item"}, R.a({"href": "graphs.html"}, "Graphs"))]
             )
         }
     });
-
 
     /* Time filter */
     var TimeFilter = React.createClass({
@@ -100,4 +99,3 @@ var commonComponents = (function () {
     }
 
 }());
-
