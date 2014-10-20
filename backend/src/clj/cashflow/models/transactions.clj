@@ -124,24 +124,27 @@
 (defn- dt->year-month-map [dt]
   {:year (. dt getYear) :month (. dt getMonthOfYear)})
 
-;; Takes a list of transactions and outputs the income sum
-;; [ {:amount -11} {:amount 2} {:amount -1}] -> -12
-(defn- transactions->income [transactions]
+(defn- transactions->income
+  "Takes a list of transactions and outputs the income sum
+  [ {:amount -11} {:amount 2} {:amount -1}] -> -12"
+  [transactions]
   (->>
     transactions
     (filter #(-> % :amount pos?))
     (reduce #(+ (:amount %2) %1) 0)))
 
-;; Takes a list of transactions and outputs the expense sum
-;; [ {:amount -11} {:amount 2} {:amount -1}] -> 2
-(defn- transactions->expense [transactions]
+(defn- transactions->expense
+  "Takes a list of transactions and outputs the expense sum
+  [ {:amount -11} {:amount 2} {:amount -1}] -> 2"
+  [transactions]
   (->>
     transactions
     (filter #(-> % :amount neg?))
     (reduce #(+ (:amount %2) %1) 0)))
 
-;; Takes a list of transactions and outputs a list of {:time "2009-10" :income 121 :expense -233}
-(defn net-income-by-month [transactions]
+(defn net-income-by-month
+  "Takes a list of transactions and outputs a list of {:time '2009-10' :income 121 :expense -233}"
+  [transactions]
   (let [grouped-by-month (group-by #(dt->year-month-map (:date %)) transactions)
         sorted (sort-by
                  (fn [[k _]] ((juxt :year :month) k)) grouped-by-month)]
