@@ -58,6 +58,7 @@
     (categories/add-category! categories {:name "Møbler" :regexes [#"Ikea", #"Plantasjon" #"Maxbo"]})
     (categories/add-category! categories {:name "Lommepenger" :regexes [#"Kantine" #"Narvesen" #"Botanisk" #"Baker"]})
     (categories/add-category! categories {:name "Mobil" :regexes [#"Mobil"]})
+    (categories/add-category! categories {:name "Lønn" :regexes [#"Megacorp"]})
     (categories/tag-and-update-transactions! transactions categories)))
 
 (defn start-and-bootstrap []
