@@ -93,3 +93,19 @@
         response => (contains {:body anything :headers anything :status 200})
         (:body response) => [{:category "coffee" :sum 2}
                              {:category "store" :sum 5}]))
+
+(fact "can get net-income"
+      (let [response (->
+                       {:transactions
+                         (atom [ {:id 1 :date (t/date-time 2010 1 1) :category "store" :amount -1}
+                                 {:id 1 :date (t/date-time 2010 1 2) :category "store" :amount 1}
+                                 {:id 2 :date (t/date-time 2011 5 1) :category "coffee" :amount -2}
+                                 {:id 2 :date (t/date-time 2012 5 1) :category "store" :amount 2}
+                                 {:id 3 :date (t/date-time 2012 5 2) :category "store" :amount 3}])}
+                       (cashflow/test-app-handler (ring-mock/request :get "/api/transactions/net-income"))
+                       json-util/json-parse-body)]
+
+        response => (contains {:body anything :headers anything :status 200})
+        (:body response) => [{:time "2010-1" :income 1 :expense -1}
+                             {:time "2011-5" :income 0 :expense -2}
+                             {:time "2012-5" :income 5 :expense 0}]))

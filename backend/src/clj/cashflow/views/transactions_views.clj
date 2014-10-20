@@ -25,7 +25,6 @@
                   :years        (trans/unique-years @transactions)
                   :current-year year})))
 
-
 (defn transactions-in-month [transactions year month-index]
   (let [transactions-in-month (trans/transactions-in-month @transactions (. Integer parseInt year) (. Integer parseInt month-index))]
     (render-file

@@ -38,6 +38,9 @@
                                        (. Integer parseInt year))]
                   {:body (trans/sum-transactions-pr-category trans-in-year)}))
 
+           (GET "/transactions/net-income"  {{:keys [transactions]} :mutants}
+                {:body (trans/net-income-by-month @transactions)})
+
            (POST ["/transactions/:id", :id #"[0-9]+"] [id :as {{:keys [transactions]} :mutants body-params :body-params}]
                  (let [updated-transactions (trans/change-transaction transactions body-params)]
                    {:body (trans/find-transaction updated-transactions (. Integer parseInt id))})))
