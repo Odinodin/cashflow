@@ -1,6 +1,5 @@
 var R = React.DOM;
 
-
 var cashFlowChartTheme = {
     colors: ['#ff7472', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572',
         '#FF9655', '#FFF263', '#6AF9C4'],
@@ -85,6 +84,10 @@ var GraphNetIncome = React.createClass({
 
 var GraphsPage = React.createClass({
     displayName: "GraphsPage",
+
+    propTypes: {
+        netIncomeByMonth: React.PropTypes.object.isRequired
+    },
 
     getInitialState: function () {
         // TODO test data for now
