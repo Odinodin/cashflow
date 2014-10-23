@@ -40,8 +40,7 @@ var cashFlowChartTheme = {
 var GraphNetIncome = React.createClass({
     displayName: "GraphNetIncome",
 
-
-    componentDidMount: function () {
+    drawChart: function (props) {
         new Highcharts.Chart(
             Highcharts.merge(
                 cashFlowChartTheme,
@@ -56,7 +55,7 @@ var GraphNetIncome = React.createClass({
                     series: [
                         {
                             name: 'Income',
-                            data: this.props.netIncomeByMonth.income,
+                            data: props.netIncomeByMonth.income,
                             dataLabels: {
                                 enabled: false,
                                 color: "#c0c0c0"
@@ -65,7 +64,7 @@ var GraphNetIncome = React.createClass({
                         },
                         {
                             name: 'Expenses',
-                            data: this.props.netIncomeByMonth.expenses,
+                            data: props.netIncomeByMonth.expenses,
                             dataLabels: {
                                 enabled: false,
                                 color: "#c0c0c0"
@@ -76,6 +75,15 @@ var GraphNetIncome = React.createClass({
                 }));
     },
 
+    componentDidMount: function () {
+        this.drawChart(this.props);
+    },
+
+    shouldComponentUpdate: function (props) {
+        this.drawChart(props);
+        return false;
+    },
+
     render: function () {
         return R.div({id: "graph"});
     }
@@ -83,36 +91,52 @@ var GraphNetIncome = React.createClass({
 
 
 var GraphsPage = React.createClass({
-    displayName: "GraphsPage",
+        displayName: "GraphsPage",
 
-    propTypes: {
-        netIncomeByMonth: React.PropTypes.object.isRequired
-    },
+        propTypes: {
+            netIncomeByMonth: React.PropTypes.object.isRequired
+        },
 
-    getInitialState: function () {
-        // TODO test data for now
-        return {netIncomeByMonth: {income: [
-            [1, 10],
-            [2, 20]
-        ], expenses: [
-            [1, 30],
-            [2, 10]
-        ]}};
-    },
+        getInitialState: function () {
+            return {
+                netIncomeByMonth: {
+                    income: [],
+                    expenses: []}};
+        },
 
-    componentDidMount: function () {
-        // TODO Retrieve data from server
-    },
+        jsonToExpenses: function (json) {
+            return cull.map(function (obj) {
+                return [obj.time, obj.expense * -1];
+            }, json);
+        },
 
-    render: function () {
-        return R.div({id: "main"},
-            [
-                commonComponents.Menu(),
-                GraphNetIncome({
-                    netIncomeByMonth: this.state.netIncomeByMonth
-                })
-            ]);
-    }
-});
+        jsonToIncome: function (json) {
+            return cull.map(function (obj) {
+                return [obj.time, obj.income];
+            }, json);
+        },
+
+        componentDidMount: function () {
+            // TODO Retrieve data from server
+            superagent.get('/api/transactions/net-income')
+                .end(function (res) {
+                    this.setState({netIncomeByMonth: {
+                        income: this.jsonToIncome(res.body),
+                        expenses: this.jsonToExpenses(res.body)}})
+                }.bind(this));
+
+        },
+
+        render: function () {
+            return R.div({id: "main"},
+                [
+                    commonComponents.Menu(),
+                    GraphNetIncome({
+                        netIncomeByMonth: this.state.netIncomeByMonth
+                    })
+                ]);
+        }
+    })
+    ;
 
 React.renderComponent(GraphsPage({}), document.body);
