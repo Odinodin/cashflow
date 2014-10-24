@@ -37,8 +37,11 @@ var cashFlowChartTheme = {
     }
 };
 
-var GraphNetIncome = React.createClass({
-    displayName: "GraphNetIncome",
+
+var GraphSumByCategory = React.createClass({
+    displayName: "GraphSumByCategory",
+
+    // TODO add propTypes validation
 
     drawChart: function (props) {
         new Highcharts.Chart(
@@ -47,7 +50,53 @@ var GraphNetIncome = React.createClass({
                 {
                     chart: {
                         type: 'column',
-                        renderTo: 'graph'
+                        renderTo: 'graphSumCategory'
+                    },
+                    xAxis: {
+                        type: 'category'
+                    },
+                    series: [
+                        {
+                            name: 'Categories',
+                            data: props.sumByCategory,
+                            dataLabels: {
+                                enabled: true,
+                                color: "#c0c0c0"
+                            }
+                        }
+                    ]
+                }));
+    },
+
+    componentDidMount: function () {
+        this.drawChart(this.props);
+    },
+
+    shouldComponentUpdate: function (props) {
+        // Use prop argument instead of this.props
+        this.drawChart(props);
+        return false;
+    },
+
+    render: function () {
+        return R.div({id: "graphSumCategory"});
+    }
+});
+
+
+var GraphNetIncome = React.createClass({
+    displayName: "GraphNetIncome",
+
+    // TODO add propTypes validation
+
+    drawChart: function (props) {
+        new Highcharts.Chart(
+            Highcharts.merge(
+                cashFlowChartTheme,
+                {
+                    chart: {
+                        type: 'column',
+                        renderTo: 'graphNetIncome'
                     },
                     xAxis: {
                         type: 'category'
@@ -80,12 +129,13 @@ var GraphNetIncome = React.createClass({
     },
 
     shouldComponentUpdate: function (props) {
+        // Use prop argument instead of this.props
         this.drawChart(props);
         return false;
     },
 
     render: function () {
-        return R.div({id: "graph"});
+        return R.div({id: "graphNetIncome"});
     }
 });
 
@@ -99,6 +149,7 @@ var GraphsPage = React.createClass({
 
         getInitialState: function () {
             return {
+                sumByCategory: [],
                 netIncomeByMonth: {
                     income: [],
                     expenses: []}};
@@ -116,8 +167,14 @@ var GraphsPage = React.createClass({
             }, json);
         },
 
+        jsonToSumByTag: function (json) {
+            return cull.map(function (tagWithSum) {
+
+                return [tagWithSum.category, Math.abs(tagWithSum.sum)];
+            }, json);
+        },
+
         componentDidMount: function () {
-            // TODO Retrieve data from server
             superagent.get('/api/transactions/net-income')
                 .end(function (res) {
                     this.setState({netIncomeByMonth: {
@@ -125,7 +182,12 @@ var GraphsPage = React.createClass({
                         expenses: this.jsonToExpenses(res.body)}})
                 }.bind(this));
 
+            superagent.get('/api/transactions/sum/2009')
+                .end(function (res) {
+                    this.setState({sumByCategory: this.jsonToSumByTag(res.body)})
+                }.bind(this));
         },
+
 
         render: function () {
             return R.div({id: "main"},
@@ -133,10 +195,12 @@ var GraphsPage = React.createClass({
                     commonComponents.Menu(),
                     GraphNetIncome({
                         netIncomeByMonth: this.state.netIncomeByMonth
+                    }),
+                    GraphSumByCategory({
+                        sumByCategory: this.state.sumByCategory
                     })
                 ]);
         }
-    })
-    ;
+    });
 
 React.renderComponent(GraphsPage({}), document.body);
