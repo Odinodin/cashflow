@@ -9,7 +9,6 @@
             clojure.tools.nrepl.server
             [ring.middleware.format :as middleware]
             [cashflow.encoding :as encoding]
-            [cashflow.routes.home :refer [home-routes]]
             [cashflow.routes.transactions :refer [transactions-routes]]
             [cashflow.routes.categories :refer [category-routes]]))
 
@@ -32,7 +31,6 @@
   (println "cashflow is shutting down"))
 
 (defroutes app-routes
-           (route/resources "/")
            (route/not-found "Not Found"))
 
 (def app
@@ -41,7 +39,6 @@
       (context "/api" []
                category-routes
                transactions-routes)
-      home-routes
       app-routes)
     (handler/site)
     (middleware/wrap-restful-format :formats [:json-kw])
