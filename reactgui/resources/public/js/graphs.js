@@ -37,6 +37,28 @@ var cashFlowChartTheme = {
     }
 };
 
+var GraphTypeSelector = React.createClass({
+    displayName: "GraphTypeSelector",
+
+    propTypes: {
+        selectedGraphType: React.PropTypes.string.isRequired,
+        graphTypes: React.PropTypes.array.isRequired,
+        onChangeGraphType: React.PropTypes.func.isRequired
+    },
+
+    render: function() {
+        return R.div({className: "container bg-box padded"},
+            this.props.graphTypes.map(function(graphType) {
+                var classes = "flat-button";
+                if (this.props.selectedGraphType === graphType.name) {
+                    classes += " selected";
+                }
+
+                return R.button({className: classes, onClick: function() {this.props.onChangeGraphType(graphType.name)}.bind(this)}, graphType.name)
+            }.bind(this))
+        )
+    }
+});
 
 var GraphSumByCategory = React.createClass({
     displayName: "GraphSumByCategory",
@@ -87,7 +109,9 @@ var GraphSumByCategory = React.createClass({
 var GraphNetIncome = React.createClass({
     displayName: "GraphNetIncome",
 
-    // TODO add propTypes validation
+    propTypes: {
+        netIncomeByMonth: React.PropTypes.object.isRequired
+    },
 
     drawChart: function (props) {
         new Highcharts.Chart(
@@ -141,66 +165,118 @@ var GraphNetIncome = React.createClass({
 
 
 var GraphsPage = React.createClass({
-        displayName: "GraphsPage",
+    displayName: "GraphsPage",
 
-        propTypes: {
-            netIncomeByMonth: React.PropTypes.object.isRequired
-        },
+    getDefaultProps: function() {
+        return {
+            graphTypes:[{name: "Net income"}, {name: "Categories"}]
+        };
+    },
 
-        getInitialState: function () {
-            return {
-                sumByCategory: [],
-                netIncomeByMonth: {
-                    income: [],
-                    expenses: []}};
-        },
+    getInitialState: function () {
+        return {
+            selectedGraphType: "Net income",
+            years: [],
+            timeFilter: {},
+            sumByCategory: [],
+            netIncomeByMonth: {
+                income: [],
+                expenses: []}};
+    },
 
-        jsonToExpenses: function (json) {
-            return cull.map(function (obj) {
-                return [obj.time, obj.expense * -1];
-            }, json);
-        },
+    jsonToExpenses: function (json) {
+        return cull.map(function (obj) {
+            return [obj.time, obj.expense * -1];
+        }, json);
+    },
 
-        jsonToIncome: function (json) {
-            return cull.map(function (obj) {
-                return [obj.time, obj.income];
-            }, json);
-        },
+    jsonToIncome: function (json) {
+        return cull.map(function (obj) {
+            return [obj.time, obj.income];
+        }, json);
+    },
 
-        jsonToSumByTag: function (json) {
-            return cull.map(function (tagWithSum) {
+    jsonToSumByTag: function (json) {
+        return cull.map(function (tagWithSum) {
+            return [tagWithSum.category, Math.abs(tagWithSum.sum)];
+        }, json);
+    },
 
-                return [tagWithSum.category, Math.abs(tagWithSum.sum)];
-            }, json);
-        },
+    loadAvailableYears: function () {
+        superagent.get("/api/transactions/time/years")
+            .end(function (res) {
+                this.setState({
+                    years: res.body.years,
+                    timeFilter: {year: res.body.years[res.body.years.length -1]}
+                });
 
-        componentDidMount: function () {
-            superagent.get('/api/transactions/net-income')
-                .end(function (res) {
-                    this.setState({netIncomeByMonth: {
-                        income: this.jsonToIncome(res.body),
-                        expenses: this.jsonToExpenses(res.body)}})
-                }.bind(this));
+                // TODO Ugly hack, introduce promises instead
+                // I.e need to first get years before loading sum by category
+                this.loadSumByCategoryFromServer(this.state.timeFilter);
 
-            superagent.get('/api/transactions/sum/2009')
-                .end(function (res) {
-                    this.setState({sumByCategory: this.jsonToSumByTag(res.body)})
-                }.bind(this));
-        },
+            }.bind(this));
+    },
 
+    loadSumByCategoryFromServer : function(timeFilter) {
+        var route = '/api/transactions/sum/' + timeFilter.year;
+        if (timeFilter.month) route += '/' + timeFilter.month;
 
-        render: function () {
-            return R.div({id: "main"},
-                [
-                    commonComponents.Menu(),
-                    GraphNetIncome({
-                        netIncomeByMonth: this.state.netIncomeByMonth
-                    }),
-                    GraphSumByCategory({
-                        sumByCategory: this.state.sumByCategory
-                    })
-                ]);
+        superagent.get(route)
+            .end(function (res) {
+                this.setState({sumByCategory: this.jsonToSumByTag(res.body)})
+            }.bind(this));
+    },
+
+    loadNetIncomeFromServer: function() {
+        superagent.get('/api/transactions/net-income')
+            .end(function (res) {
+                this.setState({netIncomeByMonth: {
+                    income: this.jsonToIncome(res.body),
+                    expenses: this.jsonToExpenses(res.body)}})
+            }.bind(this));
+    },
+
+    componentDidMount: function () {
+        this.loadAvailableYears();
+        this.loadNetIncomeFromServer();
+    },
+
+    onTimeFilterChange: function (timeFilter) {
+        this.setState({timeFilter: timeFilter});
+        this.loadSumByCategoryFromServer(timeFilter)
+    },
+
+    onChangeGraphType: function(graphTypeSelected) {
+        this.setState({selectedGraphType: graphTypeSelected});
+    },
+
+    render: function () {
+        var comps = [
+            commonComponents.Menu(),
+            commonComponents.TimeFilter({
+                years: this.state.years,
+                timeFilter: this.state.timeFilter,
+                onFilterChange: this.onTimeFilterChange}),
+            GraphTypeSelector({
+                graphTypes: this.props.graphTypes,
+                selectedGraphType: this.state.selectedGraphType,
+                onChangeGraphType: this.onChangeGraphType
+            })
+        ];
+
+        // Decide which graphs to show
+        if (this.state.selectedGraphType === 'Net income') {
+            comps.push(GraphNetIncome({
+                netIncomeByMonth: this.state.netIncomeByMonth
+            }));
+        } else if (this.state.selectedGraphType === 'Categories') {
+            comps.push(GraphSumByCategory({
+                sumByCategory: this.state.sumByCategory
+            }));
         }
-    });
+
+        return R.div({id: "main"}, comps);
+    }
+});
 
 React.renderComponent(GraphsPage({}), document.body);

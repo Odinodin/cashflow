@@ -140,13 +140,16 @@ var TransactionPage = React.createClass({
 
     componentDidMount: function () {
         this.loadAvailableYears();
-        this.loadTransactionsFromServer(this.state.timeFilter);
+
     },
 
     loadAvailableYears: function () {
         superagent.get("/api/transactions/time/years")
             .end(function (res) {
                 this.setState({years: res.body.years});
+                // TODO Ugly hack, introduce promises instead
+                // I.e need to first get years before loading transactions
+                this.loadTransactionsFromServer(this.state.timeFilter);
             }.bind(this));
     },
 
