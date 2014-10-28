@@ -36,6 +36,7 @@
                    {:port         port
                     :init         init
                     :auto-reload? true
+                    :open-browser? false
                     :destroy      destroy
                     :join         true}))
     (println (str "You can view the site at http://localhost:" port))))
