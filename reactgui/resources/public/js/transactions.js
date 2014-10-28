@@ -20,11 +20,16 @@ var TransactionSummaryTable = React.createClass({
                 ),
                 R.tbody({},
                     this.props.transactionSums.map(function (sum) {
-                        var categoryName = sum.category;
-                        if (categoryName === null) categoryName = "?";
+
+                        var categoryDiv;
+                        if (sum.category !== null) {
+                            categoryDiv = R.div({className: "category"}, sum.category);
+                        } else {
+                            categoryDiv = R.div({className: "category category-missing"}, "?");
+                        }
 
                         return R.tr({}, [
-                            R.td({}, R.div({className: "category"}, categoryName)),
+                            R.td({}, categoryDiv),
                             R.td({}, R.div({}, sum.sum))])
                     }.bind(this))
                 )
