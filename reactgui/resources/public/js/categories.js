@@ -59,7 +59,7 @@ var CategoryTable = React.createClass({
                         return R.tr({}, [
                             R.td({}, R.button({onClick: function() {this.props.onCategoryDelete(category.name)}.bind(this),
                                 className: "delete"}, "\u2716")),
-                            R.td({key: "name", className: "tag"}, category.name),
+                            R.td({key: "name", className: "category"}, category.name),
                             R.td({key: "regexes"}, category.regexes.join(", "))]);
                     }.bind(this)))
             ])

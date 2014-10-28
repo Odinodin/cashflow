@@ -21,7 +21,7 @@ var TransactionSummaryTable = React.createClass({
                 R.tbody({},
                     this.props.transactionSums.map(function (sum) {
                         return R.tr({}, [
-                            R.td({}, R.div({className: "tag"}, sum.category)),
+                            R.td({}, R.div({className: "category"}, sum.category)),
                             R.td({}, R.div({}, sum.sum))])
                     }.bind(this))
                 )
@@ -46,14 +46,14 @@ var TransactionRow = React.createClass({
         var comp = [];
         if (trans.category) {
             var td = R.div({
-                className: "tag",
+                className: "category",
                 onClick: function () {
                     this.props.onEditTransaction(trans.id)
                 }.bind(this)}, trans.category)
             comp.push(td);
         } else {
             var td = R.div({
-                className: "tag category-missing",
+                className: "category category-missing",
                 onClick: function () {
                     this.props.onEditTransaction(trans.id)
                 }.bind(this)}, "?");
@@ -64,7 +64,7 @@ var TransactionRow = React.createClass({
         if (isThisRowBeingEdited) {
             var cells = this.props.categories.map(function (category) {
                 return R.div({
-                    className: "tag category-candidate fade-in",
+                    className: "category category-candidate fade-in",
                     onClick: function () {
                         this.props.onChangeTransactionCategory(trans.id, category.name)
                     }.bind(this)
