@@ -97,6 +97,10 @@ body {
     transition: 0.25s linear;
 }
 
+.category:hover {
+    background-color: #747474;
+}
+
 .category-missing {
     background-color: #5d5d5d;
 }
