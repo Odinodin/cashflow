@@ -1,7 +1,5 @@
 # cashflow
 
-FIXME
-
 ## Prerequisites
 
 You will need [Leiningen][1] 1.7.0 or above installed.
@@ -10,9 +8,12 @@ You will need [Leiningen][1] 1.7.0 or above installed.
 
 ## Running
 
-To start a web server for the application, run:
+The system has two apps, one for the backend and one for the frontend.
+
+To start the solution, run the following from both /backend and /reactgui:
 
     lein ring server
+
 
 ## License
 
