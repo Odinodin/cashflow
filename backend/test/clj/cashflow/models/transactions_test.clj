@@ -58,6 +58,8 @@
 
 
 (fact "Can filter transactions by year and month"
+      (transactions-in-month [] 2014 5) => []
+
       (transactions-in-month
         [{:date (t/date-time 2014 5 1) :description "inside" :amount 1}
          {:date (t/date-time 2014 5 25) :description "inside" :amount 3}
@@ -71,10 +73,12 @@
        {:date (t/date-time 2014 5 25) :description "inside" :amount 3}])
 
 (fact "Can sum transactions"
-      (sum-transactions [{:amount 10} {:amount 20} {:amount 30}]) => 60
-      (sum-transactions []) => 0)
+      (sum-transactions []) => 0
+      (sum-transactions [{:amount 10} {:amount 20} {:amount 30}]) => 60)
 
 (fact "Can sum transactions for each category"
+      (sum-transactions-pr-category []) => []
+
       (sum-transactions-pr-category
         [{:category "a" :amount 1}
          {:category "a" :amount 2}
@@ -90,6 +94,8 @@
       (sum-transactions-pr-category []) => [])
 
 (fact "Can calculate income and expenses by month for a list of transactions"
+      (net-income-by-month []) => []
+
       (net-income-by-month
         [{:date (t/date-time 2014 5 1) :amount 1}
          {:date (t/date-time 2014 5 2) :amount 2}
@@ -104,6 +110,8 @@
        {:time "2014-5" :income 3 :expense -30}])
 
 (fact "Can find all years in transactions"
+      (unique-years []) => []
+
       (unique-years
         [{:date (t/date-time 2014 5 1)}
          {:date (t/date-time 2014 5 25)}
@@ -121,6 +129,8 @@
       [{:id 1 :date (t/date-time 2014 5 1) :amount 1 :category "coffee"}])
 
 (fact "Can find transaction with id"
+      (find-transaction [] 1) => nil
+
       (find-transaction [{:id 1 :amount 123} {:id 2 :amount 2}] 1)
 
       => {:id 1 :amount 123})
