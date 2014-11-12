@@ -1,7 +1,9 @@
 (ns cashflow.models.transactions-test
   (:require [cashflow.models.transactions :refer :all]
             [midje.sweet :refer :all]
-            [clj-time.core :as t]))
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]
+            [datomic.api :as d]))
 
 (def test-file (.getFile (clojure.java.io/resource "test-transactions.csv")))
 
@@ -134,3 +136,26 @@
       (find-transaction [{:id 1 :amount 123} {:id 2 :amount 2}] 1)
 
       => {:id 1 :amount 123})
+
+
+
+(defn create-empty-in-memory-db []
+  (let [uri "datomic:mem://cashflow-db"]
+    (d/delete-database uri)
+    (d/create-database uri)
+    (let [conn (d/connect uri)
+          schema (load-file (.getFile (clojure.java.io/resource "schema.edn")))]
+      (d/transact conn schema)
+      conn)))
+
+
+(fact "Can add transaction to database"
+      (create-empty-in-memory-db)
+      (->
+        (add-transactions "datomic:mem://cashflow-db"
+                            [{:transaction/date (tc/to-date (t/date-time 2009 05 06)) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
+                             {:transaction/date (tc/to-date (t/date-time 2009 05 06)) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
+        :tempids
+        vals
+        count)
+      => 2)

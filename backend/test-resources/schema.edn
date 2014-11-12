@@ -1,0 +1,29 @@
+;; {:id 2 :date (t/date-time 2009 05 06) :code "VARER" :description "REMA 1000" :amount -159.20M}
+
+[{:db/id                 #db/id[:db.part/db]
+  :db/ident              :transaction/date
+  :db/valueType          :db.type/instant
+  :db/cardinality        :db.cardinality/one
+  :db/doc                "The transaction date"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id                 #db/id[:db.part/db]
+  :db/ident              :transaction/code
+  :db/valueType          :db.type/string
+  :db/cardinality        :db.cardinality/one
+  :db/doc                "The transaction's code"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id                 #db/id[:db.part/db]
+  :db/ident              :transaction/description
+  :db/valueType          :db.type/string
+  :db/cardinality        :db.cardinality/one
+  :db/doc                "Description for the transaction"
+  :db.install/_attribute :db.part/db}
+
+ {:db/id                 #db/id[:db.part/db]
+  :db/ident              :transaction/amount
+  :db/valueType          :db.type/bigdec
+  :db/cardinality        :db.cardinality/one
+  :db/doc                "The amount of money for the transaction"
+  :db.install/_attribute :db.part/db}]

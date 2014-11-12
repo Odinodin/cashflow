@@ -19,3 +19,8 @@ scrap.cljs
 odin*.*
 
 /out
+
+# Avoid checking in node modules
+reactgui/node_modules/*
+!reactgui/node_modules/app
+!reactgui/node_modules/lib

@@ -2,7 +2,8 @@
   (:require [clojure.java.io :as io]
             [clj-time.core :as t]
             [clj-time.format :as t-format]
-            [clj-time.coerce :as t-coerce])
+            [clj-time.coerce :as t-coerce]
+            [datomic.api :as d])
   (:import [java.io BufferedReader FileReader]))
 
 (defn- string->date [date]
@@ -152,3 +153,9 @@
       {:time    (str (:year k) "-" (:month k))
        :income  (transactions->income v)
        :expense (transactions->expense v)})))
+
+;; Datomic
+(defn add-transactions [db-uri transactions]
+  (let [transactions-with-db-id (map #(assoc %1 :db/id (d/tempid :db.part/user)) transactions)]
+    @(d/transact (d/connect db-uri)
+                transactions-with-db-id)))

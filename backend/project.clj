@@ -14,6 +14,8 @@
 
                  [prismatic/schema "0.2.6"]
 
+                 [com.datomic/datomic-pro "0.9.4956"]
+
                  ;; GUI
                  [selmer "0.6.6"]
 
