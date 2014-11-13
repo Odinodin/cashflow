@@ -1,16 +1,9 @@
 (ns cashflow.models.transactions
   (:require [clojure.java.io :as io]
             [clj-time.core :as t]
-            [clj-time.format :as t-format]
-            [clj-time.coerce :as t-coerce]
-            [datomic.api :as d])
+            [datomic.api :as d]
+            [cashflow.time :as ct])
   (:import [java.io BufferedReader FileReader]))
-
-(defn- string->date [date]
-  (t-format/parse (t-format/formatter "dd.MM.yyyy") date))
-
-(defn- iso8600string->date [date]
-  (t-format/parse (t-format/formatter "yyyy-MM-dd") date))
 
 (def transaction-id-sequence (atom 0))
 
@@ -19,7 +12,7 @@
 ;; ["06.05.2009" "06.05.2009" "VARER" "05.05 PRINCESS AVD. STENERSGT. 1 OSLO" "-119,00" "17017470066"]
 (defn lines->transactions [lines-as-vectors]
   (for [[date date2 code description amount & dontcare] lines-as-vectors]
-    {:date        (string->date date)
+    {:date        (ct/string->date date)
      :code        code
      :description description :amount (-> amount
                                           (clojure.string/replace "," ".")
@@ -44,19 +37,6 @@
        (to-transactions transaction-id-sequence)
        (swap! transactions into)))
 
-;; Date helpers
-(defn- same-date? [date1 date2]
-  (= (t-coerce/to-local-date date1)
-     (t-coerce/to-local-date date2)))
-
-(defn- same-year-month? [date year month]
-  (and (= (clj-time.core/year date) year)
-       (= (clj-time.core/month date) month)))
-
-(defn- same-year? [date year]
-  (= (clj-time.core/year date) year))
-
-
 (defn find-transaction [transactions id]
   (->> transactions
       (filter #(= id (:id %1)))
@@ -70,20 +50,19 @@
 
 
 ;; Queries
-;; TODO Add test + submit patch to clj-time (same-year?, same-year-month?)
 (defn transactions-in-month [transaction-list year month-index]
   (->>
-    (filter #(-> % :date (same-year-month? year month-index)) transaction-list)
+    (filter #(-> % :date (ct/same-year-month? year month-index)) transaction-list)
     (sort-by :date)))
 
 (defn transactions-in-year [transaction-list year]
   (->>
-    (filter #(-> % :date (same-year? year)) transaction-list)
+    (filter #(-> % :date (ct/same-year? year)) transaction-list)
     (sort-by :date)))
 
 (defn transactions-at-date [transaction-list query-date]
   (->>
-    (filter #(-> % :date (same-date? query-date)) transaction-list)
+    (filter #(-> % :date (ct/same-date? query-date)) transaction-list)
     (sort-by :date)))
 
 (defn transactions-in-interval [transaction-list interval]
@@ -97,11 +76,11 @@
 (defn transactions-in [transactions start-date end-date]
   (transactions-in-interval
     transactions
-    (t/interval (iso8600string->date start-date)
-                (iso8600string->date end-date))))
+    (t/interval (ct/iso8600string->date start-date)
+                (ct/iso8600string->date end-date))))
 
 (defn transactions-at [transactions query-date]
-  (transactions-at-date transactions (iso8600string->date query-date)))
+  (transactions-at-date transactions (ct/iso8600string->date query-date)))
 
 (defn unique-years [transaction-list]
   (->>
