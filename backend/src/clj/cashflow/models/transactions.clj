@@ -134,7 +134,36 @@
        :expense (transactions->expense v)})))
 
 ;; Datomic
-(defn add-transactions [db-uri transactions]
+(defn add-transactions [db-conn transactions]
   (let [transactions-with-db-id (map #(assoc %1 :db/id (d/tempid :db.part/user)) transactions)]
-    @(d/transact (d/connect db-uri)
+    @(d/transact db-conn
                 transactions-with-db-id)))
+
+(defn- db-ids->entity-maps
+  "Takes a list of datomic entity ids retrieves and returns
+  a list of hydrated entities in the form of a list of maps."
+  [db-conn db-ids]
+  (->>
+    db-ids
+    seq
+    flatten
+    (map #(->>
+           %
+           ;; id -> lazy entity map
+           (d/entity (d/db db-conn))
+           ;; realize all values
+           d/touch
+           (into {})))))
+
+(defn dfind-transactions-by-year [db-conn year]
+  (->>
+    (d/q
+      '[:find ?e
+        :in $ ?q-year
+        :where
+        [?e :transaction/date ?date]
+        [((fn [dt] (+ (.getYear dt) 1900)) ?date) ?tyear]
+        [(= ?q-year ?tyear)]]
+      (d/db db-conn)
+      year)
+    (db-ids->entity-maps db-conn)))
