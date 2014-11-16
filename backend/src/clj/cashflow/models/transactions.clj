@@ -168,6 +168,22 @@
       year)
     (db-ids->entity-maps db-conn)))
 
+(defn dfind-transactions-by-month [db-conn year month-index]
+  (->>
+    (d/q
+      '[:find ?e
+        :in $ ?q-year ?q-month
+        :where
+        [?e :transaction/date ?date]
+        [((fn [dt] (+ (.getYear dt) 1900)) ?date) ?tyear]
+        [((fn [dt] (+ (.getMonth dt) 1)) ?date) ?tmonth]
+        [(= ?q-year ?tyear)]
+        [(= ?q-month ?tmonth)]]
+      (d/db db-conn)
+      year
+      month-index)
+    (db-ids->entity-maps db-conn)))
+
 (defn dfind-unique-years-in-transactions [db-conn]
   (->
     (d/q
