@@ -39,8 +39,8 @@
 
 (defn find-transaction [transactions id]
   (->> transactions
-      (filter #(= id (:id %1)))
-      first))
+       (filter #(= id (:id %1)))
+       first))
 
 (defn change-transaction [transactions mutation]
   (swap! transactions
@@ -96,10 +96,10 @@
 
 (defn sum-transactions-pr-category [transaction-list]
   (let [unique-categorynames (-> (map :category transaction-list)
-                            distinct)]
+                                 distinct)]
     (for [categoryname unique-categorynames]
       {:category categoryname
-       :sum     (sum-transactions (filter #(= categoryname (:category %)) transaction-list))})))
+       :sum      (sum-transactions (filter #(= categoryname (:category %)) transaction-list))})))
 
 (defn- dt->year-month-map [dt]
   {:year (. dt getYear) :month (. dt getMonthOfYear)})
@@ -137,7 +137,7 @@
 (defn add-transactions [db-conn transactions]
   (let [transactions-with-db-id (map #(assoc %1 :db/id (d/tempid :db.part/user)) transactions)]
     @(d/transact db-conn
-                transactions-with-db-id)))
+                 transactions-with-db-id)))
 
 (defn- db-ids->entity-maps
   "Takes a list of datomic entity ids retrieves and returns
@@ -167,3 +167,14 @@
       (d/db db-conn)
       year)
     (db-ids->entity-maps db-conn)))
+
+(defn dfind-unique-years-in-transactions [db-conn]
+  (->
+    (d/q
+      '[:find (distinct ?year)
+        :where
+        [_ :transaction/date ?date]
+        [((fn [dt] (+ (.getYear dt) 1900)) ?date) ?year]
+        ]
+      (d/db db-conn))
+    ffirst))

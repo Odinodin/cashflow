@@ -170,3 +170,14 @@
       =>
       [{:transaction/date (tc/to-date (t/date-time 2009 05 06)) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
        {:transaction/date (tc/to-date (t/date-time 2009 05 06)) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
+
+(fact "Can find the list of unique years of transactions"
+      (let [uri "datomic:mem://cashflow-db"]
+        (create-empty-in-memory-db uri)
+        (add-transactions (d/connect uri)
+                          [{:transaction/date (tc/to-date (t/date-time 2008 05 06)) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
+                           {:transaction/date (tc/to-date (t/date-time 2008 05 06)) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
+                           {:transaction/date (tc/to-date (t/date-time 2009 05 06)) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
+        (dfind-unique-years-in-transactions (d/connect uri)))
+      =>
+      #{2008 2009})
