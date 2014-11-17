@@ -153,7 +153,7 @@
            (d/entity (d/db db-conn))
            ;; realize all values
            d/touch
-           (into {})))))
+           (into {:db/id %})))))
 
 (defn dfind-transactions-by-year [db-conn year]
   (->>

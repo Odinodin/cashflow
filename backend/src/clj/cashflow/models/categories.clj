@@ -1,4 +1,5 @@
-(ns cashflow.models.categories)
+(ns cashflow.models.categories
+  (:require [datomic.api :as d]))
 
 (defn add-category! [categories category]
   (swap! categories conj category))
@@ -20,10 +21,10 @@
   [transactions category-rules]
   (map
     #(assoc % :category (->>
-                         (match-category-rules category-rules (:description %))
-                         (map :name)
-                         (vec)
-                         (first)))
+                          (match-category-rules category-rules (:description %))
+                          (map :name)
+                          (vec)
+                          (first)))
     transactions))
 
 (defn tag-and-update-transactions! [transactions categories]
@@ -38,5 +39,38 @@
 (defn delete! [categories category-name]
   (swap! categories #(remove (fn [category-rule] (= (:name category-rule) category-name)) %)))
 
-(defn category-exists? [categories name]
-  (some #(= (:name %) name) categories))
+;; Datomic
+(defn dt-add-category! [db-conn category]
+  (let [category-with-db-id (assoc category :db/id (d/tempid :db.part/user))]
+    @(d/transact db-conn
+                 [category-with-db-id])))
+
+
+(defn- db-ids->entity-maps
+  "Takes a list of datomic entity ids retrieves and returns
+  a list of hydrated entities in the form of a list of maps."
+  [db-conn db-ids]
+  (->>
+    db-ids
+    seq
+    flatten
+    (map #(->>
+           %
+           ;; id -> lazy entity map
+           (d/entity (d/db db-conn))
+           ;; realize all values
+           d/touch
+           (into {:db/id %})))))
+
+(defn dt-list-categories [db-conn]
+  (->>
+    (d/q
+      '[:find ?e
+        :where
+        [?e :category/name]]
+      (d/db db-conn))
+    (db-ids->entity-maps db-conn)))
+
+
+(defn dt-remove-category! [db-conn category-id]
+  (d/transact db-conn [[:db.fn/retractEntity category-id]]))
