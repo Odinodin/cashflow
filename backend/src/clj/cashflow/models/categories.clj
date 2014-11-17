@@ -46,6 +46,7 @@
                  [category-with-db-id])))
 
 
+;; TODO extract in to separte ns
 (defn- db-ids->entity-maps
   "Takes a list of datomic entity ids retrieves and returns
   a list of hydrated entities in the form of a list of maps."
