@@ -1,6 +1,6 @@
 (ns cashflow.models.transactions-test
   (:require [cashflow.models.transactions :refer :all]
-            [cashflow.db-util :as db-util]
+            [cashflow.test-db :as test-db]
             [midje.sweet :refer :all]
             [clj-time.core :as t]
             [clj-time.coerce :as tc]
@@ -139,7 +139,7 @@
       => {:id 1 :amount 123})
 
 (fact "Can add transaction to database"
-      (db-util/create-empty-in-memory-db "datomic:mem://cashflow-db")
+      (test-db/create-empty-in-memory-db "datomic:mem://cashflow-db")
       (->
         (add-transactions (d/connect "datomic:mem://cashflow-db")
                           [{:transaction/date (tc/to-date (t/date-time 2009 05 06)) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
@@ -151,7 +151,7 @@
 
 (fact "Can find transactions by year"
       (let [uri "datomic:mem://cashflow-db"]
-        (db-util/create-empty-in-memory-db uri)
+        (test-db/create-empty-in-memory-db uri)
         (add-transactions (d/connect uri)
                           [{:transaction/date (tc/to-date (t/date-time 2009 05 06)) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
                            {:transaction/date (tc/to-date (t/date-time 2009 05 06)) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
@@ -165,7 +165,7 @@
 
 (fact "Can find transactions by month"
       (let [uri "datomic:mem://cashflow-db"]
-        (db-util/create-empty-in-memory-db uri)
+        (test-db/create-empty-in-memory-db uri)
         (add-transactions (d/connect uri)
                           [{:transaction/date (tc/to-date (t/date-time 2009 05 06)) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
                            {:transaction/date (tc/to-date (t/date-time 2009 06 06)) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
@@ -177,7 +177,7 @@
 
 (fact "Can find the list of unique years of transactions"
       (let [uri "datomic:mem://cashflow-db"]
-        (db-util/create-empty-in-memory-db uri)
+        (test-db/create-empty-in-memory-db uri)
         (add-transactions (d/connect uri)
                           [{:transaction/date (tc/to-date (t/date-time 2008 05 06)) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
                            {:transaction/date (tc/to-date (t/date-time 2008 05 06)) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}

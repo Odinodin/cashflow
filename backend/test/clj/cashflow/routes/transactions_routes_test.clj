@@ -1,6 +1,7 @@
 (ns cashflow.routes.transactions-routes-test
   (:require [ring.mock.request :as ring-mock]
             [midje.sweet :refer :all]
+            [cashflow.test-db :as test-db]
             [cashflow.handler :as cashflow]
             [cashflow.json-util :as json-util]
             [cheshire.core :as json]
@@ -8,6 +9,7 @@
 
 (fact "can list transactions"
       (let [db-uri "datomic:mem://cashflow-db"
+            _ (test-db/create-empty-in-memory-db db-uri)
             response (->
                        {:database {:uri db-uri}
                         :transactions (atom [{:description "ape" :amount 1 :tags ["store"]}])}

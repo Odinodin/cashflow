@@ -1,4 +1,4 @@
-(ns cashflow.routes.categories_test
+(ns cashflow.routes.categories_routes_test
   (:import java.io.ByteArrayInputStream)
   (:require [ring.mock.request :as ring-mock]
             [midje.sweet :refer :all]
@@ -6,7 +6,7 @@
             [cashflow.handler :as cashflow]
             [cashflow.models.categories :as categories]
             [cashflow.json-util :as json-util]
-            [cashflow.test-db :as db-util]))
+            [cashflow.test-db :as test-db]))
 
 
 (defn- create-category [testsystem category-map]
@@ -30,7 +30,7 @@
 
 (fact "can create category"
       (let [db-uri "datomic:mem://cashflow-db"
-            _ (db-util/create-empty-in-memory-db db-uri)
+            _ (test-db/create-empty-in-memory-db db-uri)
             response (create-category {:database {:uri db-uri}}
                                       {:category/name "test" :category/regexes ["a" "b"]})]
 
@@ -38,7 +38,7 @@
 
 (fact "can list categories"
       (let [db-uri "datomic:mem://cashflow-db"
-            _ (db-util/create-empty-in-memory-db db-uri)
+            _ (test-db/create-empty-in-memory-db db-uri)
             _ (create-category {:database {:uri db-uri}}
                                {:category/name "store" :category/regexes ["x"]})
             response (list-categories {:database {:uri db-uri}})]
@@ -49,7 +49,7 @@
 
 (fact "can get category"
       (let [db-uri "datomic:mem://cashflow-db"
-            _ (db-util/create-empty-in-memory-db db-uri)
+            _ (test-db/create-empty-in-memory-db db-uri)
             _ (create-category {:database {:uri db-uri}}
                                {:category/name "store" :category/regexes ["x"]})
             response (->
@@ -62,7 +62,7 @@
 
 (fact "can delete category"
       (let [db-uri "datomic:mem://cashflow-db"
-            _ (db-util/create-empty-in-memory-db db-uri)
+            _ (test-db/create-empty-in-memory-db db-uri)
             _ (create-category {:database {:uri db-uri}}
                                {:category/name "power" :category/regexes ["x"]})
             delete-response (->

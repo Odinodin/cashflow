@@ -1,6 +1,6 @@
 (ns cashflow.models.categories-test
   (:require [cashflow.models.categories :refer :all]
-            [cashflow.db-util :as db-util]
+            [cashflow.test-db :as test-db]
             [datomic.api :as d]
             [midje.sweet :refer :all]))
 
@@ -38,7 +38,7 @@
 ;; Datomic
 (fact "Can add category to db"
       (let [uri "datomic:mem://cashflow-db"]
-        (db-util/create-empty-in-memory-db uri)
+        (test-db/create-empty-in-memory-db uri)
         (dt-add-category! (d/connect uri) {:category/name "store" :category/regexes ["Kiwi" "Rimi"]})
         (dt-add-category! (d/connect uri) {:category/name "car" :category/regexes ["BMW" "Peugeot"]})
         (dt-list-categories (d/connect uri)))
@@ -48,7 +48,7 @@
 
 (fact "Can remove category from db"
       (let [uri "datomic:mem://cashflow-db"
-            _ (db-util/create-empty-in-memory-db uri)
+            _ (test-db/create-empty-in-memory-db uri)
             result (dt-add-category! (d/connect uri) {:category/name "store" :category/regexes ["Kiwi" "Rimi"]})]
         (dt-remove-category! (d/connect uri) "store")
         (dt-list-categories (d/connect uri)))
