@@ -182,6 +182,6 @@
                           [{:transaction/date (tc/to-date (t/date-time 2008 05 06)) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
                            {:transaction/date (tc/to-date (t/date-time 2008 05 06)) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
                            {:transaction/date (tc/to-date (t/date-time 2009 05 06)) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
-        (dfind-unique-years-in-transactions (d/connect uri)))
+        (dfind-unique-years-in-transactions (d/db (d/connect uri))))
       =>
       #{2008 2009})

@@ -45,7 +45,7 @@
     (middleware/wrap-restful-format :formats [:json-kw])
     #_(prone/wrap-exceptions)))
 
-;; TODO Validate the mutants
+;; TODO Validate the system map
 (defn test-app-handler
   [testsystem request]
   (app (assoc request :system testsystem)))

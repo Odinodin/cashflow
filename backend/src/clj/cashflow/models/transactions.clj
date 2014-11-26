@@ -185,7 +185,7 @@
       month-index)
     (db-ids->entity-maps db-conn)))
 
-(defn dfind-unique-years-in-transactions [db-conn]
+(defn dfind-unique-years-in-transactions [db]
   (->
     (d/q
       '[:find (distinct ?year)
@@ -193,5 +193,5 @@
         [_ :transaction/date ?date]
         [((fn [dt] (+ (.getYear dt) 1900)) ?date) ?year]
         ]
-      (d/db db-conn))
+      db)
     ffirst))
