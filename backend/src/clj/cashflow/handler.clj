@@ -17,12 +17,13 @@
 ;; Contains all mutants.
 ;; :transactions are lists of maps with these keys:   {:date :code :description :amount :category}
 ;; :categories are lists of                                 {:name "categoryname" :regexes [#"list" #"of" #"regexes"]}
-(declare mutants)
+(declare system)
 
 (defn init []
   (println "cashflow is starting..")
-  (def mutants
-    {:transactions (atom [])
+  (def system
+    {:database {:uri "datomic:mem://cashflow-db"}           ;; TODO Currently hardcoded
+     :transactions (atom [])
      :categories (atom [])})
   #_(let [repl (clojure.tools.nrepl.server/start-server :port 0 :bind "127.0.0.1")]
     (println "Repl started at" (:port repl))))
@@ -44,10 +45,11 @@
     (middleware/wrap-restful-format :formats [:json-kw])
     #_(prone/wrap-exceptions)))
 
+;; TODO Validate the mutants
 (defn test-app-handler
-  [testmutants request]
-  (app (assoc request :mutants testmutants)))
+  [testsystem request]
+  (app (assoc request :system testsystem)))
 
 (defn lein-app-handler
   [request]
-  (app (assoc request :mutants mutants)))
+  (app (assoc request :system system)))

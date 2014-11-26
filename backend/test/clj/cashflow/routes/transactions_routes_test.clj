@@ -7,21 +7,23 @@
             [clj-time.core :as t]))
 
 (fact "can list transactions"
-      (let [response (->
-                       {:transactions (atom [{:description "ape" :amount 1 :tags ["store"]}])}
+      (let [db-uri "datomic:mem://cashflow-db"
+            response (->
+                       {:database {:uri db-uri}
+                        :transactions (atom [{:description "ape" :amount 1 :tags ["store"]}])}
                        (cashflow/test-app-handler (ring-mock/request :get "/api/transactions"))
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
         (:body response) => [{:description "ape" :amount 1 :tags ["store"]}]))
 
-
 (fact "can filter transactions by year"
-      (let [response (->
-                       {:transactions
-                         (atom [{:date (t/date-time 2012 5 10) :description "wrong date" :amount 100}
-                                 {:date (t/date-time 2012 9 12) :description "wrong date" :amount 100}
-                                 {:date (t/date-time 2013 5 11) :description "right date" :amount 200}])}
+      (let [db-uri "datomic:mem://cashflow-db"
+            response (->
+                       {:database {:uri db-uri}
+                        :transactions (atom [{:date (t/date-time 2012 5 10) :description "wrong date" :amount 100}
+                                             {:date (t/date-time 2012 9 12) :description "wrong date" :amount 100}
+                                             {:date (t/date-time 2013 5 11) :description "right date" :amount 200}])}
                        (cashflow/test-app-handler (ring-mock/request :get "/api/transactions/time/2013"))
                        json-util/json-parse-body)]
 
@@ -29,8 +31,10 @@
         (:body response) => [{:date "2013-05-11" :description "right date" :amount 200}]))
 
 (fact "can filter transactions by month"
-      (let [response (->
-                       {:transactions
+      (let [db-uri "datomic:mem://cashflow-db"
+            response (->
+                       {:database {:uri db-uri}
+                        :transactions
                          (atom [{:date (t/date-time 2012 5 10) :description "right date" :amount 100}
                                 {:date (t/date-time 2012 9 12) :description "wrong date" :amount 100}
                                 {:date (t/date-time 2013 5 11) :description "wrong date" :amount 200}])}
@@ -41,8 +45,10 @@
         (:body response) => [{:date "2012-05-10" :description "right date" :amount 100}]))
 
 (fact "can get the list of years of transaction data"
-      (let [response (->
-                       {:transactions
+      (let [db-uri "datomic:mem://cashflow-db"
+            response (->
+                       {:database {:uri db-uri}
+                        :transactions
                          (atom [{:date (t/date-time 2010 1 1)}
                                 {:date (t/date-time 2011 1 1)}
                                 {:date (t/date-time 2013 1 1)}])}
@@ -54,8 +60,10 @@
 
 
 (fact "can change existing transaction category"
-      (let [response (->
-                       {:transactions
+      (let [db-uri "datomic:mem://cashflow-db"
+            response (->
+                       {:database {:uri db-uri}
+                        :transactions
                          (atom [{:id 1 :date (t/date-time 2010 1 1) :category "store"}])}
                        (cashflow/test-app-handler {:request-method :post
                                                    :uri            "/api/transactions/1"
@@ -67,8 +75,10 @@
         (:body response) => {:id 1 :date "2010-01-01" :category "other"}))
 
 (fact "can list sum of transactions by category per month"
-      (let [response (->
-                       {:transactions
+      (let [db-uri "datomic:mem://cashflow-db"
+            response (->
+                       {:database {:uri db-uri}
+                        :transactions
                          (atom [ {:id 1 :date (t/date-time 2010 1 1) :category "store" :amount 1}
                                  {:id 2 :date (t/date-time 2012 5 1) :category "coffee" :amount 2}
                                  {:id 2 :date (t/date-time 2012 5 1) :category "store" :amount 2}
@@ -81,8 +91,10 @@
                              {:category "store" :sum 5}]))
 
 (fact "can list sum of transactions by category per year"
-      (let [response (->
-                       {:transactions
+      (let [db-uri "datomic:mem://cashflow-db"
+            response (->
+                       {:database {:uri db-uri}
+                        :transactions
                          (atom [ {:id 1 :date (t/date-time 2010 1 1) :category "store" :amount 1}
                                  {:id 2 :date (t/date-time 2012 5 1) :category "coffee" :amount 2}
                                  {:id 2 :date (t/date-time 2012 5 1) :category "store" :amount 2}
@@ -95,8 +107,10 @@
                              {:category "store" :sum 5}]))
 
 (fact "can get net-income"
-      (let [response (->
-                       {:transactions
+      (let [db-uri "datomic:mem://cashflow-db"
+            response (->
+                       {:database {:uri db-uri}
+                        :transactions
                          (atom [ {:id 1 :date (t/date-time 2010 1 1) :category "store" :amount -1}
                                  {:id 1 :date (t/date-time 2010 1 2) :category "store" :amount 1}
                                  {:id 2 :date (t/date-time 2011 5 1) :category "coffee" :amount -2}

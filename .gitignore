@@ -1,5 +1,4 @@
-
-backend/target
+backend/target/
 target/
 .idea/
 /lib

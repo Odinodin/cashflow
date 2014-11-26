@@ -36,15 +36,24 @@
 (defn categoryname->category [categories category-name]
   (first (filter #(= category-name (:name %)) categories)))
 
-(defn delete! [categories category-name]
-  (swap! categories #(remove (fn [category-rule] (= (:name category-rule) category-name)) %)))
+(defn hydrate-entity
+  "Takes a datom and a tempid and retrieves the entity as a map"
+  [datom tempid]
+  (let [db (:db-after datom)]
+    (->>
+      (d/resolve-tempid db (:tempids datom) tempid)
+      (d/entity db)
+      d/touch
+      (into {}))))
 
 ;; Datomic
 (defn dt-add-category! [db-conn category]
-  (let [category-with-db-id (assoc category :db/id (d/tempid :db.part/user))]
-    @(d/transact db-conn
-                 [category-with-db-id])))
-
+  (let [tempid (d/tempid :db.part/user)
+        category-with-db-id (assoc category :db/id tempid)]
+    (->
+      @(d/transact db-conn
+                   [category-with-db-id])
+      (hydrate-entity tempid))))
 
 ;; TODO extract in to separte ns
 (defn- db-ids->entity-maps
@@ -59,9 +68,8 @@
            %
            ;; id -> lazy entity map
            (d/entity (d/db db-conn))
-           ;; realize all values
            d/touch
-           (into {:db/id %})))))
+           (into {})))))
 
 (defn dt-list-categories [db-conn]
   (->>
@@ -73,5 +81,24 @@
     (db-ids->entity-maps db-conn)))
 
 
-(defn dt-remove-category! [db-conn category-id]
-  (d/transact db-conn [[:db.fn/retractEntity category-id]]))
+(defn dt-find-category [db category-name]
+  (->> (d/q
+         '[:find ?e
+           :in $ ?category-name
+           :where
+           [?e :category/name ?category-name]]
+         db
+         category-name)
+       ffirst
+       (d/entity db)))
+
+(defn dt-remove-category! [db-conn category-name]
+  (let [category-id (->> (d/q
+                           '[:find ?e
+                             :in $ ?category-name
+                             :where
+                             [?e :category/name ?category-name]]
+                           (d/db db-conn)
+                           category-name)
+                         ffirst)]
+  (d/transact db-conn [[:db.fn/retractEntity category-id]])))

@@ -9,7 +9,7 @@
             [selmer.parser :as selmer]
             [clojure.pprint :refer [pprint]]
             [clojure.tools.namespace.repl :refer [refresh]]
-
+            [datomic.api :as d]
             [cashflow.handler :as handler]
             [cashflow.models.transactions :as trans]
             [cashflow.models.categories :as categories]))
@@ -47,8 +47,8 @@
 
 
 (defn bootstrap-testdata []
-  (let [categories (:categories handler/mutants)
-        transactions (:transactions handler/mutants)]
+  (let [categories (:categories handler/system)
+        transactions (:transactions handler/system)]
     (reset! categories [])
     (reset! transactions [])
     (trans/add-transactions-in-file! transactions (.getFile (clojure.java.io/resource "test-transactions.csv")))
@@ -62,6 +62,19 @@
     (categories/add-category! categories {:name "Lønn" :regexes [#"Megacorp"]})
     (categories/tag-and-update-transactions! transactions categories)))
 
+
+
+(defn create-empty-in-memory-db [uri]
+  (d/delete-database uri)
+  (d/create-database uri)
+  (let [conn (d/connect uri)
+        schema (load-file (.getFile (clojure.java.io/resource "schema.edn")))]
+    (d/transact conn schema)
+    conn))
+
+
+
 (defn start-and-bootstrap []
   (start-server)
-  (bootstrap-testdata))
+  (create-empty-in-memory-db "datomic:mem://cashflow-db")
+  #_(bootstrap-testdata))

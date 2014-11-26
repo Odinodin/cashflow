@@ -41,8 +41,7 @@
         (db-util/create-empty-in-memory-db uri)
         (dt-add-category! (d/connect uri) {:category/name "store" :category/regexes ["Kiwi" "Rimi"]})
         (dt-add-category! (d/connect uri) {:category/name "car" :category/regexes ["BMW" "Peugeot"]})
-        (->> (dt-list-categories (d/connect uri))
-             (map #(dissoc % :db/id))))
+        (dt-list-categories (d/connect uri)))
       =>
       [{:category/name "store" :category/regexes #{"Kiwi" "Rimi"}}
        {:category/name "car" :category/regexes #{"BMW" "Peugeot"}}])
@@ -50,9 +49,8 @@
 (fact "Can remove category from db"
       (let [uri "datomic:mem://cashflow-db"
             _ (db-util/create-empty-in-memory-db uri)
-            result (dt-add-category! (d/connect uri) {:category/name "store" :category/regexes ["Kiwi" "Rimi"]})
-            category-id (first (vals (:tempids result)))]
-        (dt-remove-category! (d/connect uri) category-id)
+            result (dt-add-category! (d/connect uri) {:category/name "store" :category/regexes ["Kiwi" "Rimi"]})]
+        (dt-remove-category! (d/connect uri) "store")
         (dt-list-categories (d/connect uri)))
       =>
       [])
