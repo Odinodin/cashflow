@@ -30,9 +30,9 @@
                       :else
                       {:body @transactions}))
 
-           (GET "/transactions/time/years" {{:keys [transactions]} :system}
-                {:body {:years (trans/unique-years
-                                 @transactions)}})
+           (GET "/transactions/time/years" {{{:keys [uri]} :database} :system}
+                {:body {:years (trans/dfind-unique-years-in-transactions
+                                 (d/db (d/connect uri)))}})
 
            (GET "/transactions/time/:year" [year :as {{{:keys [uri]} :database} :system}]
                 (transasctions-by-year uri year))

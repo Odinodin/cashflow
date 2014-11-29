@@ -42,6 +42,7 @@
 
 (fact "can list transactions by month"
       (let [db-uri "datomic:mem://cashflow-db"
+            _ (test-db/create-empty-in-memory-db db-uri)
             _ (tmodel/add-transactions
                 (d/connect db-uri)
                 [{:transaction/date (t/date-time 2012 5 10) :transaction/description "right date" :transaction/amount 100M}
@@ -56,18 +57,18 @@
 
 (fact "can get the list of years of transaction data"
       (let [db-uri "datomic:mem://cashflow-db"
+            _ (test-db/create-empty-in-memory-db db-uri)
+            _ (tmodel/add-transactions
+                (d/connect db-uri)
+                [{:transaction/date (t/date-time 2010 1 1) :transaction/description "right date" :transaction/amount 100M}
+                 {:transaction/date (t/date-time 2011 1 1) :transaction/description "wrong date" :transaction/amount 100M}
+                 {:transaction/date (t/date-time 2013 1 1) :transaction/description "wrong date" :transaction/amount 200M}])
             response (->
-                       {:database {:uri db-uri}
-                        :transactions
-                                  (atom [{:date (t/date-time 2010 1 1)}
-                                         {:date (t/date-time 2011 1 1)}
-                                         {:date (t/date-time 2013 1 1)}])}
-                       (cashflow/test-app-handler (ring-mock/request :get "/api/transactions/time/years"))
+                       (cashflow/test-app-handler {:database {:uri db-uri}} (ring-mock/request :get "/api/transactions/time/years"))
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
-        (:body response) => {:years [2010 2011 2013]}))
-
+        (->> response :body :years (into #{}))  => #{2010 2011 2013}))
 
 (fact "can change existing transaction category"
       (let [db-uri "datomic:mem://cashflow-db"
