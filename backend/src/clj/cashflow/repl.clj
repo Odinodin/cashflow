@@ -52,15 +52,17 @@
     (reset! categories [])
     (reset! transactions [])
     (trans/add-transactions-in-file! transactions (.getFile (clojure.java.io/resource "test-transactions.csv")))
-    (categories/add-category! categories {:name "Butikk" :regexes [#"Rema" #"Kiwi" #"Rimi" #"KIWI" #"Coop" #"REMA"]})
-    (categories/add-category! categories {:name "Reise" :regexes [#"NSB" #"Jet"]})
-    (categories/add-category! categories {:name "Barnehage" :regexes [#"Barnehage"]})
-    (categories/add-category! categories {:name "Hus" :regexes [#"Housing", #"Kommunen" #"Husleie"]})
-    (categories/add-category! categories {:name "Møbler" :regexes [#"Ikea", #"Plantasjon" #"Maxbo"]})
-    (categories/add-category! categories {:name "Lommepenger" :regexes [#"Kantine" #"Narvesen" #"Botanisk" #"Baker"]})
-    (categories/add-category! categories {:name "Mobil" :regexes [#"Mobil"]})
-    (categories/add-category! categories {:name "Lønn" :regexes [#"Megacorp"]})
-    (categories/tag-and-update-transactions! transactions categories)))
+    ;; TODO put into datomic instead :)
+    #_(comment
+      (categories/add-category! categories {:name "Butikk" :regexes [#"Rema" #"Kiwi" #"Rimi" #"KIWI" #"Coop" #"REMA"]})
+      (categories/add-category! categories {:name "Reise" :regexes [#"NSB" #"Jet"]})
+      (categories/add-category! categories {:name "Barnehage" :regexes [#"Barnehage"]})
+      (categories/add-category! categories {:name "Hus" :regexes [#"Housing", #"Kommunen" #"Husleie"]})
+      (categories/add-category! categories {:name "Møbler" :regexes [#"Ikea", #"Plantasjon" #"Maxbo"]})
+      (categories/add-category! categories {:name "Lommepenger" :regexes [#"Kantine" #"Narvesen" #"Botanisk" #"Baker"]})
+      (categories/add-category! categories {:name "Mobil" :regexes [#"Mobil"]})
+      (categories/add-category! categories {:name "Lønn" :regexes [#"Megacorp"]})
+      (categories/tag-and-update-transactions! transactions categories))))
 
 
 

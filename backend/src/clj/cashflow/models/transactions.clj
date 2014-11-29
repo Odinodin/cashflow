@@ -93,14 +93,14 @@
 
 ;; Operations over transactions
 (defn sum-transactions [transaction-list]
-  (reduce + (map :amount transaction-list)))
+  (reduce + (map :transaction/amount transaction-list)))
 
 (defn sum-transactions-pr-category [transaction-list]
-  (let [unique-categorynames (-> (map :category transaction-list)
+  (let [unique-categorynames (-> (map :transaction/category transaction-list)
                                  distinct)]
     (for [categoryname unique-categorynames]
       {:category categoryname
-       :sum      (sum-transactions (filter #(= categoryname (:category %)) transaction-list))})))
+       :sum      (sum-transactions (filter #(= categoryname (:transaction/category %)) transaction-list))})))
 
 (defn- dt->year-month-map [dt]
   {:year (. dt getYear) :month (. dt getMonthOfYear)})

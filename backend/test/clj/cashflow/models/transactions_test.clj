@@ -69,35 +69,19 @@
        {:date (t/date-time 2014 5 25) :description "inside" :amount 3}
        {:date (t/date-time 2014 6 30) :description "inside" :amount 2}])
 
-
-(fact "Can filter transactions by year and month"
-      (transactions-in-month [] 2014 5) => []
-
-      (transactions-in-month
-        [{:date (t/date-time 2014 5 1) :description "inside" :amount 1}
-         {:date (t/date-time 2014 5 25) :description "inside" :amount 3}
-         {:date (t/date-time 2014 6 30) :description "outside" :amount 2}
-         {:date (t/date-time 2000 1 1) :description "outside" :amount 4}]
-        2014
-        5)
-
-      =>
-      [{:date (t/date-time 2014 5 1) :description "inside" :amount 1}
-       {:date (t/date-time 2014 5 25) :description "inside" :amount 3}])
-
 (fact "Can sum transactions"
       (sum-transactions []) => 0
-      (sum-transactions [{:amount 10} {:amount 20} {:amount 30}]) => 60)
+      (sum-transactions [{:transaction/amount 10} {:transaction/amount 20} {:transaction/amount 30}]) => 60)
 
 (fact "Can sum transactions for each category"
       (sum-transactions-pr-category []) => []
 
       (sum-transactions-pr-category
-        [{:category "a" :amount 1}
-         {:category "a" :amount 2}
-         {:category "b" :amount 3}
-         {:category "b" :amount 3}
-         {:category "c" :amount 4}])
+        [{:transaction/category "a" :transaction/amount 1}
+         {:transaction/category "a" :transaction/amount 2}
+         {:transaction/category "b" :transaction/amount 3}
+         {:transaction/category "b" :transaction/amount 3}
+         {:transaction/category "c" :transaction/amount 4}])
 
       => [{:category "a" :sum 3}
           {:category "b" :sum 6}
