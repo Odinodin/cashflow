@@ -20,6 +20,9 @@
 
         response => (contains {:body anything :headers anything :status 200})
         (:body response) => [{:description "ape" :amount 1 :tags ["store"]}]))
+(defn- filter-ids [transaction-list]
+  (->> transaction-list (map #(dissoc % :transaction/id))))
+
 
 (fact "can list transactions by year"
       (let [db-uri "datomic:mem://cashflow-db"
@@ -35,21 +38,21 @@
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
-        (->> (:body response) (map #(dissoc % :transaction/id))) => [{:transaction/date "2009-05-06" :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.2}]))
+        (filter-ids (:body response)) => [{:transaction/date "2009-05-06" :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.2}]))
 
 (fact "can list transactions by month"
       (let [db-uri "datomic:mem://cashflow-db"
+            _ (tmodel/add-transactions
+                (d/connect db-uri)
+                [{:transaction/date (t/date-time 2012 5 10) :transaction/description "right date" :transaction/amount 100M}
+                 {:transaction/date (t/date-time 2012 9 12) :transaction/description "wrong date" :transaction/amount 100M}
+                 {:transaction/date (t/date-time 2013 5 11) :transaction/description "wrong date" :transaction/amount 200M}])
             response (->
-                       {:database {:uri db-uri}
-                        :transactions
-                                  (atom [{:date (t/date-time 2012 5 10) :description "right date" :amount 100}
-                                         {:date (t/date-time 2012 9 12) :description "wrong date" :amount 100}
-                                         {:date (t/date-time 2013 5 11) :description "wrong date" :amount 200}])}
-                       (cashflow/test-app-handler (ring-mock/request :get "/api/transactions/time/2012/5"))
+                       (cashflow/test-app-handler {:database {:uri db-uri}} (ring-mock/request :get "/api/transactions/time/2012/5"))
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
-        (:body response) => [{:date "2012-05-10" :description "right date" :amount 100}]))
+        (filter-ids (:body response)) => [{:transaction/date "2012-05-10" :transaction/description "right date" :transaction/amount 100}]))
 
 (fact "can get the list of years of transaction data"
       (let [db-uri "datomic:mem://cashflow-db"
