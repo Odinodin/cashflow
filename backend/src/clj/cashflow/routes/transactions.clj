@@ -13,13 +13,17 @@
   {:body (trans/dfind-transactions-by-month
            (d/connect db-uri)
            (. Integer parseInt year)
-           (. Integer parseInt month))}
-  )
+           (. Integer parseInt month))})
 
 (defn- transasctions-by-year [db-uri year]
   {:body (trans/dfind-transactions-by-year
            (d/connect db-uri)
            (. Integer parseInt year))})
+
+(defn- net-income-by-month [db-uri]
+  (let [all-transactions (trans/d-all-transactions (d/db (d/connect db-uri)))
+        income-by-month (trans/net-income-by-month all-transactions)]
+    {:body income-by-month}))
 
 (defroutes transactions-routes
            #_(GET "/transactions" [start-date end-date :as {{:keys [transactions]} :system}]
@@ -53,8 +57,8 @@
                                        (. Integer parseInt year))]
                   {:body (trans/sum-transactions-pr-category trans-in-year)}))
 
-           (GET "/transactions/net-income"  {{:keys [transactions]} :system}
-                {:body (trans/net-income-by-month @transactions)})
+           (GET "/transactions/net-income"  {{{:keys [uri]} :database} :system}
+                (net-income-by-month uri))
 
            (POST ["/transactions/:id", :id #"[0-9]+"] [id :as {{:keys [transactions]} :system body-params :body-params}]
                  (let [updated-transactions (trans/change-transaction transactions body-params)]

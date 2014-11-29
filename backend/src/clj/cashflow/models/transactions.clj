@@ -111,8 +111,8 @@
   [transactions]
   (->>
     transactions
-    (filter #(-> % :amount pos?))
-    (reduce #(+ (:amount %2) %1) 0)))
+    (filter #(-> % :transaction/amount pos?))
+    (reduce #(+ (:transaction/amount %2) %1) 0)))
 
 (defn- transactions->expense
   "Takes a list of transactions and outputs the expense sum
@@ -120,13 +120,13 @@
   [transactions]
   (->>
     transactions
-    (filter #(-> % :amount neg?))
-    (reduce #(+ (:amount %2) %1) 0)))
+    (filter #(-> % :transaction/amount neg?))
+    (reduce #(+ (:transaction/amount %2) %1) 0)))
 
 (defn net-income-by-month
   "Takes a list of transactions and outputs a list of {:time '2009-10' :income 121 :expense -233}"
   [transactions]
-  (let [grouped-by-month (group-by #(dt->year-month-map (:date %)) transactions)
+  (let [grouped-by-month (group-by #(dt->year-month-map (:transaction/date %)) transactions)
         sorted (sort-by
                  (fn [[k _]] ((juxt :year :month) k)) grouped-by-month)]
     (for [[k v] sorted]
@@ -155,7 +155,7 @@
 (defn- db-ids->entity-maps
   "Takes a list of datomic entity ids retrieves and returns
   a list of hydrated entities in the form of a list of maps."
-  [db-conn db-ids]
+  [db db-ids]
   (->>
     db-ids
     seq
@@ -163,11 +163,22 @@
     (map #(->>
            %
            ;; id -> lazy entity map
-           (d/entity (d/db db-conn))
+           (d/entity db)
            ;; realize all values
            d/touch
            (into {})))))
 
+(defn d-all-transactions [db]
+  (->>
+    (d/q
+      '[:find ?e
+        :where
+        [?e :transaction/id]]
+      db)
+    (db-ids->entity-maps db)
+    date->datetime))
+
+;; TODO take db as param, not db-conn
 (defn dfind-transactions-by-year [db-conn year]
   (->>
     (d/q
@@ -179,9 +190,10 @@
         [(= ?q-year ?tyear)]]
       (d/db db-conn)
       year)
-    (db-ids->entity-maps db-conn)
+    (db-ids->entity-maps (d/db db-conn))
     date->datetime))
 
+;; TODO take db as param, not db-conn
 (defn dfind-transactions-by-month [db-conn year month-index]
   (->>
     (d/q
@@ -196,7 +208,7 @@
       (d/db db-conn)
       year
       month-index)
-    (db-ids->entity-maps db-conn)
+    (db-ids->entity-maps (d/db db-conn))
     date->datetime))
 
 (defn dfind-unique-years-in-transactions [db]

@@ -100,13 +100,13 @@
       (net-income-by-month []) => []
 
       (net-income-by-month
-        [{:date (t/date-time 2014 5 1) :amount 1}
-         {:date (t/date-time 2014 5 2) :amount 2}
-         {:date (t/date-time 2014 5 2) :amount -10}
-         {:date (t/date-time 2014 5 3) :amount -20}
-         {:date (t/date-time 2013 6 1) :amount 1}
-         {:date (t/date-time 2013 6 2) :amount 1}
-         {:date (t/date-time 2013 6 3) :amount -4}])
+        [{:transaction/date (t/date-time 2014 5 1) :transaction/amount 1}
+         {:transaction/date (t/date-time 2014 5 2) :transaction/amount 2}
+         {:transaction/date (t/date-time 2014 5 2) :transaction/amount -10}
+         {:transaction/date (t/date-time 2014 5 3) :transaction/amount -20}
+         {:transaction/date (t/date-time 2013 6 1) :transaction/amount 1}
+         {:transaction/date (t/date-time 2013 6 2) :transaction/amount 1}
+         {:transaction/date (t/date-time 2013 6 3) :transaction/amount -4}])
 
       =>
       [{:time "2013-6" :income 2 :expense -4}

@@ -114,15 +114,16 @@
                              {:category "store" :sum 5}]))
 
 (fact "can get net-income"
-      (let [response (->
-                       {:database {:uri db-uri}
-                        :transactions
-                                  (atom [{:id 1 :date (t/date-time 2010 1 1) :category "store" :amount -1}
-                                         {:id 1 :date (t/date-time 2010 1 2) :category "store" :amount 1}
-                                         {:id 2 :date (t/date-time 2011 5 1) :category "coffee" :amount -2}
-                                         {:id 2 :date (t/date-time 2012 5 1) :category "store" :amount 2}
-                                         {:id 3 :date (t/date-time 2012 5 2) :category "store" :amount 3}])}
-                       (cashflow/test-app-handler (ring-mock/request :get "/api/transactions/net-income"))
+      (let [_ (test-db/create-empty-in-memory-db db-uri)
+            _ (tmodel/add-transactions
+                (d/connect db-uri)
+                [{:transaction/date (t/date-time 2010 1 1) :transaction/amount -1M}
+                 {:transaction/date (t/date-time 2010 1 2) :transaction/amount 1M}
+                 {:transaction/date (t/date-time 2011 5 1) :transaction/amount -2M}
+                 {:transaction/date (t/date-time 2012 5 1) :transaction/amount 2M}
+                 {:transaction/date (t/date-time 2012 5 2) :transaction/amount 3M}])
+            response (->
+                       (cashflow/test-app-handler {:database {:uri db-uri}} (ring-mock/request :get "/api/transactions/net-income"))
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
