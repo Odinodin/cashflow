@@ -8,6 +8,16 @@
 
 (def test-file (.getFile (clojure.java.io/resource "test-transactions.csv")))
 
+(defn- datom->entity [datom]
+  (->>
+    datom
+    :tempids
+    vals
+    first
+    (d/entity (:db-after datom))
+    d/touch))
+
+
 (fact "Can parse file"
       (count (parse-file (.getFile (clojure.java.io/resource "test-transactions.csv")))) => 62)
 
@@ -151,6 +161,24 @@
         count)
       => 2)
 
+(fact "Can find transaction by id in database"
+      (test-db/create-empty-in-memory-db db-uri)
+      (let [new-trans-datom (add-transactions (d/connect db-uri)
+                                              [{:transaction/date        (t/date-time 2009 05 06)
+                                                :transaction/code        "VARER"
+                                                :transaction/description "NARVESEN"
+                                                :transaction/amount      -119.00M}])
+            transaction (datom->entity new-trans-datom)
+            transaction-id (:transaction/id transaction)]
+
+        (d-find-transaction-by-id (d/db (d/connect db-uri)) transaction-id)
+
+        => {:transaction/id          transaction-id
+            :transaction/date        (t/date-time 2009 05 06)
+            :transaction/code        "VARER"
+            :transaction/description "NARVESEN"
+            :transaction/amount      -119.00M}))
+
 (fact "Can find transactions by year"
       (test-db/create-empty-in-memory-db db-uri)
       (add-transactions (d/connect db-uri)
@@ -166,14 +194,13 @@
         (dfind-transactions-by-year (d/connect db-uri) 2009)
         (map #(dissoc % :transaction/id)))
       =>
-      [{:transaction/date (t/date-time 2009 05 06)
-        :transaction/code "VARER"
+      [{:transaction/date        (t/date-time 2009 05 06)
+        :transaction/code        "VARER"
         :transaction/description "NARVESEN"
-        :transaction/amount -119.00M}
-       {:transaction/date (t/date-time 2009 05 06)
-        :transaction/code "VARER"
+        :transaction/amount      -119.00M}
+       {:transaction/date        (t/date-time 2009 05 06)
+        :transaction/code        "VARER"
         :transaction/description "REMA 1000" :transaction/amount -159.20M}])
-
 
 (fact "Can find transactions by month"
       (test-db/create-empty-in-memory-db db-uri)

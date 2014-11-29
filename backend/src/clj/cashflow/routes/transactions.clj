@@ -60,6 +60,6 @@
            (GET "/transactions/net-income"  {{{:keys [uri]} :database} :system}
                 (net-income-by-month uri))
 
-           (POST ["/transactions/:id", :id #"[0-9]+"] [id :as {{:keys [transactions]} :system body-params :body-params}]
+           (POST ["/transactions/:id"] [id :as {{:keys [transactions]} :system body-params :body-params}]
                  (let [updated-transactions (trans/change-transaction transactions body-params)]
                    {:body (trans/find-transaction updated-transactions (. Integer parseInt id))})))

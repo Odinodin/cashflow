@@ -178,6 +178,19 @@
     (db-ids->entity-maps db)
     date->datetime))
 
+(defn d-find-transaction-by-id [db id]
+  (->>
+    (d/q
+      '[:find ?e
+        :in $ ?q-id
+        :where
+        [?e :transaction/id ?q-id]]
+      db
+      id)
+    (db-ids->entity-maps db)
+    date->datetime
+    first))
+
 ;; TODO take db as param, not db-conn
 (defn dfind-transactions-by-year [db-conn year]
   (->>
