@@ -38,7 +38,7 @@
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
-        (filter-ids (:body response)) => [{:transaction/date "2009-05-06" :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.2}]))
+        (-> response :body filter-ids) => [{:transaction/date "2009-05-06" :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.2}]))
 
 (fact "can list transactions by month"
       (let [db-uri "datomic:mem://cashflow-db"
@@ -52,7 +52,7 @@
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
-        (filter-ids (:body response)) => [{:transaction/date "2012-05-10" :transaction/description "right date" :transaction/amount 100}]))
+        (-> response :body filter-ids) => [{:transaction/date "2012-05-10" :transaction/description "right date" :transaction/amount 100}]))
 
 (fact "can get the list of years of transaction data"
       (let [db-uri "datomic:mem://cashflow-db"
