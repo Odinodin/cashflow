@@ -1,6 +1,7 @@
 (ns cashflow.models.transactions
   (:require [clojure.java.io :as io]
             [clj-time.core :as t]
+            [clj-time.coerce :as tc]
             [datomic.api :as d]
             [cashflow.time :as ct])
   (:import [java.io BufferedReader FileReader]))
@@ -134,8 +135,19 @@
        :expense (transactions->expense v)})))
 
 ;; Datomic
+(defn- date->datetime [transaction-list]
+  (map #(->
+         %1
+         (update-in [:transaction/date] tc/to-date-time))
+       transaction-list))
+
+
 (defn add-transactions [db-conn transactions]
-  (let [transactions-with-db-id (map #(assoc %1 :db/id (d/tempid :db.part/user)) transactions)]
+  (let [transactions-with-db-id (map #(->
+                                       %1
+                                       (update-in [:transaction/date] tc/to-date)
+                                       (assoc :db/id (d/tempid :db.part/user))
+                                       (assoc :transaction/id (str (java.util.UUID/randomUUID)))) transactions)]
     @(d/transact db-conn
                  transactions-with-db-id)))
 
@@ -154,7 +166,7 @@
            (d/entity (d/db db-conn))
            ;; realize all values
            d/touch
-           (into {:db/id %})))))
+           (into {})))))
 
 (defn dfind-transactions-by-year [db-conn year]
   (->>
@@ -167,7 +179,8 @@
         [(= ?q-year ?tyear)]]
       (d/db db-conn)
       year)
-    (db-ids->entity-maps db-conn)))
+    (db-ids->entity-maps db-conn)
+    date->datetime))
 
 (defn dfind-transactions-by-month [db-conn year month-index]
   (->>
@@ -183,7 +196,8 @@
       (d/db db-conn)
       year
       month-index)
-    (db-ids->entity-maps db-conn)))
+    (db-ids->entity-maps db-conn)
+    date->datetime))
 
 (defn dfind-unique-years-in-transactions [db]
   (->

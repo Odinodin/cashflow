@@ -1,10 +1,20 @@
 (ns cashflow.routes.transactions
   (:require
     [cashflow.models.transactions :as trans]
+    [datomic.api :as d]
     [compojure.core :refer :all]))
 
+
+(defn- format-date [transaction-list]
+  (map #(assoc % :transaction/date (-> (:transaction/date %) (format))) transaction-list))
+
+(defn- transasctions-by-year [db-uri year]
+  {:body (trans/dfind-transactions-by-year
+           (d/connect db-uri)
+           (. Integer parseInt year))})
+
 (defroutes transactions-routes
-           (GET "/transactions" [start-date end-date :as {{:keys [transactions]} :system}]
+           #_(GET "/transactions" [start-date end-date :as {{:keys [transactions]} :system}]
                 (cond (and start-date end-date)
                       {:body (trans/transactions-in @transactions start-date end-date)}
                       start-date
@@ -16,8 +26,8 @@
                 {:body {:years (trans/unique-years
                                  @transactions)}})
 
-           (GET "/transactions/time/:year" [year :as {{:keys [transactions]} :system}]
-                {:body (trans/transactions-in-year @transactions (. Integer parseInt year))})
+           (GET "/transactions/time/:year" [year :as {{{:keys [uri]} :database} :system}]
+                (transasctions-by-year uri year))
 
            (GET "/transactions/time/:year/:month" [year month :as {{:keys [transactions]} :system}]
                 {:body (trans/transactions-in-month

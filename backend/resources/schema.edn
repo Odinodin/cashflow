@@ -1,7 +1,12 @@
-;; {:id 2 :date (t/date-time 2009 05 06) :code "VARER" :description "REMA 1000" :amount -159.20M}
-
 [
  ;; Transactions
+ {:db/id                 #db/id[:db.part/db]
+  :db/ident              :transaction/id
+  :db/valueType          :db.type/string
+  :db/cardinality        :db.cardinality/one
+  :db/doc                "The transaction public id"
+  :db.install/_attribute :db.part/db}
+
  {:db/id                 #db/id[:db.part/db]
   :db/ident              :transaction/date
   :db/valueType          :db.type/instant
