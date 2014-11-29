@@ -24,9 +24,10 @@
   (->> transaction-list (map #(dissoc % :transaction/id))))
 
 
+(def db-uri "datomic:mem://cashflow-db")
+
 (fact "can list transactions by year"
-      (let [db-uri "datomic:mem://cashflow-db"
-            _ (test-db/create-empty-in-memory-db db-uri)
+      (let [_ (test-db/create-empty-in-memory-db db-uri)
             _ (tmodel/add-transactions
                 (d/connect db-uri)
                 [{:transaction/date (t/date-time 2008 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
@@ -41,8 +42,7 @@
         (-> response :body filter-ids) => [{:transaction/date "2009-05-06" :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.2}]))
 
 (fact "can list transactions by month"
-      (let [db-uri "datomic:mem://cashflow-db"
-            _ (test-db/create-empty-in-memory-db db-uri)
+      (let [_ (test-db/create-empty-in-memory-db db-uri)
             _ (tmodel/add-transactions
                 (d/connect db-uri)
                 [{:transaction/date (t/date-time 2012 5 10) :transaction/description "right date" :transaction/amount 100M}
@@ -56,8 +56,7 @@
         (-> response :body filter-ids) => [{:transaction/date "2012-05-10" :transaction/description "right date" :transaction/amount 100}]))
 
 (fact "can get the list of years of transaction data"
-      (let [db-uri "datomic:mem://cashflow-db"
-            _ (test-db/create-empty-in-memory-db db-uri)
+      (let [_ (test-db/create-empty-in-memory-db db-uri)
             _ (tmodel/add-transactions
                 (d/connect db-uri)
                 [{:transaction/date (t/date-time 2010 1 1) :transaction/description "right date" :transaction/amount 100M}
@@ -71,8 +70,7 @@
         (->> response :body :years (into #{}))  => #{2010 2011 2013}))
 
 (fact "can change existing transaction category"
-      (let [db-uri "datomic:mem://cashflow-db"
-            response (->
+      (let [response (->
                        {:database {:uri db-uri}
                         :transactions
                                   (atom [{:id 1 :date (t/date-time 2010 1 1) :category "store"}])}
@@ -86,8 +84,7 @@
         (:body response) => {:id 1 :date "2010-01-01" :category "other"}))
 
 (fact "can list sum of transactions by category per month"
-      (let [db-uri "datomic:mem://cashflow-db"
-            response (->
+      (let [response (->
                        {:database {:uri db-uri}
                         :transactions
                                   (atom [{:id 1 :date (t/date-time 2010 1 1) :category "store" :amount 1}
@@ -102,8 +99,7 @@
                              {:category "store" :sum 5}]))
 
 (fact "can list sum of transactions by category per year"
-      (let [db-uri "datomic:mem://cashflow-db"
-            response (->
+      (let [response (->
                        {:database {:uri db-uri}
                         :transactions
                                   (atom [{:id 1 :date (t/date-time 2010 1 1) :category "store" :amount 1}
@@ -118,8 +114,7 @@
                              {:category "store" :sum 5}]))
 
 (fact "can get net-income"
-      (let [db-uri "datomic:mem://cashflow-db"
-            response (->
+      (let [response (->
                        {:database {:uri db-uri}
                         :transactions
                                   (atom [{:id 1 :date (t/date-time 2010 1 1) :category "store" :amount -1}

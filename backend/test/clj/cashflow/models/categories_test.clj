@@ -36,21 +36,22 @@
 
 
 ;; Datomic
+(def db-uri "datomic:mem://cashflow-db")
+
 (fact "Can add category to db"
-      (let [uri "datomic:mem://cashflow-db"]
-        (test-db/create-empty-in-memory-db uri)
-        (dt-add-category! (d/connect uri) {:category/name "store" :category/regexes ["Kiwi" "Rimi"]})
-        (dt-add-category! (d/connect uri) {:category/name "car" :category/regexes ["BMW" "Peugeot"]})
-        (dt-list-categories (d/connect uri)))
+      (test-db/create-empty-in-memory-db db-uri)
+      (dt-add-category! (d/connect db-uri) {:category/name "store" :category/regexes ["Kiwi" "Rimi"]})
+      (dt-add-category! (d/connect db-uri) {:category/name "car" :category/regexes ["BMW" "Peugeot"]})
+      (dt-list-categories (d/connect db-uri))
+
       =>
       [{:category/name "store" :category/regexes #{"Kiwi" "Rimi"}}
        {:category/name "car" :category/regexes #{"BMW" "Peugeot"}}])
 
 (fact "Can remove category from db"
-      (let [uri "datomic:mem://cashflow-db"
-            _ (test-db/create-empty-in-memory-db uri)
-            result (dt-add-category! (d/connect uri) {:category/name "store" :category/regexes ["Kiwi" "Rimi"]})]
-        (dt-remove-category! (d/connect uri) "store")
-        (dt-list-categories (d/connect uri)))
+      (test-db/create-empty-in-memory-db db-uri)
+      (dt-add-category! (d/connect db-uri) {:category/name "store" :category/regexes ["Kiwi" "Rimi"]})
+      (dt-remove-category! (d/connect db-uri) "store")
+      (dt-list-categories (d/connect db-uri))
       =>
       [])

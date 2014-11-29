@@ -138,10 +138,12 @@
 
       => {:id 1 :amount 123})
 
+(def db-uri "datomic:mem://cashflow-db")
+
 (fact "Can add transaction to database"
-      (test-db/create-empty-in-memory-db "datomic:mem://cashflow-db")
+      (test-db/create-empty-in-memory-db db-uri)
       (->
-        (add-transactions (d/connect "datomic:mem://cashflow-db")
+        (add-transactions (d/connect db-uri)
                           [{:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
                            {:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
         :tempids
@@ -150,20 +152,19 @@
       => 2)
 
 (fact "Can find transactions by year"
-      (let [uri "datomic:mem://cashflow-db"]
-        (test-db/create-empty-in-memory-db uri)
-        (add-transactions (d/connect uri)
-                          [{:transaction/date (t/date-time 2009 05 06)
-                            :transaction/code "VARER"
-                            :transaction/description "NARVESEN"
-                            :transaction/amount -119.00M}
-                           {:transaction/date (t/date-time 2009 05 06)
-                            :transaction/code "VARER"
-                            :transaction/description "REMA 1000"
-                            :transaction/amount -159.20M}])
-        (->>
-          (dfind-transactions-by-year (d/connect uri) 2009)
-          (map #(dissoc % :transaction/id))))
+      (test-db/create-empty-in-memory-db db-uri)
+      (add-transactions (d/connect db-uri)
+                        [{:transaction/date        (t/date-time 2009 05 06)
+                          :transaction/code        "VARER"
+                          :transaction/description "NARVESEN"
+                          :transaction/amount      -119.00M}
+                         {:transaction/date        (t/date-time 2009 05 06)
+                          :transaction/code        "VARER"
+                          :transaction/description "REMA 1000"
+                          :transaction/amount      -159.20M}])
+      (->>
+        (dfind-transactions-by-year (d/connect db-uri) 2009)
+        (map #(dissoc % :transaction/id)))
       =>
       [{:transaction/date (t/date-time 2009 05 06)
         :transaction/code "VARER"
@@ -175,24 +176,22 @@
 
 
 (fact "Can find transactions by month"
-      (let [uri "datomic:mem://cashflow-db"]
-        (test-db/create-empty-in-memory-db uri)
-        (add-transactions (d/connect uri)
-                          [{:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
-                           {:transaction/date (t/date-time 2009 06 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
-        (->>
-          (dfind-transactions-by-month (d/connect uri) 2009 6)
-          (map #(dissoc % :transaction/id))))
+      (test-db/create-empty-in-memory-db db-uri)
+      (add-transactions (d/connect db-uri)
+                        [{:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
+                         {:transaction/date (t/date-time 2009 06 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
+      (->>
+        (dfind-transactions-by-month (d/connect db-uri) 2009 6)
+        (map #(dissoc % :transaction/id)))
       =>
       [{:transaction/date (t/date-time 2009 06 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
 
 (fact "Can find the list of unique years of transactions"
-      (let [uri "datomic:mem://cashflow-db"]
-        (test-db/create-empty-in-memory-db uri)
-        (add-transactions (d/connect uri)
-                          [{:transaction/date (t/date-time 2008 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
-                           {:transaction/date (t/date-time 2008 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
-                           {:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
-        (dfind-unique-years-in-transactions (d/db (d/connect uri))))
+      (test-db/create-empty-in-memory-db db-uri)
+      (add-transactions (d/connect db-uri)
+                        [{:transaction/date (t/date-time 2008 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
+                         {:transaction/date (t/date-time 2008 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
+                         {:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
+      (dfind-unique-years-in-transactions (d/db (d/connect db-uri)))
       =>
       #{2008 2009})

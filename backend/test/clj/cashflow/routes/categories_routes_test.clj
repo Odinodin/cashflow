@@ -9,6 +9,8 @@
             [cashflow.test-db :as test-db]))
 
 
+(def db-uri "datomic:mem://cashflow-db")
+
 (defn- create-category [testsystem category-map]
   (->
     (cashflow/test-app-handler
@@ -29,16 +31,14 @@
     json-util/json-parse-body))
 
 (fact "can create category"
-      (let [db-uri "datomic:mem://cashflow-db"
-            _ (test-db/create-empty-in-memory-db db-uri)
+      (let [_ (test-db/create-empty-in-memory-db db-uri)
             response (create-category {:database {:uri db-uri}}
                                       {:category/name "test" :category/regexes ["a" "b"]})]
 
         response => (contains {:body anything :headers anything :status 201})))
 
 (fact "can list categories"
-      (let [db-uri "datomic:mem://cashflow-db"
-            _ (test-db/create-empty-in-memory-db db-uri)
+      (let [_ (test-db/create-empty-in-memory-db db-uri)
             _ (create-category {:database {:uri db-uri}}
                                {:category/name "store" :category/regexes ["x"]})
             response (list-categories {:database {:uri db-uri}})]
@@ -48,8 +48,7 @@
 
 
 (fact "can get category"
-      (let [db-uri "datomic:mem://cashflow-db"
-            _ (test-db/create-empty-in-memory-db db-uri)
+      (let [_ (test-db/create-empty-in-memory-db db-uri)
             _ (create-category {:database {:uri db-uri}}
                                {:category/name "store" :category/regexes ["x"]})
             response (->
@@ -61,8 +60,7 @@
 
 
 (fact "can delete category"
-      (let [db-uri "datomic:mem://cashflow-db"
-            _ (test-db/create-empty-in-memory-db db-uri)
+      (let [_ (test-db/create-empty-in-memory-db db-uri)
             _ (create-category {:database {:uri db-uri}}
                                {:category/name "power" :category/regexes ["x"]})
             delete-response (->
