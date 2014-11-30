@@ -4,7 +4,8 @@
             [midje.sweet :refer :all]
             [clj-time.core :as t]
             [clj-time.coerce :as tc]
-            [datomic.api :as d]))
+            [datomic.api :as d]
+            [cashflow.models.transactions :as trans]))
 
 (def test-file (.getFile (clojure.java.io/resource "test-transactions.csv")))
 
@@ -20,21 +21,21 @@
       (lines->transactions
         [["06.05.2009" "06.05.2009" "VARER" "NARVESEN" "-119,00" "17017470066"]
          ["06.05.2009" "06.05.2009" "VARER" "REMA 1000" "-159,20" "17017532866"]])
-      => [{:date (t/date-time 2009 05 06) :code "VARER" :description "NARVESEN" :amount -119.00M}
-          {:date (t/date-time 2009 05 06) :code "VARER" :description "REMA 1000" :amount -159.20M}])
+      => [{:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
+          {:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
 
 (fact "Can add transactions in file"
-      (let [transactions (atom [])]
-        (add-transactions-in-file! transactions test-file) => not-empty
-        (count @transactions) => 56))
+      (test-db/create-empty-in-memory-db db-uri)
+      (add-transactions-in-file! (d/connect db-uri) test-file)
+      (count (trans/d-all-transactions (d/db (d/connect db-uri)))) => 56)
 
 (fact "Internal transfers are filtered out when adding transactions"
-      (to-transactions (atom 0) [["06.05.2009" "06.05.2009" "VARER" "NARVESEN" "-119,00" "17017470066"]
+      (to-transactions [["06.05.2009" "06.05.2009" "VARER" "NARVESEN" "-119,00" "17017470066"]
                                  ["06.05.2009" "06.05.2009" "OVFNETTB" "Internal transfer, filter me" "-159,20" "17017532866"]
                                  ["06.05.2009" "06.05.2009" "VARER" "REMA 1000" "-159,20" "17017532866"]
                                  ["06.05.2009" "06.05.2009" "MOB.B.OVF" "Internal transfer, filter me" "-159,20" "17017532866"]])
-      => [{:id 1 :date (t/date-time 2009 05 06) :code "VARER" :description "NARVESEN" :amount -119.00M}
-          {:id 2 :date (t/date-time 2009 05 06) :code "VARER" :description "REMA 1000" :amount -159.20M}])
+      => [{:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
+          {:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
 
 (fact "Can sum transactions"
       (sum-transactions []) => 0
@@ -72,14 +73,6 @@
       =>
       [{:time "2013-6" :income 2 :expense -4}
        {:time "2014-5" :income 3 :expense -30}])
-
-(fact "can change transaction category"
-      (change-transaction
-        (atom [{:id 1 :date (t/date-time 2014 5 1) :amount 1 :category "store"}])
-        {:id 1 :category "coffee"})
-
-      =>
-      [{:id 1 :date (t/date-time 2014 5 1) :amount 1 :category "coffee"}])
 
 (def db-uri "datomic:mem://cashflow-db")
 

@@ -6,43 +6,6 @@
             [cashflow.time :as ct])
   (:import [java.io BufferedReader FileReader]))
 
-(def transaction-id-sequence (atom 0))
-
-;; Example line:
-;;  Date                       Code   Description                             Amount    Reference
-;; ["06.05.2009" "06.05.2009" "VARER" "05.05 PRINCESS AVD. STENERSGT. 1 OSLO" "-119,00" "17017470066"]
-(defn lines->transactions [lines-as-vectors]
-  (for [[date date2 code description amount & dontcare] lines-as-vectors]
-    {:date        (ct/string->date date)
-     :code        code
-     :description description :amount (-> amount
-                                          (clojure.string/replace "," ".")
-                                          bigdec)}))
-(defn parse-file [file]
-  {:pre [(not (nil? file))]}
-  (with-open [rdr (BufferedReader.
-                    (FileReader. file))]
-    (let [lines (doall (line-seq rdr))]
-      (for [line (rest lines)]
-        (clojure.string/split line #"\t")))))
-
-(defn to-transactions [id-atom lines]
-  (->>
-    lines
-    lines->transactions
-    (remove (comp #{"OVFNETTB" "MOB.B.OVF"} :code))
-    (map #(assoc %1 :id (swap! id-atom inc)))))
-
-(defn add-transactions-in-file! [transactions file]
-  (->> (parse-file file)
-       (to-transactions transaction-id-sequence)
-       (swap! transactions into)))
-
-(defn change-transaction [transactions mutation]
-  (swap! transactions
-         (fn [trans]
-           (map #(if (= (:id mutation) (:id %)) (merge % mutation) %)
-                trans))))
 
 ;; Operations over transactions
 (defn sum-transactions [transaction-list]
@@ -196,3 +159,34 @@
         ]
       db)
     ffirst))
+
+;; Import ..
+;; Example line:
+;;  Date                       Code   Description                             Amount    Reference
+;; ["06.05.2009" "06.05.2009" "VARER" "05.05 PRINCESS AVD. STENERSGT. 1 OSLO" "-119,00" "17017470066"]
+(defn lines->transactions [lines-as-vectors]
+  (for [[date date2 code description amount & dontcare] lines-as-vectors]
+    {:transaction/date        (ct/string->date date)
+     :transaction/code        code
+     :transaction/description description
+     :transaction/amount      (-> amount
+                                  (clojure.string/replace "," ".")
+                                  bigdec)}))
+(defn parse-file [file]
+  {:pre [(not (nil? file))]}
+  (with-open [rdr (BufferedReader.
+                    (FileReader. file))]
+    (let [lines (doall (line-seq rdr))]
+      (for [line (rest lines)]
+        (clojure.string/split line #"\t")))))
+
+(defn to-transactions [lines]
+  (->>
+    lines
+    lines->transactions
+    (remove (comp #{"OVFNETTB" "MOB.B.OVF"} :transaction/code))))
+
+(defn add-transactions-in-file! [db-conn file]
+  (->> (parse-file file)
+       to-transactions
+       (add-transactions db-conn)))
