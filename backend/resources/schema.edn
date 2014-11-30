@@ -4,7 +4,8 @@
   :db/ident              :category/name
   :db/valueType          :db.type/string
   :db/cardinality        :db.cardinality/one
-  :db/doc                "The name of the category"
+  :db/unique             :db.unique/identity
+  :db/doc                "The unique name of the category"
   :db.install/_attribute :db.part/db}
 
  {:db/id                 #db/id[:db.part/db]
@@ -19,7 +20,8 @@
   :db/ident              :transaction/id
   :db/valueType          :db.type/string
   :db/cardinality        :db.cardinality/one
-  :db/doc                "The transaction public id"
+  :db/unique             :db.unique/identity
+  :db/doc                "The unique transaction public id"
   :db.install/_attribute :db.part/db}
 
  {:db/id                 #db/id[:db.part/db]
