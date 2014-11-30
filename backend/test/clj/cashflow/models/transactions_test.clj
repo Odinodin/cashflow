@@ -46,29 +46,6 @@
       => [{:id 1 :date (t/date-time 2009 05 06) :code "VARER" :description "NARVESEN" :amount -119.00M}
           {:id 2 :date (t/date-time 2009 05 06) :code "VARER" :description "REMA 1000" :amount -159.20M}])
 
-(fact "Can find transactions for a day"
-      (transactions-at-date
-        [{:date (t/date-time 2014 05 10) :code "Varer" :description "wrong date" :amount 100}
-         {:date (t/date-time 2014 05 11) :code "Varer" :description "right date" :amount 200}]
-        (t/date-time 2014 05 11))
-
-      => [{:date (t/date-time 2014 05 11) :code "Varer" :description "right date" :amount 200}])
-
-(fact "Can filter transactions for a period"
-      (transactions-in-interval
-        [{:date (t/date-time 2014 5 1) :description "inside" :amount 1}
-         {:date (t/date-time 2014 5 25) :description "inside" :amount 3}
-         {:date (t/date-time 2014 6 30) :description "inside" :amount 2}
-         {:date (t/date-time 2000 1 1) :description "outside" :amount 4}]
-        (t/interval
-          (t/date-time 2014 5 1)
-          (t/date-time 2014 6 30 23 59 59)))
-
-      =>
-      [{:date (t/date-time 2014 5 1) :description "inside" :amount 1}
-       {:date (t/date-time 2014 5 25) :description "inside" :amount 3}
-       {:date (t/date-time 2014 6 30) :description "inside" :amount 2}])
-
 (fact "Can sum transactions"
       (sum-transactions []) => 0
       (sum-transactions [{:transaction/amount 10} {:transaction/amount 20} {:transaction/amount 30}]) => 60)
@@ -105,17 +82,6 @@
       =>
       [{:time "2013-6" :income 2 :expense -4}
        {:time "2014-5" :income 3 :expense -30}])
-
-(fact "Can find all years in transactions"
-      (unique-years []) => []
-
-      (unique-years
-        [{:date (t/date-time 2014 5 1)}
-         {:date (t/date-time 2014 5 25)}
-         {:date (t/date-time 2011 6 30)}
-         {:date (t/date-time 2000 1 1)}])
-
-      => [2000 2011 2014])
 
 (fact "can change transaction category"
       (change-transaction

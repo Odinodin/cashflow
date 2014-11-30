@@ -61,36 +61,6 @@
     (filter #(-> % :date (ct/same-year? year)) transaction-list)
     (sort-by :date)))
 
-(defn transactions-at-date [transaction-list query-date]
-  (->>
-    (filter #(-> % :date (ct/same-date? query-date)) transaction-list)
-    (sort-by :date)))
-
-(defn transactions-in-interval [transaction-list interval]
-  (->>
-    (filter #(->>
-              %
-              :date
-              (t/within? interval)) transaction-list)
-    (sort-by :date)))
-
-(defn transactions-in [transactions start-date end-date]
-  (transactions-in-interval
-    transactions
-    (t/interval (ct/iso8600string->date start-date)
-                (ct/iso8600string->date end-date))))
-
-(defn transactions-at [transactions query-date]
-  (transactions-at-date transactions (ct/iso8600string->date query-date)))
-
-(defn unique-years [transaction-list]
-  (->>
-    transaction-list
-    (map #(-> % :date t/year))
-    distinct
-    vec
-    sort))
-
 ;; Operations over transactions
 (defn sum-transactions [transaction-list]
   (reduce + (map :transaction/amount transaction-list)))

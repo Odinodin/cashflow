@@ -9,20 +9,8 @@
             [datomic.api :as d]
             [clj-time.core :as t]))
 
-#_(fact "can list transactions"
-      (let [db-uri "datomic:mem://cashflow-db"
-            _ (test-db/create-empty-in-memory-db db-uri)
-            response (->
-                       {:database {:uri db-uri}
-                        :transactions (atom [{:description "ape" :amount 1 :tags ["store"]}])}
-                       (cashflow/test-app-handler (ring-mock/request :get "/api/transactions"))
-                       json-util/json-parse-body)]
-
-        response => (contains {:body anything :headers anything :status 200})
-        (:body response) => [{:description "ape" :amount 1 :tags ["store"]}]))
 (defn- filter-ids [transaction-list]
   (->> transaction-list (map #(dissoc % :transaction/id))))
-
 
 (def db-uri "datomic:mem://cashflow-db")
 
@@ -69,6 +57,7 @@
         response => (contains {:body anything :headers anything :status 200})
         (->> response :body :years (into #{}))  => #{2010 2011 2013}))
 
+;; TODO last one to convert ..
 (fact "can change existing transaction category"
       (let [response (->
                        {:database {:uri db-uri}
@@ -84,34 +73,39 @@
         (:body response) => {:id 1 :date "2010-01-01" :category "other"}))
 
 (fact "can list sum of transactions by category per month"
-      (let [response (->
-                       {:database {:uri db-uri}
-                        :transactions
-                                  (atom [{:id 1 :date (t/date-time 2010 1 1) :category "store" :amount 1}
-                                         {:id 2 :date (t/date-time 2012 5 1) :category "coffee" :amount 2}
-                                         {:id 2 :date (t/date-time 2012 5 1) :category "store" :amount 2}
-                                         {:id 3 :date (t/date-time 2012 5 2) :category "store" :amount 3}])}
-                       (cashflow/test-app-handler (ring-mock/request :get "/api/transactions/sum/2012/5"))
+      (let [_ (test-db/create-empty-in-memory-db db-uri)
+            _ (tmodel/add-transactions
+                (d/connect db-uri)
+                [{:transaction/date (t/date-time 2010 1 1) :transaction/category "store" :transaction/amount 1M}
+                 {:transaction/date (t/date-time 2012 5 1) :transaction/category "coffee" :transaction/amount 2M}
+                 {:transaction/date (t/date-time 2012 5 1) :transaction/category "store" :transaction/amount 2M}
+                 {:transaction/date (t/date-time 2012 5 2) :transaction/category "store" :transaction/amount 3M}])
+
+            response (->
+                       (cashflow/test-app-handler {:database {:uri db-uri}}
+                                                  (ring-mock/request :get "/api/transactions/sum/2012/5"))
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
-        (:body response) => [{:category "coffee" :sum 2}
-                             {:category "store" :sum 5}]))
+        (->> response :body (into #{})) => #{{:category "coffee" :sum 2}
+                              {:category "store" :sum 5}}))
 
 (fact "can list sum of transactions by category per year"
-      (let [response (->
-                       {:database {:uri db-uri}
-                        :transactions
-                                  (atom [{:id 1 :date (t/date-time 2010 1 1) :category "store" :amount 1}
-                                         {:id 2 :date (t/date-time 2012 5 1) :category "coffee" :amount 2}
-                                         {:id 2 :date (t/date-time 2012 5 1) :category "store" :amount 2}
-                                         {:id 3 :date (t/date-time 2012 5 2) :category "store" :amount 3}])}
-                       (cashflow/test-app-handler (ring-mock/request :get "/api/transactions/sum/2012"))
+      (let [_ (test-db/create-empty-in-memory-db db-uri)
+            _ (tmodel/add-transactions
+                (d/connect db-uri)
+                [{:transaction/date (t/date-time 2010 1 1) :transaction/category "store" :transaction/amount 1M}
+                 {:transaction/date (t/date-time 2012 5 1) :transaction/category "coffee" :transaction/amount 2M}
+                 {:transaction/date (t/date-time 2012 5 1) :transaction/category "store" :transaction/amount 2M}
+                 {:transaction/date (t/date-time 2012 5 2) :transaction/category "store" :transaction/amount 3M}])
+            response (->
+                       (cashflow/test-app-handler {:database {:uri db-uri}}
+                                                  (ring-mock/request :get "/api/transactions/sum/2012"))
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
-        (:body response) => [{:category "coffee" :sum 2}
-                             {:category "store" :sum 5}]))
+        (->> response :body (into #{})) => #{{:category "coffee" :sum 2}
+                                             {:category "store" :sum 5}}))
 
 (fact "can get net-income"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
