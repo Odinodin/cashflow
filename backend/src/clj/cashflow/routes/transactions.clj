@@ -49,5 +49,5 @@
 
            (POST ["/transactions/:id"] [id :as {{{:keys [uri]} :database} :system
                                                 body-params               :body-params}]
-                 (let [updated-transactions (trans/update-transaction (d/connect uri) body-params)]
-                   {:body (trans/d-find-transaction-by-id (d/db (d/connect uri)) id)})))
+                 (trans/update-transaction (d/connect uri) body-params)
+                 {:body (trans/d-find-transaction-by-id (d/db (d/connect uri)) id)}))
