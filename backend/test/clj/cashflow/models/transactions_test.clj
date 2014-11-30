@@ -7,6 +7,8 @@
             [datomic.api :as d]
             [cashflow.models.transactions :as trans]))
 
+(def db-uri "datomic:mem://cashflow-db")
+
 (def test-file (.getFile (clojure.java.io/resource "test-transactions.csv")))
 
 (fact "Can parse file"
