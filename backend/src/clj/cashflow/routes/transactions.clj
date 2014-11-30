@@ -44,9 +44,10 @@
                 (let [trans-in-year (transactions-by-year uri year)]
                   {:body (trans/sum-transactions-pr-category trans-in-year)}))
 
-           (GET "/transactions/net-income"  {{{:keys [uri]} :database} :system}
+           (GET "/transactions/net-income" {{{:keys [uri]} :database} :system}
                 {:body (net-income-by-month uri)})
 
-           (POST ["/transactions/:id"] [id :as {{:keys [transactions]} :system body-params :body-params}]
-                 (let [updated-transactions (trans/change-transaction transactions body-params)]
-                   {:body (trans/find-transaction updated-transactions (. Integer parseInt id))})))
+           (POST ["/transactions/:id"] [id :as {{{:keys [uri]} :database} :system
+                                                body-params               :body-params}]
+                 (let [updated-transactions (trans/update-transaction (d/connect uri) body-params)]
+                   {:body (trans/d-find-transaction-by-id (d/db (d/connect uri)) id)})))

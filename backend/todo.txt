@@ -2,9 +2,7 @@
 TODO
 =========
 
-- database
-    - datomic ..
-
+- make create and update return the entire entity ...
 
 
 

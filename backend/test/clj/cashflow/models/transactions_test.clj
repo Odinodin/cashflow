@@ -8,16 +8,6 @@
 
 (def test-file (.getFile (clojure.java.io/resource "test-transactions.csv")))
 
-(defn- datom->entity [datom]
-  (->>
-    datom
-    :tempids
-    vals
-    first
-    (d/entity (:db-after datom))
-    d/touch))
-
-
 (fact "Can parse file"
       (count (parse-file (.getFile (clojure.java.io/resource "test-transactions.csv")))) => 62)
 
@@ -91,13 +81,6 @@
       =>
       [{:id 1 :date (t/date-time 2014 5 1) :amount 1 :category "coffee"}])
 
-(fact "Can find transaction with id"
-      (find-transaction [] 1) => nil
-
-      (find-transaction [{:id 1 :amount 123} {:id 2 :amount 2}] 1)
-
-      => {:id 1 :amount 123})
-
 (def db-uri "datomic:mem://cashflow-db")
 
 (fact "Can add transaction to database"
@@ -118,7 +101,7 @@
                                                 :transaction/code        "VARER"
                                                 :transaction/description "NARVESEN"
                                                 :transaction/amount      -119.00M}])
-            transaction (datom->entity new-trans-datom)
+            transaction (test-db/datom->entity new-trans-datom)
             transaction-id (:transaction/id transaction)]
 
         (d-find-transaction-by-id (d/db (d/connect db-uri)) transaction-id)

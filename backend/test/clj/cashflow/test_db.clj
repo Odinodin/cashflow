@@ -8,3 +8,15 @@
         schema (load-file (.getFile (clojure.java.io/resource "schema.edn")))]
     (d/transact conn schema)
     conn))
+
+(defn datom->entity
+  "Takes a datom i.e the result of a datomic transaction and finds the single
+  entity in that transaction. "
+  [datom]
+  (->>
+    datom
+    :tempids
+    vals
+    first
+    (d/entity (:db-after datom))
+    d/touch))

@@ -38,28 +38,11 @@
        (to-transactions transaction-id-sequence)
        (swap! transactions into)))
 
-(defn find-transaction [transactions id]
-  (->> transactions
-       (filter #(= id (:id %1)))
-       first))
-
 (defn change-transaction [transactions mutation]
   (swap! transactions
          (fn [trans]
            (map #(if (= (:id mutation) (:id %)) (merge % mutation) %)
                 trans))))
-
-
-;; Queries
-(defn transactions-in-month [transaction-list year month-index]
-  (->>
-    (filter #(-> % :date (ct/same-year-month? year month-index)) transaction-list)
-    (sort-by :date)))
-
-(defn transactions-in-year [transaction-list year]
-  (->>
-    (filter #(-> % :date (ct/same-year? year)) transaction-list)
-    (sort-by :date)))
 
 ;; Operations over transactions
 (defn sum-transactions [transaction-list]
@@ -105,22 +88,6 @@
        :expense (transactions->expense v)})))
 
 ;; Datomic
-(defn- date->datetime [transaction-list]
-  (map #(->
-         %1
-         (update-in [:transaction/date] tc/to-date-time))
-       transaction-list))
-
-
-(defn add-transactions [db-conn transactions]
-  (let [transactions-with-db-id (map #(->
-                                       %1
-                                       (update-in [:transaction/date] tc/to-date)
-                                       (assoc :db/id (d/tempid :db.part/user))
-                                       (assoc :transaction/id (str (java.util.UUID/randomUUID)))) transactions)]
-    @(d/transact db-conn
-                 transactions-with-db-id)))
-
 ;; TODO extract in to separte ns
 (defn- db-ids->entity-maps
   "Takes a list of datomic entity ids retrieves and returns
@@ -137,6 +104,31 @@
            ;; realize all values
            d/touch
            (into {})))))
+
+(defn- date->datetime [transaction-list]
+  (map #(->
+         %1
+         (update-in [:transaction/date] tc/to-date-time))
+       transaction-list))
+
+
+(defn add-transactions [db-conn transactions]
+  (let [transactions-with-db-id (map #(->
+                                       %1
+                                       (update-in [:transaction/date] tc/to-date)
+                                       (assoc :db/id (d/tempid :db.part/user))
+                                       (assoc :transaction/id (str (java.util.UUID/randomUUID)))) transactions)]
+    @(d/transact db-conn
+                 transactions-with-db-id)))
+
+(defn update-transaction
+  "Updates an existing transaction.
+  Note that it relies on datomic upsert functionality. I.e we do not have to find the db/id
+  because the transaction has a unique transaction/id field. "
+  [db-conn transaction]
+  (let [with-db-id (assoc transaction :db/id #db/id [:db.part/user])] ;; will be replaced by existing id due to unique transaction/id field
+    @(d/transact db-conn
+                 [with-db-id])))
 
 (defn d-all-transactions [db]
   (->>

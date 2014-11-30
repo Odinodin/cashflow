@@ -55,22 +55,24 @@
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
-        (->> response :body :years (into #{}))  => #{2010 2011 2013}))
+        (->> response :body :years (into #{})) => #{2010 2011 2013}))
 
-;; TODO last one to convert ..
 (fact "can change existing transaction category"
-      (let [response (->
-                       {:database {:uri db-uri}
-                        :transactions
-                                  (atom [{:id 1 :date (t/date-time 2010 1 1) :category "store"}])}
-                       (cashflow/test-app-handler {:request-method :post
-                                                   :uri            "/api/transactions/1"
-                                                   :body           (java.io.ByteArrayInputStream. (.getBytes (json/generate-string {:id 1 :category "other"})))
+      (let [_ (test-db/create-empty-in-memory-db db-uri)
+            new-trans (tmodel/add-transactions
+                        (d/connect db-uri)
+                        [{:transaction/date (t/date-time 2010 1 1) :transaction/category "store"}])
+            trans-id (-> new-trans test-db/datom->entity :transaction/id)
+            response (->
+                       (cashflow/test-app-handler {:database {:uri db-uri}}
+                                                  {:request-method :post
+                                                   :uri            (str "/api/transactions/" trans-id)
+                                                   :body           (java.io.ByteArrayInputStream. (.getBytes (json/generate-string {:transaction/id trans-id :transaction/category "other"})))
                                                    :content-type   "application/json"})
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
-        (:body response) => {:id 1 :date "2010-01-01" :category "other"}))
+        (:body response) => {:transaction/id trans-id :transaction/date "2010-01-01" :transaction/category "other"}))
 
 (fact "can list sum of transactions by category per month"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
@@ -88,7 +90,7 @@
 
         response => (contains {:body anything :headers anything :status 200})
         (->> response :body (into #{})) => #{{:category "coffee" :sum 2}
-                              {:category "store" :sum 5}}))
+                                             {:category "store" :sum 5}}))
 
 (fact "can list sum of transactions by category per year"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
