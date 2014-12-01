@@ -45,14 +45,10 @@
   (.stop @server)
   (reset! server nil))
 
-
 (defn bootstrap-testdata []
-  (let [categories (:categories handler/system)
-        transactions (:transactions handler/system)]
-    (reset! categories [])
-    (reset! transactions [])
-    (trans/add-transactions-in-file! transactions (.getFile (clojure.java.io/resource "test-transactions.csv")))
-    ;; TODO put into datomic instead :)
+  (let [db-uri "datomic:mem://cashflow-db"]
+    (trans/add-transactions-in-file! (d/connect db-uri) (.getFile (clojure.java.io/resource "test-transactions.csv")))
+
     #_(comment
       (categories/add-category! categories {:name "Butikk" :regexes [#"Rema" #"Kiwi" #"Rimi" #"KIWI" #"Coop" #"REMA"]})
       (categories/add-category! categories {:name "Reise" :regexes [#"NSB" #"Jet"]})
@@ -64,8 +60,6 @@
       (categories/add-category! categories {:name "Lønn" :regexes [#"Megacorp"]})
       (categories/tag-and-update-transactions! transactions categories))))
 
-
-
 (defn create-empty-in-memory-db [uri]
   (d/delete-database uri)
   (d/create-database uri)
@@ -74,9 +68,7 @@
     (d/transact conn schema)
     conn))
 
-
-
 (defn start-and-bootstrap []
   (start-server)
   (create-empty-in-memory-db "datomic:mem://cashflow-db")
-  #_(bootstrap-testdata))
+  (bootstrap-testdata))

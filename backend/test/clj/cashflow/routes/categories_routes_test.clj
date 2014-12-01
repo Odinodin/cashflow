@@ -33,39 +33,38 @@
 (fact "can create category"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
             response (create-category {:database {:uri db-uri}}
-                                      {:category/name "test" :category/regexes ["a" "b"]})]
+                                      {:name "test" :regexes ["a" "b"]})]
 
         response => (contains {:body anything :headers anything :status 201})))
 
 (fact "can list categories"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
             _ (create-category {:database {:uri db-uri}}
-                               {:category/name "store" :category/regexes ["x"]})
+                               {:name "store" :regexes ["x"]})
             response (list-categories {:database {:uri db-uri}})]
 
         response => (contains {:body anything :headers anything :status 200})
-        (:body response) => [{:category/name "store" :category/regexes ["x"]}]))
-
+        (:body response) => [{:name "store" :regexes ["x"]}]))
 
 (fact "can get category"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
             _ (create-category {:database {:uri db-uri}}
-                               {:category/name "store" :category/regexes ["x"]})
+                               {:name "store" :regexes ["x"]})
             response (->
                        (cashflow/test-app-handler {:database {:uri db-uri}}
                                                   (ring-mock/request :get "/api/categories/store"))
                        json-util/json-parse-body)]
         response => (contains {:body anything :headers anything :status 200})
-        (:body response) => {:category/name "store" :category/regexes ["x"]}))
-
+        (:body response) => {:name "store" :regexes ["x"]}))
 
 (fact "can delete category"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
             _ (create-category {:database {:uri db-uri}}
-                               {:category/name "power" :category/regexes ["x"]})
+                               {:name "power" :regexes ["x"]})
             delete-response (->
                               (cashflow/test-app-handler {:database {:uri db-uri}}
                                                          (ring-mock/request :delete "/api/categories/power"))
                               json-util/json-parse-body)
             list-response (list-categories {:database {:uri db-uri}})]
-        delete-response => (contains {:body anything :headers anything :status 200})))
+        delete-response => (contains {:body anything :headers anything :status 200})
+        (-> list-response :body count) => 0))

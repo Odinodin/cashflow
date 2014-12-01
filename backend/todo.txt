@@ -4,5 +4,7 @@ TODO
 
 - make create and update return the entire entity ...
 
+- only delete categories that are not in use by transactions ...
+
 
 

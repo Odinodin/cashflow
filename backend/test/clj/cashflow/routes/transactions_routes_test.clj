@@ -9,10 +9,10 @@
             [datomic.api :as d]
             [clj-time.core :as t]))
 
-(defn- filter-ids [transaction-list]
-  (->> transaction-list (map #(dissoc % :transaction/id))))
-
 (def db-uri "datomic:mem://cashflow-db")
+
+(defn- filter-ids [transaction-list]
+  (->> transaction-list (map #(dissoc % :id))))
 
 (fact "can list transactions by year"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
@@ -27,7 +27,7 @@
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
-        (-> response :body filter-ids) => [{:transaction/date "2009-05-06" :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.2}]))
+        (-> response :body filter-ids) => [{:date "2009-05-06" :code "VARER" :description "REMA 1000" :amount -159.2}]))
 
 (fact "can list transactions by month"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
@@ -41,7 +41,7 @@
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
-        (-> response :body filter-ids) => [{:transaction/date "2012-05-10" :transaction/description "right date" :transaction/amount 100}]))
+        (-> response :body filter-ids) => [{:date "2012-05-10" :description "right date" :amount 100}]))
 
 (fact "can get the list of years of transaction data"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
@@ -72,7 +72,7 @@
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
-        (:body response) => {:transaction/id trans-id :transaction/date "2010-01-01" :transaction/category "other"}))
+        (:body response) => {:id trans-id :date "2010-01-01" :category "other"}))
 
 (fact "can list sum of transactions by category per month"
       (let [_ (test-db/create-empty-in-memory-db db-uri)

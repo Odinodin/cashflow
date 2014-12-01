@@ -6,8 +6,18 @@
     [compojure.core :refer :all]))
 
 
-(defn- format-date [transaction-list]
-  (map #(assoc % :transaction/date (-> (:transaction/date %) (format))) transaction-list))
+(defn- map-keys [f m]
+  (zipmap (map f (keys m))
+          (vals m)))
+
+(defn- to-public-keys
+  "Takes a list of maps and transforms all keys from :prefix/keyword -> keyword
+  Note that (-> :x/y name keyword) returns :y"
+  [transaction]
+  (map-keys (comp keyword name) transaction))
+
+(defn- from-public-keys [public-transaction]
+  (map-keys #(->> % name (str "transaction/") keyword) public-transaction))
 
 (defn- transactions-in-month [db-uri year month]
   (trans/dfind-transactions-by-month
@@ -31,10 +41,10 @@
                                  (d/db (d/connect uri)))}})
 
            (GET "/transactions/time/:year" [year :as {{{:keys [uri]} :database} :system}]
-                {:body (transactions-by-year uri year)})
+                {:body (->> (transactions-by-year uri year) (map to-public-keys))})
 
            (GET "/transactions/time/:year/:month" [year month :as {{{:keys [uri]} :database} :system}]
-                {:body (transactions-in-month uri year month)})
+                {:body (->> (transactions-in-month uri year month) (map to-public-keys))})
 
            (GET "/transactions/sum/:year/:month" [year month :as {{{:keys [uri]} :database} :system}]
                 (let [trans-in-month (transactions-in-month uri year month)]
@@ -49,5 +59,5 @@
 
            (POST ["/transactions/:id"] [id :as {{{:keys [uri]} :database} :system
                                                 body-params               :body-params}]
-                 (trans/update-transaction (d/connect uri) body-params)
-                 {:body (trans/d-find-transaction-by-id (d/db (d/connect uri)) id)}))
+                 (trans/update-transaction (d/connect uri) (-> body-params from-public-keys))
+                 {:body (->> (trans/d-find-transaction-by-id (d/db (d/connect uri)) id) to-public-keys)}))

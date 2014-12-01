@@ -5,18 +5,32 @@
     [compojure.core :refer :all]
     [datomic.api :as d]))
 
+(defn- map-keys [f m]
+  (zipmap (map f (keys m))
+          (vals m)))
+
+(defn- to-public-keys
+  "Takes a list of maps and transforms all keys from :prefix/keyword -> keyword
+  Note that (-> :x/y name keyword) returns :y"
+  [category]
+  (map-keys (comp keyword name) category))
+
+(defn- from-public-keys [public-category]
+  (map-keys #(->> % name (str "category/") keyword) public-category))
+
 ;; TODO Check for duplicates
 (defn- create-category [request]
   (let [db-conn (-> request :system :database :uri d/connect)
-        new-category (-> request :body-params)
-        category-map (categories/dt-add-category! db-conn new-category)]
+        new-category (-> request :body-params from-public-keys)
+        category-map (-> (categories/dt-add-category! db-conn new-category) to-public-keys)]
     {:status 201
      :body category-map}))
 
 (defn- list-categories [request]
-  (let [db-conn (-> request :system :database :uri d/connect)]
+  (let [db-conn (-> request :system :database :uri d/connect)
+        public-categories (->> (categories/dt-list-categories db-conn) (map to-public-keys))]
     {:status 200
-     :body (categories/dt-list-categories db-conn)}))
+     :body public-categories}))
 
 (defn- delete-category [request category-name]
   (let [db-conn (-> request :system :database :uri d/connect)]
@@ -27,7 +41,7 @@
 (defn- find-category [request category-name]
   (let [db (-> request :system :database :uri d/connect d/db)]
     {:status 200
-     :body (categories/dt-find-category  db category-name)}))
+     :body (-> (categories/dt-find-category db category-name) to-public-keys)}))
 
 (defroutes category-routes
            (GET "/categories" [] list-categories)
