@@ -46,7 +46,7 @@ var TransactionRow = React.createClass({
         transaction: React.PropTypes.object.isRequired,
         categories: React.PropTypes.array.isRequired,
         onEditTransaction: React.PropTypes.func.isRequired,
-        transactionBeingEdited: React.PropTypes.number,
+        transactionBeingEdited: React.PropTypes.string,
         onChangeTransactionCategory: React.PropTypes.func.isRequired
     },
 
@@ -189,7 +189,7 @@ var TransactionPage = React.createClass({
                 // Update transaction list and clear edit-state
                 this.setState({
                     transactions: res.body,
-                    transactionBeingEdited: -1});
+                    transactionBeingEdited: "none"});
             }.bind(this));
 
         this.loadTransactionSumsFromServer(timeFilter);
