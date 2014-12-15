@@ -149,4 +149,4 @@
                          {:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
       (dfind-unique-years-in-transactions (d/db (d/connect db-uri)))
       =>
-      #{2008 2009})
+      [2008 2009])

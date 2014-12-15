@@ -55,7 +55,7 @@
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
-        (->> response :body :years (into #{})) => #{2010 2011 2013}))
+        (->> response :body :years) => [2010 2011 2013]))
 
 (fact "can change existing transaction category"
       (let [_ (test-db/create-empty-in-memory-db db-uri)

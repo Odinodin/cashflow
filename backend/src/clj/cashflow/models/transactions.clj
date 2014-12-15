@@ -158,7 +158,8 @@
         [((fn [dt] (+ (.getYear dt) 1900)) ?date) ?year]
         ]
       db)
-    ffirst))
+    ffirst
+    sort))
 
 ;; Import ..
 ;; Example line:
