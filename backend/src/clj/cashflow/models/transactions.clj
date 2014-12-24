@@ -129,7 +129,8 @@
       (d/db db-conn)
       year)
     (db-ids->entity-maps (d/db db-conn))
-    date->datetime))
+    date->datetime
+    (sort-by :transaction/date)))
 
 ;; TODO take db as param, not db-conn
 (defn dfind-transactions-by-month [db-conn year month-index]
@@ -147,7 +148,8 @@
       year
       month-index)
     (db-ids->entity-maps (d/db db-conn))
-    date->datetime))
+    date->datetime
+    (sort-by :transaction/date)))
 
 (defn dfind-unique-years-in-transactions [db]
   (->
