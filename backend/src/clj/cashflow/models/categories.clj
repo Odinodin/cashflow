@@ -7,7 +7,7 @@
   [category-rules text]
   (filter
     (fn [rule]
-      (some #(re-find % text) (:category/regexes rule)))
+      (some #(re-find % text) (:category/matches rule)))
     category-rules))
 
 (defn tag-transactions

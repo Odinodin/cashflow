@@ -48,6 +48,7 @@
 (defn bootstrap-testdata []
   (let [db-uri "datomic:mem://cashflow-db"]
     (trans/add-transactions-in-file! (d/connect db-uri) (.getFile (clojure.java.io/resource "test-transactions.csv")))
+    (cashflow.models.categories/dt-add-category! (d/connect db-uri) {:name "Butikk" :regexes ["Rema" "Kiwi"]})
 
     #_(comment
       (categories/add-category! categories {:name "Butikk" :regexes [#"Rema" #"Kiwi" #"Rimi" #"KIWI" #"Coop" #"REMA"]})

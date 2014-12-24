@@ -9,10 +9,10 @@
   :db.install/_attribute :db.part/db}
 
  {:db/id                 #db/id[:db.part/db]
-  :db/ident              :category/regexes
+  :db/ident              :category/matches
   :db/valueType          :db.type/string
   :db/cardinality        :db.cardinality/many
-  :db/doc                "The category rule as regexes as string"
+  :db/doc                "A list of strings to suggest categories based on transaction descriptions"
   :db.install/_attribute :db.part/db}
 
  ;; Transactions

@@ -8,25 +8,25 @@ var CategoryEditor = React.createClass({
 
         // Get data from the form
         var name = this.refs.name.getDOMNode().value.trim();
-        var regexes = this.refs.regexes.getDOMNode().value.trim();
-        if (!name || !regexes) {
+        var matches = this.refs.matches.getDOMNode().value.trim();
+        if (!name || !matches) {
             return;
         }
 
         superagent.post("/api/categories")
-            .send({name: name, regexes: regexes.split(' ')})
+            .send({name: name, matches: matches.split(' ')})
             .set('Accept', 'application/json')
             .end(function(res){
                 if (res.ok) {
                     this.props.onCategoryCreate(res.body);
                 } else {
-                    alert('Oh no! error ' + res.text);
+                    console.log('Failed to post category', res);
                 }
             }.bind(this));
 
         // Clear form
         this.refs.name.getDOMNode().value = '';
-        this.refs.regexes.getDOMNode().value = '';
+        this.refs.matches.getDOMNode().value = '';
         return;
     },
 
@@ -35,7 +35,7 @@ var CategoryEditor = React.createClass({
             R.form({className: "padded", onSubmit: this.handleSubmit},
                 [
                     R.input({name: "name", type: "text", placeholder: "Category name", className: "form-control", ref: "name"}),
-                    R.input({name: "regexes", type: "text", placeholder: "Regexes", className: "form-control", ref: "regexes"}),
+                    R.input({name: "matches", type: "text", placeholder: "Matches", className: "form-control", ref: "matches"}),
                     R.button({className: "flat-button", type: "submit"}, "Add category")
                 ]
             )
@@ -52,7 +52,7 @@ var CategoryTable = React.createClass({
                     R.tr({}, [
                         R.th({}, ""),
                         R.th({}, "Category"),
-                        R.th({}, "Regexes")
+                        R.th({}, "Matches")
                     ])),
                 R.tbody({},
                     this.props.categories.map(function (category) {
@@ -60,7 +60,7 @@ var CategoryTable = React.createClass({
                             R.td({}, R.button({onClick: function() {this.props.onCategoryDelete(category.name)}.bind(this),
                                 className: "delete"}, "\u2716")),
                             R.td({key: "name", className: "category"}, category.name),
-                            R.td({key: "regexes"}, category.regexes.join(", "))]);
+                            R.td({key: "matches"}, category.matches.join(", "))]);
                     }.bind(this)))
             ])
         }
