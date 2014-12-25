@@ -1,5 +1,5 @@
 (ns cashflow.routes.categories_routes_test
-  (:import java.io.ByteArrayInputStream)
+  (:import (java.io ByteArrayInputStream))
   (:require [ring.mock.request :as ring-mock]
             [midje.sweet :refer :all]
             [cheshire.core :as json]
@@ -17,7 +17,7 @@
       testsystem
       {:request-method :post
        :uri            "/api/categories"
-       :body           (java.io.ByteArrayInputStream.
+       :body           (ByteArrayInputStream.
                          (.getBytes
                            (json/generate-string category-map)))
        :content-type   "application/json"})
@@ -44,7 +44,8 @@
             response (list-categories {:database {:uri db-uri}})]
 
         response => (contains {:body anything :headers anything :status 200})
-        (:body response) => [{:name "store" :matches ["x"]}]))
+        (:body response)
+        => [{:name "store" :matches ["x"]}]))
 
 (fact "can get category"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
@@ -55,7 +56,8 @@
                                                   (ring-mock/request :get "/api/categories/store"))
                        json-util/json-parse-body)]
         response => (contains {:body anything :headers anything :status 200})
-        (:body response) => {:name "store" :matches ["x"]}))
+        (:body response)
+        => {:name "store" :matches ["x"]}))
 
 (fact "can delete category"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
@@ -67,4 +69,5 @@
                               json-util/json-parse-body)
             list-response (list-categories {:database {:uri db-uri}})]
         delete-response => (contains {:body anything :headers anything :status 200})
-        (-> list-response :body count) => 0))
+        (-> list-response :body count)
+        => 0))
