@@ -123,6 +123,7 @@
                        json-util/json-parse-body)]
 
         response => (contains {:body anything :headers anything :status 200})
+
         (:body response) => [{:time "2010-1" :income 1 :expense -1}
                              {:time "2011-5" :income 0 :expense -2}
                              {:time "2012-5" :income 5 :expense 0}]))

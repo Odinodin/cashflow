@@ -33,7 +33,6 @@ var TransactionSummaryTable = React.createClass({
                             R.td({}, R.div({}, sum.sum))])
                     }.bind(this))
                 )
-
             ]
         )
     }
@@ -50,22 +49,37 @@ var TransactionRow = React.createClass({
         onChangeTransactionCategory: React.PropTypes.func.isRequired
     },
 
-    categoryComponent: function (trans, transactionBeingEdited) {
+    suggestedCategoryForTrans: function (trans, categories) {
+
+        var suggested = cull.select(function (cat) {
+            return cull.some(function (match) {
+                return trans.description.toUpperCase().indexOf(match.toUpperCase()) > -1
+            }, cat.matches);
+        }, categories);
+        return suggested[0];
+    },
+
+    categoryComponent: function (trans, transactionBeingEdited, categories) {
         var comp = [];
-        if (trans.category) {
+        var hasCategory = trans.category;
+        if (hasCategory) {
+            // Transaction has a category
             var td = R.div({
                 className: "category",
                 onClick: function () {
                     this.props.onEditTransaction(trans.id)
-                }.bind(this)}, trans.category)
+                }.bind(this)
+            }, trans.category);
             comp.push(td);
         } else {
-            var td = R.div({
+            // Transaction has no category assigned
+            var noCategoryDiv = R.div({
                 className: "category category-missing",
                 onClick: function () {
                     this.props.onEditTransaction(trans.id)
-                }.bind(this)}, "?");
-            comp.push(td);
+                }.bind(this)
+            }, "?");
+            comp.push(noCategoryDiv);
         }
 
         var isThisRowBeingEdited = (transactionBeingEdited === trans.id);
@@ -82,6 +96,20 @@ var TransactionRow = React.createClass({
             comp.push(cells);
         }
 
+        if (!isThisRowBeingEdited && !hasCategory) {
+            var suggestedCategory = this.suggestedCategoryForTrans(trans, categories);
+
+            if (suggestedCategory) {
+                var suggestedCategoryDiv = R.div({
+                    className: "category category-suggestion",
+                    onClick: function () {
+                        this.props.onChangeTransactionCategory(trans.id, suggestedCategory.name)
+                    }.bind(this)
+                }, suggestedCategory.name + "?");
+                comp.push(suggestedCategoryDiv);
+            }
+        }
+
         return R.td({className: "wide50"}, comp);
 
     },
@@ -92,7 +120,7 @@ var TransactionRow = React.createClass({
                 R.td({}, this.props.transaction.code),
                 R.td({}, this.props.transaction.description),
                 R.td({}, this.props.transaction.amount),
-                this.categoryComponent(this.props.transaction, this.props.transactionBeingEdited)
+                this.categoryComponent(this.props.transaction, this.props.transactionBeingEdited, this.props.categories)
             ]
         )
     }
@@ -148,7 +176,7 @@ var TransactionPage = React.createClass({
 
     componentDidMount: function () {
         this.loadAvailableYears();
-
+        this.loadCategoriesFromServer();
     },
 
     loadAvailableYears: function () {
@@ -175,7 +203,8 @@ var TransactionPage = React.createClass({
             .end(function (res) {
                 // Update transaction list and clear edit-state
                 this.setState({
-                    transactionSums: res.body});
+                    transactionSums: res.body
+                });
             }.bind(this));
 
     },
@@ -189,7 +218,8 @@ var TransactionPage = React.createClass({
                 // Update transaction list and clear edit-state
                 this.setState({
                     transactions: res.body,
-                    transactionBeingEdited: "none"});
+                    transactionBeingEdited: "none"
+                });
             }.bind(this));
 
         this.loadTransactionSumsFromServer(timeFilter);
@@ -226,7 +256,8 @@ var TransactionPage = React.createClass({
                 commonComponents.TimeFilter({
                     years: this.state.years,
                     timeFilter: this.state.timeFilter,
-                    onFilterChange: this.onTimeFilterChange}),
+                    onFilterChange: this.onTimeFilterChange
+                }),
                 TransactionSummaryTable({
                     transactionSums: this.state.transactionSums
                 }),
