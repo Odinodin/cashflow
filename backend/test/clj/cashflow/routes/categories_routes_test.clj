@@ -33,34 +33,34 @@
 (fact "can create category"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
             response (create-category {:database {:uri db-uri}}
-                                      {:name "test" :regexes ["a" "b"]})]
+                                      {:name "test" :matches ["a" "b"]})]
 
         response => (contains {:body anything :headers anything :status 201})))
 
 (fact "can list categories"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
             _ (create-category {:database {:uri db-uri}}
-                               {:name "store" :regexes ["x"]})
+                               {:name "store" :matches ["x"]})
             response (list-categories {:database {:uri db-uri}})]
 
         response => (contains {:body anything :headers anything :status 200})
-        (:body response) => [{:name "store" :regexes ["x"]}]))
+        (:body response) => [{:name "store" :matches ["x"]}]))
 
 (fact "can get category"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
             _ (create-category {:database {:uri db-uri}}
-                               {:name "store" :regexes ["x"]})
+                               {:name "store" :matches ["x"]})
             response (->
                        (cashflow/test-app-handler {:database {:uri db-uri}}
                                                   (ring-mock/request :get "/api/categories/store"))
                        json-util/json-parse-body)]
         response => (contains {:body anything :headers anything :status 200})
-        (:body response) => {:name "store" :regexes ["x"]}))
+        (:body response) => {:name "store" :matches ["x"]}))
 
 (fact "can delete category"
       (let [_ (test-db/create-empty-in-memory-db db-uri)
             _ (create-category {:database {:uri db-uri}}
-                               {:name "power" :regexes ["x"]})
+                               {:name "power" :matches ["x"]})
             delete-response (->
                               (cashflow/test-app-handler {:database {:uri db-uri}}
                                                          (ring-mock/request :delete "/api/categories/power"))

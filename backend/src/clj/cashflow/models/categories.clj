@@ -1,26 +1,21 @@
 (ns cashflow.models.categories
+  (:import (java.util.regex Pattern))
   (:require [datomic.api :as d]))
 
-(defn match-category-rules
-  "Find matching category rules by returning all rules that
-  have regexes that matches the text"
-  [category-rules text]
-  (filter
-    (fn [rule]
-      (some #(re-find % text) (:category/matches rule)))
-    category-rules))
+(defn- category-matches-text?
+  [category text]
+  (let [matches (:category/matches category)]
+    (some #(re-find (re-pattern (str "(?i)" (Pattern/quote %))) text) matches)))
 
-(defn tag-transactions
-  "Run all category rules over all transactions"
-  [transactions category-rules]
-  (map
-    #(assoc %
-            :transaction/category
-            (->>
-              (match-category-rules category-rules (:transaction/description %))
-              (mapv :category/name)
-              first))
-    transactions))
+(defn suggest-categories
+  "Find matching categories names by returning all categories that match the text.
+  Returns a set of category names"
+  [transaction categories]
+  (->>
+    categories
+    (filter #(category-matches-text? % (:transaction/description transaction)))
+    (map :category/name)
+    (into #{})))
 
 (defn hydrate-entity
   "Takes a datom and a tempid and retrieves the entity as a map"
