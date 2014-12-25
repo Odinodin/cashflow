@@ -76,8 +76,6 @@
       [{:time "2013-6" :income 2 :expense -4}
        {:time "2014-5" :income 3 :expense -30}])
 
-(def db-uri "datomic:mem://cashflow-db")
-
 (fact "Can add transaction to database"
       (test-db/create-empty-in-memory-db db-uri)
       (->

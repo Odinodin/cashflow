@@ -36,6 +36,15 @@
                    [category-with-db-id])
       (hydrate-entity tempid))))
 
+(defn- db-id->entity-map
+  "Takes a db-id (datomic entity id) and returns a hydrated entity in the form of a regular map"
+  [db db-id]
+  (->>
+    db-id
+    (d/entity db) ;; id -> lazy entity map
+    d/touch
+    (into {})))
+
 ;; TODO extract in to separte ns
 (defn- db-ids->entity-maps
   "Takes a list of datomic entity ids retrieves and returns
@@ -45,12 +54,7 @@
     db-ids
     seq
     flatten
-    (map #(->>
-           %
-           ;; id -> lazy entity map
-           (d/entity (d/db db-conn))
-           d/touch
-           (into {})))))
+    (map #(db-id->entity-map (d/db db-conn) %))))
 
 (defn dt-list-categories [db-conn]
   (->>
@@ -71,7 +75,7 @@
          db
          category-name)
        ffirst
-       (d/entity db)))
+       (db-id->entity-map db)))
 
 (defn dt-remove-category! [db-conn category-name]
   (let [category-id (->> (d/q
