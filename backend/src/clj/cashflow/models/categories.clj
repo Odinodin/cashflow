@@ -28,22 +28,16 @@
       (into {}))))
 
 ;; Datomic
-(defn dt-add-category! [db-conn category]
-  (let [tempid (d/tempid :db.part/user)
-        category-with-db-id (assoc category :db/id tempid)]
-    (->
-      @(d/transact db-conn
-                   [category-with-db-id])
-      (hydrate-entity tempid))))
 
 (defn- db-id->entity-map
   "Takes a db-id (datomic entity id) and returns a hydrated entity in the form of a regular map"
   [db db-id]
-  (->>
-    db-id
-    (d/entity db) ;; id -> lazy entity map
-    d/touch
-    (into {})))
+  (when db-id
+    (->>
+      db-id
+      (d/entity db)                                         ;; id -> lazy entity map
+      d/touch
+      (into {}))))
 
 ;; TODO extract in to separte ns
 (defn- db-ids->entity-maps
@@ -65,8 +59,7 @@
       (d/db db-conn))
     (db-ids->entity-maps db-conn)))
 
-
-(defn dt-find-category [db category-name]
+(defn dt-find-category-id [db category-name]
   (->> (d/q
          '[:find ?e
            :in $ ?category-name
@@ -74,8 +67,43 @@
            [?e :category/name ?category-name]]
          db
          category-name)
-       ffirst
+       ffirst))
+
+(defn dt-find-category [db category-name]
+  (->> (dt-find-category-id db category-name)
        (db-id->entity-map db)))
+
+(defn- create-new-category!
+  [db-conn category]
+  (let [tempid (d/tempid :db.part/user)
+        category-with-db-id (assoc category :db/id tempid)]
+    (->
+      @(d/transact db-conn
+                   [category-with-db-id])
+      (hydrate-entity tempid))))
+
+;; TODO can be simplified
+(defn- values-to-retract [key oldmap newmap]
+  (clojure.set/difference
+    (-> (get oldmap key) set)
+    (-> (get newmap key) set)))
+
+(defn- update-category!
+  [db-conn prev-cat-db-id new-cat]
+  (let [new-cat (assoc new-cat :db/id #db/id [:db.part/user])
+        prev-cat (db-id->entity-map (d/db db-conn) prev-cat-db-id)
+        retracts-vals (values-to-retract :category/matches prev-cat new-cat)
+        retract-statements (for [match retracts-vals]
+                             [:db/retract prev-cat-db-id :category/matches match])]
+
+      @(d/transact db-conn (conj retract-statements new-cat))
+      (dt-find-category (d/db db-conn) (:category/name new-cat))))
+
+
+(defn dt-add-category! [db-conn category]
+  (if-let [prev-cat-db-id (dt-find-category-id (d/db db-conn) (:category/name category))]
+    (update-category! db-conn prev-cat-db-id category)
+    (create-new-category! db-conn category)))
 
 (defn dt-remove-category! [db-conn category-name]
   (let [category-id (->> (d/q

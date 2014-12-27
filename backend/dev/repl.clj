@@ -1,4 +1,4 @@
-(ns cashflow.repl
+(ns repl
   (:use cashflow.handler
         ring.server.standalone
         clojure.repl
@@ -6,7 +6,6 @@
   (:require [clj-time.coerce :as t-coerce]
             [clj-time.format :as t-format]
             [clj-time.core :as t]
-            [selmer.parser :as selmer]
             [clojure.pprint :refer [pprint]]
             [clojure.tools.namespace.repl :refer [refresh]]
             [datomic.api :as d]

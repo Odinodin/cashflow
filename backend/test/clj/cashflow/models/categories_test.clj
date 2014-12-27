@@ -34,7 +34,7 @@
 
       => [])
 
-#_(fact "Can update category"
+(fact "Can update category"
       (test-db/create-empty-in-memory-db db-uri)
       (dt-add-category! (conn db-uri) {:category/name "store" :category/matches ["Kiwi" "Rimi"]})
       (dt-add-category! (conn db-uri) {:category/name "store" :category/matches ["Rema"]})
@@ -42,7 +42,6 @@
 
       => [{:category/name "store" :category/matches #{"Rema"}}])
 
-;; TODO Adding a duplicate transaction fails.
 
 (fact "Can suggest categories based on transaction description"
       (suggest-categories nil nil) => #{}
