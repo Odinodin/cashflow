@@ -22,11 +22,7 @@
 (defn init []
   (println "cashflow is starting..")
   (def system
-    {:database {:uri "datomic:mem://cashflow-db"}           ;; TODO Currently hardcoded
-     :transactions (atom [])
-     :categories (atom [])})
-  #_(let [repl (clojure.tools.nrepl.server/start-server :port 0 :bind "127.0.0.1")]
-    (println "Repl started at" (:port repl))))
+    {:database {:uri "datomic:mem://cashflow-db"}}))        ; TODO Currently hardcoded
 
 (defn destroy []
   (println "cashflow is shutting down"))
