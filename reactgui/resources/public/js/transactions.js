@@ -115,7 +115,7 @@ var TransactionRow = React.createClass({
     },
 
     render: function () {
-        return R.tr({}, [
+        return R.tr({className: "transaction-row"}, [
                 R.td({}, this.props.transaction.date),
                 R.td({}, this.props.transaction.code),
                 R.td({}, this.props.transaction.description),

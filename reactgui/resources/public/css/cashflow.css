@@ -200,3 +200,13 @@ button.delete:hover {
     -moz-animation-delay: 0.2s;
     animation-delay: 0.2s;
 }
+
+.transaction-row {
+    background-color: #2a2a2a;
+}
+
+.transaction-row:hover {
+    background-color: #3c3c3c;
+    border-color: #3c3c3c;
+    transition: background-color 0.5s ease;
+}
