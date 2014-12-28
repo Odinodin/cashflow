@@ -14,7 +14,7 @@ var CategoryEditor = React.createClass({
         }
 
         superagent.post("/api/categories")
-            .send({name: name, matches: matches.split(' ')})
+            .send({name: name, matches: matches.split(',')})
             .set('Accept', 'application/json')
             .end(function(res){
                 if (res.ok) {
