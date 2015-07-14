@@ -19,7 +19,7 @@
 ;; :categories are lists of                                 {:name "categoryname" :regexes [#"list" #"of" #"regexes"]}
 (declare system)
 
-(defn init []
+(defn init [jetty-server]
   (println "cashflow is starting..")
   (def system
     {:database {:uri "datomic:mem://cashflow-db"}}))        ; TODO Currently hardcoded

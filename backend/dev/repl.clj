@@ -1,6 +1,6 @@
 (ns repl
   (:use cashflow.handler
-        ring.server.standalone
+        ring.adapter.jetty
         clojure.repl
         [ring.middleware file-info file])
   (:require [clj-time.coerce :as t-coerce]
@@ -31,13 +31,13 @@
   [& [port]]
   (let [port (if port (Integer/parseInt port) 8080)]
     (reset! server
-            (serve (get-handler)
+            (run-jetty (get-handler)
                    {:port         port
-                    :init         init
+                    :configurator init
                     :auto-reload? true
                     :open-browser? false
                     :destroy      destroy
-                    :join         true}))
+                    :join?         false}))
     (println (str "You can view the site at http://localhost:" port))))
 
 (defn stop-server []

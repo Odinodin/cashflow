@@ -3,26 +3,24 @@
   :url "http://example.com/FIXME"
   :source-paths ["src/clj"]
   :test-paths ["test/clj"]
-  :dependencies [[org.clojure/clojure "1.6.0"]
-                 [clj-time "0.6.0"]
-                 [cheshire "5.3.1"]
-                 [compojure "1.1.6"]
+  :dependencies [[org.clojure/clojure "1.7.0"]
+                 [clj-time "0.10.0"]
+                 [cheshire "5.5.0"]
+                 [compojure "1.3.4"]
                  [hiccup "1.0.5"]
-                 [ring-middleware-format "0.4.0"]
-                 [ring "1.3.1"]
-                 [ring-server "0.3.1"]
+                 [ring-middleware-format "0.5.0"]
+                 [ring "1.4.0"]
 
-                 [prismatic/schema "0.2.6"]
+                 [prismatic/schema "0.4.3"]
 
-                 [com.datomic/datomic-pro "0.9.4956"]
+                 [com.datomic/datomic-pro "0.9.4956" :exclusions [joda-time]]
 
                  ;; GUI
-                 [selmer "0.6.6"]
+                 [selmer "0.8.2"]
 
                  ;; Support
-                 [prone "0.6.0"]
-                 [org.clojure/tools.nrepl "0.2.3"]]
-  :plugins [[lein-ring "0.8.12"]]
+                 [prone "0.8.2"]
+                 [org.clojure/tools.nrepl "0.2.10"]]
   :ring {:handler cashflow.handler/lein-app-handler
          :init cashflow.handler/init
          :destroy cashflow.handler/destroy}
@@ -32,11 +30,11 @@
   {:production {:ring
                 {:open-browser? false, :stacktraces? false, :auto-reload? false}}
    :dev {:source-paths ["dev"]
-         :dependencies [[ring-mock "0.1.5"]
-                        [ring/ring-devel "1.2.1"]
-                        [midje "1.6.3"]
-                        [print-foo "1.0.1"]
-                        [org.clojure/tools.namespace "0.2.4"]]
+         :dependencies [[ring/ring-mock "0.2.0"]
+                        [ring/ring-devel "1.4.0"]
+                        [midje "1.7.0"]
+                        [print-foo "1.0.2"]
+                        [org.clojure/tools.namespace "0.2.10"]]
          :plugins [[lein-midje "3.1.3"]]
          :test-paths ["test"]
          :resource-paths ["test-resources"]}})
