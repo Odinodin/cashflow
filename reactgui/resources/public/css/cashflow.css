@@ -29,32 +29,29 @@ body {
     padding-left: 0;
     align-items: stretch;
     height: 3em;
+    margin: 0;
 }
 
 .navbar .title {
     flex-basis: auto;
     font-size: 2em;
     background-color: #ff7472;
-    align-content: center;
-    line-height: 2em;
+    align-self: center;
     text-align: center;
-    padding-left: 1em;
-    padding-right: 1em;
+    padding: 0.5em;
     color: black;
 }
 
 .navbar a {
     text-decoration: none;
     padding: 1em;
-    line-height: 2em;
     color: #c0c0c0;
-    align-content: center;
 }
 
 .navbar li {
     display: flex;
     list-style-type: none;
-    align-self: stretch;
+    align-self: center;
     padding-left: 5px;
     padding-right: 5px;
 }
@@ -109,12 +106,19 @@ body {
     background-color: darkorange;
 }
 
-table, th {
-    text-align: left;
+table {
+    border-collapse: collapse;
+    width: 100%;
 }
 
-table td, table td * {
-    vertical-align: top;
+td {
+    text-align: left;
+    padding: 0 0.5em;
+}
+
+th {
+    text-align: left;
+    padding: 0.5em;
 }
 
 .padded {

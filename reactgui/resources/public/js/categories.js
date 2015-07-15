@@ -47,7 +47,7 @@ var CategoryTable = React.createClass({
         displayName: "CategoryTable",
 
         render: function () {
-            return R.table({className: "bg-box padded"}, [
+            return R.div({className: "bg-box padded"}, R.table({}, [
                 R.thead({},
                     R.tr({}, [
                         R.th({}, ""),
@@ -62,7 +62,7 @@ var CategoryTable = React.createClass({
                             R.td({key: "name", className: "category"}, category.name),
                             R.td({key: "matches"}, category.matches.join(", "))]);
                     }.bind(this)))
-            ])
+            ]))
         }
     }
 );

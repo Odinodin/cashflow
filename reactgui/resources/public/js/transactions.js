@@ -9,7 +9,7 @@ var TransactionSummaryTable = React.createClass({
     },
 
     render: function () {
-        return R.table({className: "bg-box padded"},
+        return R.div({className: "bg-box padded"}, R.table({},
             [
                 R.thead({},
                     R.tr({},
@@ -34,7 +34,7 @@ var TransactionSummaryTable = React.createClass({
                     }.bind(this))
                 )
             ]
-        )
+        ))
     }
 });
 
@@ -135,7 +135,7 @@ var TransactionsTable = React.createClass({
         },
 
         render: function () {
-            return R.table({className: "bg-box padded"}, [
+            return R.div({className: "bg-box padded"}, R.table({}, [
                     R.thead({},
                         R.tr({}, [
                             R.th({}, "Date"),
@@ -156,7 +156,7 @@ var TransactionsTable = React.createClass({
                         }.bind(this))
                     )
                 ]
-            )
+            ))
         }
     }
 );

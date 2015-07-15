@@ -61,11 +61,11 @@ var commonComponents = (function () {
             return R.div({className: "bg-box padded"},
                 [
                     R.div({className: "container"},
-                        this.props.years.map(function (year) {
+                        this.props.years.map(function (year, index) {
                             // Check if selected
                             var buttonClasses = (this.props.timeFilter.year == year) ? "flat-button selected" : "flat-button";
 
-                            return R.div({className: "item"},
+                            return R.div({key: index, className: "item"},
                                 R.button({
                                     className: buttonClasses,
                                     onClick: function () {
@@ -76,10 +76,10 @@ var commonComponents = (function () {
                         }, this)
                     ),
                     R.div({className: "container"},
-                        this.months.map(function (month) {
+                        this.months.map(function (month, index) {
                             var buttonClasses = (this.props.timeFilter.month == month.index) ? "flat-button selected" : "flat-button";
 
-                            return R.div({className: "item"},
+                            return R.div({key: index, className: "item"},
                                 R.button({
                                     className: buttonClasses,
                                     onClick: function () {
