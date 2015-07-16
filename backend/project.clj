@@ -13,7 +13,7 @@
 
                  [prismatic/schema "0.4.3"]
 
-                 [com.datomic/datomic-pro "0.9.4956" :exclusions [joda-time]]
+                 [com.datomic/datomic-pro "0.9.5198" :exclusions [joda-time]]
 
                  ;; GUI
                  [selmer "0.8.2"]
@@ -37,4 +37,6 @@
                         [org.clojure/tools.namespace "0.2.10"]]
          :plugins [[lein-midje "3.1.3"]]
          :test-paths ["test"]
-         :resource-paths ["test-resources"]}})
+         :resource-paths ["test-resources"]}}
+
+  :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"}})

@@ -39,7 +39,7 @@
       app-routes)
     (handler/site)
     (middleware/wrap-restful-format :formats [:json-kw])
-    #_(prone/wrap-exceptions)))
+    (prone/wrap-exceptions)))
 
 ;; TODO Validate the system map
 (defn test-app-handler

@@ -6,6 +6,4 @@ TODO
 
 - only delete categories that are not in use by transactions ...
 
-
 - remove dt- prefix in models
-

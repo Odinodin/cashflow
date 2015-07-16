@@ -17,4 +17,4 @@ To start the solution, run the following from both /backend and /reactgui:
 
 ## License
 
-Copyright © 2014 Odin Hole Standal
+Copyright © 2015 Odin Hole Standal
