@@ -14,9 +14,7 @@
 
 (encoding/add-common-json-encoders!)
 
-;; Contains all mutants.
-;; :transactions are lists of maps with these keys:   {:date :code :description :amount :category}
-;; :categories are lists of                                 {:name "categoryname" :regexes [#"list" #"of" #"regexes"]}
+;; System configuration
 (declare system)
 
 (defn init [jetty-server]
@@ -49,3 +47,7 @@
 (defn lein-app-handler
   [request]
   (app (assoc request :system system)))
+
+(defn datomic-app-handler
+  [request]
+  (app (assoc request :system {:database {:uri "datomic:dev://localhost:4334/cashflow"}})))
