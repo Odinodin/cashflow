@@ -1,8 +1,7 @@
 /* Menu */
 
-
 var commonComponents = (function () {
-    var Menu = React.createClass({
+    var Menu = React.createFactory(React.createClass({
         displayName: "Menu",
 
         render: function () {
@@ -13,10 +12,10 @@ var commonComponents = (function () {
                     R.li({className: "nav-item"}, R.a({"href": "graphs.html"}, "Graphs"))]
             )
         }
-    });
+    }));
 
     /* Time filter */
-    var TimeFilter = React.createClass({
+    var TimeFilter = React.createFactory(React.createClass({
         displayName: "TimeFilter",
 
         // Validation
@@ -91,7 +90,7 @@ var commonComponents = (function () {
                 ]
             )
         }
-    });
+    }));
 
     return {
         Menu: Menu,

@@ -1,6 +1,6 @@
 var R = React.DOM;
 
-var CategoryEditor = React.createClass({
+var CategoryEditor = React.createFactory(React.createClass({
     displayName: "CategoryEditor",
 
     handleSubmit: function (e) {
@@ -13,8 +13,13 @@ var CategoryEditor = React.createClass({
             return;
         }
 
+        matches = matches.split(',');
+        matches = cull.map(function(it) {
+            return it.trim();
+        }, matches);
+
         superagent.post("/api/categories")
-            .send({name: name, matches: matches.split(',')})
+            .send({name: name, matches: matches})
             .set('Accept', 'application/json')
             .end(function(res){
                 if (res.ok) {
@@ -41,10 +46,37 @@ var CategoryEditor = React.createClass({
             )
         )
     }
-});
+}));
 
-var CategoryTable = React.createClass({
+var CategoryTable = React.createFactory(React.createClass({
         displayName: "CategoryTable",
+
+        onEditContent: function(category, refId) {
+
+            var matches = this.refs[refId].getDOMNode().textContent;
+            var matches = matches.split(',');
+            matches = cull.map(function(it) {
+                return it.trim();
+            }, matches);
+
+            // No actual change ..
+            if (cull.difference(matches,category.matches).length === 0) {
+                console.log("no change ...");
+                return;
+            }
+
+            // TODO duplicated from above, extract this to a store ..
+            superagent.post("/api/categories")
+                .send({name: category.name, matches: matches})
+                .set('Accept', 'application/json')
+                .end(function(res){
+                    if (res.ok) {
+                        this.props.onCategoryCreate(res.body);
+                    } else {
+                        console.log('Failed to post category', res);
+                    }
+                }.bind(this));
+        },
 
         render: function () {
             return R.div({className: "bg-box padded"}, R.table({}, [
@@ -55,19 +87,19 @@ var CategoryTable = React.createClass({
                         R.th({}, "Matches")
                     ])),
                 R.tbody({},
-                    this.props.categories.map(function (category) {
+                    this.props.categories.map(function (category, index) {
                         return R.tr({}, [
                             R.td({}, R.button({onClick: function() {this.props.onCategoryDelete(category.name)}.bind(this),
                                 className: "delete"}, "\u2716")),
                             R.td({key: "name", className: "category"}, category.name),
-                            R.td({key: "matches"}, category.matches.join(", "))]);
+                            R.td({key: "matches", contentEditable: true, onBlur: this.onEditContent.bind(this, category, "category_" + index), ref: "category_" + index}, category.matches.join(", "))]);
                     }.bind(this)))
             ]))
         }
     }
-);
+));
 
-var CategoriesPage = React.createClass({
+var CategoriesPage = React.createFactory(React.createClass({
     displayName: "CategoriesPage",
 
     onCategoryCreate: function (createResult) {
@@ -104,9 +136,12 @@ var CategoriesPage = React.createClass({
             [
                 commonComponents.Menu(),
                 CategoryEditor({onCategoryCreate: this.onCategoryCreate}),
-                CategoryTable({categories: this.state.categories, onCategoryDelete: this.onCategoryDelete})
+                CategoryTable({
+                    categories: this.state.categories,
+                    onCategoryDelete: this.onCategoryDelete,
+                    onCategoryCreate: this.onCategoryCreate})
             ]);
     }
-});
+}));
 
-React.renderComponent(CategoriesPage({}), document.body);
+React.render(CategoriesPage({}), document.body);

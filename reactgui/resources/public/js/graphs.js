@@ -37,7 +37,7 @@ var cashFlowChartTheme = {
     }
 };
 
-var GraphTypeSelector = React.createClass({
+var GraphTypeSelector = React.createFactory(React.createClass({
     displayName: "GraphTypeSelector",
 
     propTypes: {
@@ -58,9 +58,9 @@ var GraphTypeSelector = React.createClass({
             }.bind(this))
         )
     }
-});
+}));
 
-var GraphSumByCategory = React.createClass({
+var GraphSumByCategory = React.createFactory(React.createClass({
     displayName: "GraphSumByCategory",
 
     // TODO add propTypes validation
@@ -103,10 +103,10 @@ var GraphSumByCategory = React.createClass({
     render: function () {
         return R.div({id: "graphSumCategory"});
     }
-});
+}));
 
 
-var GraphNetIncome = React.createClass({
+var GraphNetIncome = React.createFactory(React.createClass({
     displayName: "GraphNetIncome",
 
     propTypes: {
@@ -161,10 +161,10 @@ var GraphNetIncome = React.createClass({
     render: function () {
         return R.div({id: "graphNetIncome"});
     }
-});
+}));
 
 
-var GraphsPage = React.createClass({
+var GraphsPage = React.createFactory(React.createClass({
     displayName: "GraphsPage",
 
     getDefaultProps: function() {
@@ -277,6 +277,6 @@ var GraphsPage = React.createClass({
 
         return R.div({id: "main"}, comps);
     }
-});
+}));
 
-React.renderComponent(GraphsPage({}), document.body);
+React.render(GraphsPage({}), document.body);

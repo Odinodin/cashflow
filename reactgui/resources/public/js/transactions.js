@@ -2,7 +2,7 @@ var R = React.DOM;
 var p = React.PropTypes;
 
 /* Transactions */
-var TransactionSummaryTable = React.createClass({
+var TransactionSummaryTable = React.createFactory(React.createClass({
     displayName: "TransactionSummaryTable",
 
     propTypes: {
@@ -37,10 +37,10 @@ var TransactionSummaryTable = React.createClass({
             ]
         ))
     }
-});
+}));
 
 
-var TransactionsFilter = React.createClass({
+var TransactionsFilter = React.createFactory(React.createClass({
     displayName: "TransactionsFilter",
 
     propTypes: {
@@ -72,9 +72,9 @@ var TransactionsFilter = React.createClass({
             ]);
     }
 
-});
+}));
 
-var TransactionRow = React.createClass({
+var TransactionRow = React.createFactory(React.createClass({
     displayName: "TransactionRow",
 
     propTypes: {
@@ -160,9 +160,9 @@ var TransactionRow = React.createClass({
             ]
         )
     }
-});
+}));
 
-var TransactionsTable = React.createClass({
+var TransactionsTable = React.createFactory(React.createClass({
         displayName: "TransactionsTable",
 
         propTypes: {
@@ -206,9 +206,9 @@ var TransactionsTable = React.createClass({
             ))
         }
     }
-);
+));
 
-var TransactionPage = React.createClass({
+var TransactionPage = React.createFactory(React.createClass({
     displayName: "TransactionPage",
 
     getInitialState: function () {
@@ -330,6 +330,6 @@ var TransactionPage = React.createClass({
                 })
             ]);
     }
-});
+}));
 
-React.renderComponent(TransactionPage({}), document.body);
+React.render(TransactionPage({}), document.body);
