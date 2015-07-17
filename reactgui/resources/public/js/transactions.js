@@ -1,11 +1,12 @@
 var R = React.DOM;
+var p = React.PropTypes;
 
 /* Transactions */
 var TransactionSummaryTable = React.createClass({
     displayName: "TransactionSummaryTable",
 
     propTypes: {
-        transactionSums: React.PropTypes.array.isRequired
+        transactionSums: p.array.isRequired
     },
 
     render: function () {
@@ -38,15 +39,50 @@ var TransactionSummaryTable = React.createClass({
     }
 });
 
+
+var TransactionsFilter = React.createClass({
+    displayName: "TransactionsFilter",
+
+    propTypes: {
+        filter: p.shape({
+            showCategorized: p.bool.isRequired,
+            showUncategorized: p.bool.isRequired
+        }).isRequired,
+        onFilterChange: p.func.isRequired
+    },
+
+    handleCategoryChange: function(event) {
+        this.props.onFilterChange({
+            showCategorized: event.target.checked,
+            showUncategorized: this.props.filter.showUncategorized
+        });
+    },
+
+    handleNoCategoryChange: function(event) {
+        this.props.onFilterChange({
+            showCategorized: this.props.filter.showCategorized,
+            showUncategorized: event.target.checked});
+    },
+        
+    render: function() {
+
+        return R.div({className: "bg-box padded"}, [
+                R.input({type:"checkbox", checked: this.props.filter.showCategorized, onChange: this.handleCategoryChange}, "Category"),
+                R.input({type:"checkbox", checked: this.props.filter.showUncategorized, onChange: this.handleNoCategoryChange}, "No category")
+            ]);
+    }
+
+});
+
 var TransactionRow = React.createClass({
     displayName: "TransactionRow",
 
     propTypes: {
-        transaction: React.PropTypes.object.isRequired,
-        categories: React.PropTypes.array.isRequired,
-        onEditTransaction: React.PropTypes.func.isRequired,
-        transactionBeingEdited: React.PropTypes.string,
-        onChangeTransactionCategory: React.PropTypes.func.isRequired
+        transaction: p.object.isRequired,
+        categories: p.array.isRequired,
+        onEditTransaction: p.func.isRequired,
+        transactionBeingEdited: p.string,
+        onChangeTransactionCategory: p.func.isRequired
     },
 
     suggestedCategoryForTrans: function (trans, categories) {
@@ -130,8 +166,12 @@ var TransactionsTable = React.createClass({
         displayName: "TransactionsTable",
 
         propTypes: {
-            onChangeTransactionCategory: React.PropTypes.func.isRequired,
-            categories: React.PropTypes.array.isRequired
+            onChangeTransactionCategory: p.func.isRequired,
+            categories: p.array.isRequired,
+            transactionsFilter: p.shape({
+                showCategorized: p.bool.isRequired,
+                showUncategorized: p.bool.isRequired
+            }).isRequired
         },
 
         render: function () {
@@ -146,6 +186,13 @@ var TransactionsTable = React.createClass({
                         ])),
                     R.tbody({},
                         this.props.transactions.map(function (transaction) {
+
+                            var shouldShow = (transaction.category && this.props.transactionsFilter.showCategorized) ||
+                                (!transaction.category && this.props.transactionsFilter.showUncategorized);
+                            if (!shouldShow) {
+                                return null;
+                            }
+
                             return TransactionRow({
                                 transaction: transaction,
                                 categories: this.props.categories,
@@ -170,7 +217,10 @@ var TransactionPage = React.createClass({
             transactionSums: [],
             categories: [],
             years: [],
-            timeFilter: {year: 2009, month: null}
+            timeFilter: {year: 2009, month: null},
+            transactionsFilter: {
+                showCategorized: true,
+                showUncategorized: true}
         };
     },
 
@@ -230,6 +280,11 @@ var TransactionPage = React.createClass({
         this.loadTransactionsFromServer(timeFilter);
     },
 
+    onTransactionFilterChange: function (transactionFilter) {
+        console.log ("filter:" , transactionFilter) ;
+        this.setState({transactionsFilter: transactionFilter})
+    },
+
     onEditTransaction: function (transactionId) {
         this.loadCategoriesFromServer();
         this.setState({transactionBeingEdited: transactionId});
@@ -261,12 +316,17 @@ var TransactionPage = React.createClass({
                 TransactionSummaryTable({
                     transactionSums: this.state.transactionSums
                 }),
+                TransactionsFilter({
+                    filter: this.state.transactionsFilter,
+                    onFilterChange: this.onTransactionFilterChange
+                }),
                 TransactionsTable({
                     transactions: this.state.transactions,
                     categories: this.state.categories,
                     transactionBeingEdited: this.state.transactionBeingEdited,
                     onChangeTransactionCategory: this.onChangeTransactionCategory,
-                    onEditTransaction: this.onEditTransaction
+                    onEditTransaction: this.onEditTransaction,
+                    transactionsFilter: this.state.transactionsFilter
                 })
             ]);
     }
