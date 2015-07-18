@@ -155,7 +155,7 @@ var TransactionRow = React.createFactory(React.createClass({
                 R.td({}, this.props.transaction.date),
                 R.td({}, this.props.transaction.code),
                 R.td({}, this.props.transaction.description),
-                R.td({}, this.props.transaction.amount),
+                R.td({className: (this.props.transaction.amount > 0) ? "positive" : "negative" }, this.props.transaction.amount),
                 this.categoryComponent(this.props.transaction, this.props.transactionBeingEdited, this.props.categories)
             ]
         )
