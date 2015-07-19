@@ -47,12 +47,10 @@
                                 (when (seq categories)
                                   (d/tbody {}
                                            (map #(d/tr {}
-                                                       (d/td {})
+                                                       (d/td {}
+                                                             (d/button {:className "delete"} "\u2716"))
                                                        (d/td {:className "category"} (:name %))
-                                                       (d/td {} (clojure.string/join ", " (:matches %)))) categories)
-
-
-                                           )))))
+                                                       (d/td {} (clojure.string/join ", " (sort (:matches %))))) categories))))))
 
 (defn renderTransactions []
   (q/render
