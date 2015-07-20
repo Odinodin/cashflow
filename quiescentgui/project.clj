@@ -35,7 +35,7 @@
                                             :source-paths ["cljs"]
                                             :figwheel     true
 
-                                            :compiler     {:main          "cashflow.repl"
+                                            :compiler     {:main          "cashflow.app"
                                                            :output-to     "resources/public/js/app.js"
                                                            :output-dir    "resources/public/js/out"
                                                            :optimizations :none
