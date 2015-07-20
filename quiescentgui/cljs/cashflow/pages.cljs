@@ -40,11 +40,63 @@
                                                          (d/td {} (clojure.string/join ", " (sort (:matches %))))) categories)))))))
 
 
+(q/defcomponent TransactionsTable [transactions]
+                (d/div {:className "bg-box padded"}
+                       (d/table {}
+                                (d/thead {}
+                                         (d/tr {}
+                                               (d/th {} "Date")
+                                               (d/th {} "Code")
+                                               (d/th {} "Description")
+                                               (d/th {} "Amount")
+                                               (d/th {} "Category")))
+
+                                (when (seq transactions)
+                                  (d/tbody {}
+                                           (map #(d/tr {}
+                                                       (d/td {} "a")
+                                                       (d/td {} "b")
+                                                       (d/td {} "c")
+                                                       (d/td {} "d")
+                                                       (d/td {} "e")))
+
+                                           ))
+                                )))
+
+
+(q/defcomponent TimeFilter [years timeFilter]
+                (let [months {1 "Jan"
+                              2 "Feb"
+                              3 "Mar"
+                              4 "Apr"
+                              5 "May"
+                              6 "Jun"
+                              7 "Jul"
+                              8 "Aug"
+                              9 "Sep"
+                              10 "Oct"
+                              11 "Nov"
+                              12 "Dec"}]
+
+                  (d/div {:className "bg-box padded"}
+                         (d/div {:className "container"}
+                                (map #(d/div {:className "item"}
+                                             (d/button {:className "flat-button"} %))
+                                     years))
+                         (d/div {:className "container"}
+                                (map #(d/div {:className "item"}
+                                             (d/button {:className "flat-button"} (second %)))
+                                     months)
+                                )
+                         ))
+                )
+
 (defn renderTransactions [store]
   (q/render
     (d/div {:id "main"}
            (Menu)
-           (d/div {} "Transaction"))
+           (TimeFilter (:available-years store) {:year 2013 :month 1})
+           (TransactionsTable (:transactions store)))
     (.getElementById js/document "main")))
 
 (defn renderCategories [store action-chan]
