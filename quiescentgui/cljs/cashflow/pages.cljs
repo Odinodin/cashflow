@@ -11,11 +11,19 @@
                       (d/li {:className "nav-item"} (d/a {:href "#/transactions"} "Transactions"))
                       (d/li {:className "nav-item"} (d/a {} "Graphs"))))
 
-(q/defcomponent CategoryEditor []
-                (d/div {:className "bg-box"}
-                       (d/form {:className "padded"}
-                               (d/input {:name "name" :type "text" :placeholder "Category name" :className "form-control"})
-                               (d/input {:name "matches" :type "text" :placeholder "Matches" :className "form-control"}))))
+(q/defcomponent CategoryEditor [action-chan]
+                (let [submit-fn (fn [event]
+                                  ;; TODO figure out if there is a better way of getting form element values ..
+                                  (let [category-name (.-value (aget (.-elements (.-target event)) "category-name"))
+                                        matches (.-value (aget (.-elements (.-target event)) "matches"))]
+                                    (put! action-chan {:type :create-category :category-name category-name :matches matches})
+                                    (.preventDefault event)))]
+
+                  (d/div {:className "bg-box"}
+                         (d/form {:className "padded" :onSubmit submit-fn}
+                                 (d/input {:name "category-name" :type "text" :placeholder "Category name" :className "form-control"})
+                                 (d/input {:name "matches" :type "text" :placeholder "Matches" :className "form-control"})
+                                 (d/button {:className "flat-button" :type "submit"} "Add category")))))
 
 (q/defcomponent CategoryTable [categories action-chan]
                 (let [delete-fn (fn [category-name event]
@@ -96,6 +104,6 @@
   (q/render
     (d/div {:id "main"}
            (Menu)
-           (CategoryEditor)
+           (CategoryEditor action-chan)
            (CategoryTable (:categories store) action-chan))
     (.getElementById js/document "main")))
