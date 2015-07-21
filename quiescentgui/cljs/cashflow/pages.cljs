@@ -26,6 +26,23 @@
                                  (d/input {:name "matches" :type "text" :placeholder "Matches" :className "form-control"})
                                  (d/button {:className "flat-button" :type "submit"} "Add category")))))
 
+(q/defcomponent MatchesCell [category action-chan]
+
+                (let [matches->string  (fn [cat] (clojure.string/join ", " (sort (:matches cat))))
+                      string->matches (fn [match-str] (map clojure.string/trim (clojure.string/split match-str ",")))
+
+                      edit-fn (fn [event]
+                                (let [edited-value (-> event .-target .-textContent string->matches)]
+                                  ;; Only actually change value if there is a difference
+                                  (when-not (= (into #{} edited-value) (into #{} (:matches category)))
+                                    (put! action-chan {:type :create-category :category-name (:name category) :matches edited-value}))
+                                  (.preventDefault event)))]
+
+                  (d/td {:contentEditable true
+                         :onBlur          edit-fn}
+                        (matches->string category)))
+                )
+
 (q/defcomponent CategoryTable [categories action-chan]
                 (let [delete-fn (fn [category-name event]
                                   (put! action-chan {:type          :delete-category
@@ -44,7 +61,7 @@
                                                          (d/td {}
                                                                (d/button {:className "delete" :onClick (partial delete-fn (:name %))} "\u2716"))
                                                          (d/td {:className "category"} (:name %))
-                                                         (d/td {} (clojure.string/join ", " (sort (:matches %))))) categories)))))))
+                                                         (MatchesCell % action-chan)) categories)))))))
 
 
 (q/defcomponent TransactionRow [transaction]
