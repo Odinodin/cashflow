@@ -8,7 +8,7 @@
                 (d/ul {:className "navbar"}
                       (d/li {:className "title"} "Cashflow")
                       (d/li {:className "nav-item"} (d/a {:href "#/categories"} "Categories"))
-                      (d/li {:className "nav-item"} (d/a {:href "#/transactions" } "Transactions"))
+                      (d/li {:className "nav-item"} (d/a {:href "#/transactions"} "Transactions"))
                       (d/li {:className "nav-item"} (d/a {} "Graphs"))))
 
 (q/defcomponent CategoryEditor []
@@ -19,11 +19,9 @@
 
 (q/defcomponent CategoryTable [categories action-chan]
                 (let [delete-fn (fn [category-name event]
-                                  (.preventDefault event)
-                                  (put! action-chan {:type :delete-category
-                                                                       :category-name category-name}))]
-
-                  (prn "cats" categories)
+                                  (put! action-chan {:type          :delete-category
+                                                     :category-name category-name})
+                                  (.preventDefault event))]
                   (d/div {:className "bg-box padded"}
                          (d/table {}
                                   (d/thead {}
@@ -39,6 +37,13 @@
                                                          (d/td {:className "category"} (:name %))
                                                          (d/td {} (clojure.string/join ", " (sort (:matches %))))) categories)))))))
 
+(q/defcomponent TransactionRow [transaction]
+                (d/tr {}
+                      (d/td {} (:date transaction))
+                      (d/td {} (:code transaction))
+                      (d/td {} (:description transaction))
+                      (d/td {} (:amount transaction))
+                      (d/td {:className (when (:category transaction) "category")} (:category transaction))))
 
 (q/defcomponent TransactionsTable [transactions]
                 (d/div {:className "bg-box padded"}
@@ -51,51 +56,40 @@
                                                (d/th {} "Amount")
                                                (d/th {} "Category")))
 
+                                ;; Only show rows when there are transactions
                                 (when (seq transactions)
                                   (d/tbody {}
-                                           (map #(d/tr {}
-                                                       (d/td {} "a")
-                                                       (d/td {} "b")
-                                                       (d/td {} "c")
-                                                       (d/td {} "d")
-                                                       (d/td {} "e")))
-
-                                           ))
-                                )))
+                                           (map #(TransactionRow %)
+                                                transactions))))))
 
 
-(q/defcomponent TimeFilter [years timeFilter]
-                (let [months {1 "Jan"
-                              2 "Feb"
-                              3 "Mar"
-                              4 "Apr"
-                              5 "May"
-                              6 "Jun"
-                              7 "Jul"
-                              8 "Aug"
-                              9 "Sep"
-                              10 "Oct"
+(q/defcomponent TimeFilter [{:keys [available-years time-filter]} action-chan]
+                ;; TODO Map index the months instead of hard coding ..
+                (let [months {1  "Jan", 2 "Feb", 3 "Mar", 4 "Apr", 5 "May", 6 "Jun", 7 "Jul", 8 "Aug", 9 "Sep",
+                              10 "Oct",
                               11 "Nov"
-                              12 "Dec"}]
+                              12 "Dec"}
+                      year-class-fn (fn [year] (if (= year (:year time-filter)) "flat-button selected" "flat-button"))
+                      month-class-fn (fn [month-index] (if (= month-index (:month time-filter)) "flat-button selected" "flat-button"))
+                      on-year-click (fn [year event] (put! action-chan {:type :update-time-filter :time-filter {:year year}}) (.preventDefault event))
+                      on-month-click (fn [month event] (put! action-chan {:type :update-time-filter :time-filter (assoc time-filter :month month)}) (.preventDefault event))]
 
                   (d/div {:className "bg-box padded"}
                          (d/div {:className "container"}
-                                (map #(d/div {:className "item"}
-                                             (d/button {:className "flat-button"} %))
-                                     years))
+                                (map (fn [year] (d/div {:className "item"}
+                                                       (d/button {:className (year-class-fn year) :onClick (partial on-year-click year)} year)))
+                                     available-years))
                          (d/div {:className "container"}
-                                (map #(d/div {:className "item"}
-                                             (d/button {:className "flat-button"} (second %)))
-                                     months)
-                                )
-                         ))
-                )
+                                (map (fn [[index name]] (d/div {:className "item"}
+                                                               (d/button {:className (month-class-fn index) :onClick (partial on-month-click index)} name)))
+                                     months)))))
 
-(defn renderTransactions [store]
+(defn renderTransactions [store action-chan]
   (q/render
     (d/div {:id "main"}
            (Menu)
-           (TimeFilter (:available-years store) {:year 2013 :month 1})
+           (TimeFilter (select-keys store [:available-years :time-filter])
+                       action-chan)
            (TransactionsTable (:transactions store)))
     (.getElementById js/document "main")))
 
