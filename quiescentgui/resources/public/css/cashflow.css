@@ -113,7 +113,17 @@ table {
 
 td {
     text-align: left;
-    padding: 0 0.5em;
+    padding: 0 0.2em;
+}
+
+td.positive {
+    text-align: right;
+    color: #00be00;
+}
+
+td.negative {
+    text-align: right;
+    color: #ff7472;
 }
 
 th {

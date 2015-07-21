@@ -37,13 +37,16 @@
                                                          (d/td {:className "category"} (:name %))
                                                          (d/td {} (clojure.string/join ", " (sort (:matches %))))) categories)))))))
 
+
 (q/defcomponent TransactionRow [transaction]
-                (d/tr {}
-                      (d/td {} (:date transaction))
-                      (d/td {} (:code transaction))
-                      (d/td {} (:description transaction))
-                      (d/td {} (:amount transaction))
-                      (d/td {:className (when (:category transaction) "category")} (:category transaction))))
+                (let [amount-class (if (pos? (:amount transaction)) "positive" "negative")]
+
+                  (d/tr {}
+                        (d/td {} (:date transaction))
+                        (d/td {} (:code transaction))
+                        (d/td {} (:description transaction))
+                        (d/td {:className amount-class} (:amount transaction))
+                        (d/td {:className (when (:category transaction) "category")} (:category transaction)))))
 
 (q/defcomponent TransactionsTable [transactions]
                 (d/div {:className "bg-box padded"}
@@ -64,11 +67,7 @@
 
 
 (q/defcomponent TimeFilter [{:keys [available-years time-filter]} action-chan]
-                ;; TODO Map index the months instead of hard coding ..
-                (let [months {1  "Jan", 2 "Feb", 3 "Mar", 4 "Apr", 5 "May", 6 "Jun", 7 "Jul", 8 "Aug", 9 "Sep",
-                              10 "Oct",
-                              11 "Nov"
-                              12 "Dec"}
+                (let [month-map (zipmap (range 1 13) ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"])
                       year-class-fn (fn [year] (if (= year (:year time-filter)) "flat-button selected" "flat-button"))
                       month-class-fn (fn [month-index] (if (= month-index (:month time-filter)) "flat-button selected" "flat-button"))
                       on-year-click (fn [year event] (put! action-chan {:type :update-time-filter :time-filter {:year year}}) (.preventDefault event))
@@ -82,7 +81,7 @@
                          (d/div {:className "container"}
                                 (map (fn [[index name]] (d/div {:className "item"}
                                                                (d/button {:className (month-class-fn index) :onClick (partial on-month-click index)} name)))
-                                     months)))))
+                                     month-map)))))
 
 (defn renderTransactions [store action-chan]
   (q/render
