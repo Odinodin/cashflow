@@ -16,7 +16,8 @@
                                   ;; TODO figure out if there is a better way of getting form element values ..
                                   (let [category-name (.-value (aget (.-elements (.-target event)) "category-name"))
                                         matches (.-value (aget (.-elements (.-target event)) "matches"))]
-                                    (put! action-chan {:type :create-category :category-name category-name :matches matches})
+                                    (when-not (clojure.string/blank? category-name) (put! action-chan {:type :create-category :category-name category-name :matches matches}))
+                                    (.reset (.-target event))
                                     (.preventDefault event)))]
 
                   (d/div {:className "bg-box"}
