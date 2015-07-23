@@ -39,7 +39,17 @@
                                 (put! action-chan {:type :load-categories}))
              :update-time-filter (do
                                    (swap! store (fn [old] (assoc old :time-filter (:time-filter action))))
-                                   (put! action-chan {:type :load-transactions}))))
+                                   (put! action-chan {:type :load-transactions}))
+
+             :edit-transaction-category-started (swap! store (fn [old] (assoc old :ui-state {:is-editing-transaction-with-id (:transaction-id action)})))
+             :edit-transaction-category-finished (do (swap! store (fn [old] (assoc old :ui-state {:is-editing-transaction-with-id nil})))
+                                                     (let [response (<! (http/post (str "/api/transactions/" (:transaction-id action))
+                                                                                   {:json-params {:id (:transaction-id action)
+                                                                                                  :category (:category-name action)}}))]
+                                                       (put! action-chan {:type :load-transactions})
+                                                       )
+                                                     )
+             ))
 
          (recur))
 

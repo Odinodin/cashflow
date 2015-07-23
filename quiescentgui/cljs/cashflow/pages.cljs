@@ -28,7 +28,7 @@
 
 (q/defcomponent MatchesCell [category action-chan]
 
-                (let [matches->string  (fn [cat] (clojure.string/join ", " (sort (:matches cat))))
+                (let [matches->string (fn [cat] (clojure.string/join ", " (sort (:matches cat))))
                       string->matches (fn [match-str] (map clojure.string/trim (clojure.string/split match-str ",")))
 
                       edit-fn (fn [event]
@@ -63,8 +63,39 @@
                                                          (d/td {:className "category"} (:name %))
                                                          (MatchesCell % action-chan)) categories)))))))
 
+(q/defcomponent TransactionCategoryCell [{:keys [transaction categories ui-state]} action-chan]
 
-(q/defcomponent TransactionRow [transaction]
+                (let [on-click-category-fn (fn [event]
+                                             (put! action-chan {:type           :edit-transaction-category-started
+                                                                :transaction-id (:id transaction)})
+                                             (.preventDefault event))
+                      potential-categories (fn []
+                                             (when (= (:is-editing-transaction-with-id ui-state)
+                                                      (:id transaction))
+                                               (map #(d/div {:className "category" "category-candidate" "fade-in"
+                                                             :onClick   (fn [] (put! action-chan {:type           :edit-transaction-category-finished
+                                                                                                  :transaction-id (:id transaction)
+                                                                                                  :category-name  (:name %)}))}
+                                                            (:name %)
+
+                                                            ;; TODO Continue with on click
+                                                            )
+                                                    categories)))]
+
+                  (if (:category transaction)
+                    (d/td {:className "wide50"}
+                          (d/div {:onClick on-click-category-fn :className "category"}
+                                 (:category transaction))
+                          (potential-categories))
+                    (d/td {:className "wide50"}
+                          (d/div {:onClick on-click-category-fn :className "category category-missing"}
+                                 "?")
+                          (potential-categories))
+                    ))
+
+                )
+
+(q/defcomponent TransactionRow [{:keys [transaction categories ui-state]} action-chan]
                 (let [amount-class (if (pos? (:amount transaction)) "positive" "negative")]
 
                   (d/tr {}
@@ -72,9 +103,9 @@
                         (d/td {} (:code transaction))
                         (d/td {} (:description transaction))
                         (d/td {:className amount-class} (:amount transaction))
-                        (d/td {:className (when (:category transaction) "category")} (:category transaction)))))
+                        (TransactionCategoryCell {:transaction transaction :categories categories :ui-state ui-state} action-chan))))
 
-(q/defcomponent TransactionsTable [transactions]
+(q/defcomponent TransactionsTable [{:keys [transactions categories ui-state]} action-chan]
                 (d/div {:className "bg-box padded"}
                        (d/table {}
                                 (d/thead {}
@@ -88,7 +119,10 @@
                                 ;; Only show rows when there are transactions
                                 (when (seq transactions)
                                   (d/tbody {}
-                                           (map #(TransactionRow %)
+                                           (map #(TransactionRow {:transaction %
+                                                                  :categories  categories
+                                                                  :ui-state    ui-state}
+                                                                 action-chan)
                                                 transactions))))))
 
 
@@ -115,7 +149,7 @@
            (Menu)
            (TimeFilter (select-keys store [:available-years :time-filter])
                        action-chan)
-           (TransactionsTable (:transactions store)))
+           (TransactionsTable store action-chan))
     (.getElementById js/document "main")))
 
 (defn renderCategories [store action-chan]
