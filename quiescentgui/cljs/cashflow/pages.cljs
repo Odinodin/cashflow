@@ -72,15 +72,25 @@
                       potential-categories (fn []
                                              (when (= (:is-editing-transaction-with-id ui-state)
                                                       (:id transaction))
-                                               (map #(d/div {:className "category" "category-candidate" "fade-in"
+                                               (map #(d/div {:className "category category-candidate fade-in"
                                                              :onClick   (fn [] (put! action-chan {:type           :edit-transaction-category-finished
                                                                                                   :transaction-id (:id transaction)
                                                                                                   :category-name  (:name %)}))}
-                                                            (:name %)
+                                                            (:name %))
+                                                    categories)))
+                      suggest-category (fn []
+                                         (when (not= (:is-editing-transaction-with-id ui-state)
+                                                     (:id transaction))
+                                           (let [matches (filter (fn [category] (some #(re-find (re-pattern (str "(?i)" %)) (:description transaction)) (:matches category)) ) categories)]
+                                             (map
+                                               (fn [match] (d/div {:className "category category-suggestion"
+                                                                   :onClick   (fn [] (put! action-chan {:type           :edit-transaction-category-finished
+                                                                                                        :transaction-id (:id transaction)
+                                                                                                        :category-name  (:name match)}))}
+                                                                  (str (:name match) "?"))
+                                                 ) matches))))
 
-                                                            ;; TODO Continue with on click
-                                                            )
-                                                    categories)))]
+                      ]
 
                   (if (:category transaction)
                     (d/td {:className "wide50"}
@@ -90,10 +100,8 @@
                     (d/td {:className "wide50"}
                           (d/div {:onClick on-click-category-fn :className "category category-missing"}
                                  "?")
-                          (potential-categories))
-                    ))
-
-                )
+                          (suggest-category)
+                          (potential-categories)))))
 
 (q/defcomponent TransactionRow [{:keys [transaction categories ui-state]} action-chan]
                 (let [amount-class (if (pos? (:amount transaction)) "positive" "negative")]
