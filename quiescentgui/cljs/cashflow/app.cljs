@@ -15,7 +15,8 @@
                   :time-filter     {}
                   :transactions    []
                   :ui-state        {:transaction-page {:show-transactions-with-categories    true
-                                                       :show-transactions-without-categories true}}}))
+                                                       :show-transactions-without-categories true
+                                                       :transaction-description-filter "Rem"}}}))
 
 (def action-chan (chan))
 
@@ -50,6 +51,7 @@
                                                                                                   :category (:category-name action)}}))]
                                                        (put! action-chan {:type :load-transactions})))
 
+             :transaction-page-update-transaction-desc-filter (do (swap! store (fn [old] (assoc-in old [:ui-state :transaction-page :transaction-description-filter] (:value action)))))
              :transaction-page-toggle-show-category (do (swap! store (fn [old] (update-in old [:ui-state :transaction-page :show-transactions-with-categories] not))))
              :transaction-page-toggle-show-no-category (do (swap! store (fn [old] (update-in old [:ui-state :transaction-page :show-transactions-without-categories] not))))
              ))

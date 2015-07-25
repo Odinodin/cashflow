@@ -115,10 +115,17 @@
 
 (q/defcomponent TransactionRow [{:keys [transaction categories ui-state]} action-chan]
                 ;; Filter transactions based on UI-state
-                (when (or (and (:category transaction)
-                               (get-in ui-state [:transaction-page :show-transactions-with-categories]))
-                          (and (not (:category transaction))
-                               (get-in ui-state [:transaction-page :show-transactions-without-categories])))
+                ;; TODO clean this up
+                (when (and
+                        ;; Category or no category filtering
+                        (or (and (:category transaction)
+                                    (get-in ui-state [:transaction-page :show-transactions-with-categories]))
+                               (and (not (:category transaction))
+                                    (get-in ui-state [:transaction-page :show-transactions-without-categories])))
+                           ;; Transaction description search filter
+                           (let [desc-filter (get-in ui-state [:transaction-page :transaction-description-filter])]
+                             (or (clojure.string/blank? desc-filter )
+                                 (re-find (re-pattern (str "(?i)" desc-filter)) (:description transaction)))))
                   (let [amount-class (if (pos? (:amount transaction)) "positive" "negative")]
 
                     (d/tr {}
@@ -135,7 +142,10 @@
                                           (.preventDefault event))
                       on-no-category-click (fn [event]
                                              (put! action-chan {:type :transaction-page-toggle-show-no-category})
-                                             (.preventDefault event))]
+                                             (.preventDefault event))
+                      on-transaction-desc-filter-change (fn [event]
+                                                          (put! action-chan {:type :transaction-page-update-transaction-desc-filter :value (.-value (.-target event))})
+                                                          (.preventDefault event))]
 
                   (d/div {:className "bg-box padded"}
                          (d/input {:type    "checkbox"
@@ -144,7 +154,12 @@
 
                          (d/input {:type    "checkbox"
                                    :checked (get-in ui-state [:transaction-page :show-transactions-without-categories])
-                                   :onClick on-no-category-click} "No Category"))))
+                                   :onClick on-no-category-click} "No Category")
+                         (d/input {:type "text"
+                                   :placeholder "Transaction filter"
+                                   :className "form-control"
+                                   :value (get-in ui-state [:transaction-page :transaction-description-filter])
+                                   :onChange on-transaction-desc-filter-change}))))
 
 (q/defcomponent TransactionsTable [{:keys [transactions categories ui-state]} action-chan]
                 (d/div {:className "bg-box padded"}
