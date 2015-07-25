@@ -106,6 +106,10 @@ body {
     background-color: darkorange;
 }
 
+.category-candidate {
+    background-color: #00be00;
+}
+
 table {
     border-collapse: collapse;
     width: 100%;

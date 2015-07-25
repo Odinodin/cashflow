@@ -27,7 +27,6 @@
                                  (d/button {:className "flat-button" :type "submit"} "Add category")))))
 
 (q/defcomponent MatchesCell [category action-chan]
-
                 (let [matches->string (fn [cat] (clojure.string/join ", " (sort (:matches cat))))
                       string->matches (fn [match-str] (map clojure.string/trim (clojure.string/split match-str ",")))
 
@@ -40,8 +39,7 @@
 
                   (d/td {:contentEditable true
                          :onBlur          edit-fn}
-                        (matches->string category)))
-                )
+                        (matches->string category))))
 
 (q/defcomponent CategoryTable [categories action-chan]
                 (let [delete-fn (fn [category-name event]
@@ -63,45 +61,57 @@
                                                          (d/td {:className "category"} (:name %))
                                                          (MatchesCell % action-chan)) categories)))))))
 
-(q/defcomponent TransactionCategoryCell [{:keys [transaction categories ui-state]} action-chan]
+(defn- transaction-being-edited? [transaction ui-state]
+  (= (:is-editing-transaction-with-id ui-state)
+        (:id transaction)))
+
+(q/defcomponent CategoryForTransactionSuggestion [{:keys [transaction categories]} action-chan]
+                (let [matches (filter (fn [category] (some #(re-find (re-pattern (str "(?i)" %)) (:description transaction)) (:matches category))) categories)]
+                  (d/div {} (map
+                              (fn [match] (d/div {:className "category category-suggestion"
+                                                  :onClick   (fn [] (put! action-chan {:type           :edit-transaction-category-finished
+                                                                                       :transaction-id (:id transaction)
+                                                                                       :category-name  (:name match)}))}
+                                                 (str (:name match) "?"))
+                                ) matches))))
+
+(q/defcomponent CategoryForTransactionEditor [{:keys [transaction categories]} action-chan]
+                (d/div {}
+                       (map #(d/div {:className "category category-candidate fade-in"
+                                     :onClick   (fn [] (put! action-chan {:type           :edit-transaction-category-finished
+                                                                          :transaction-id (:id transaction)
+                                                                          :category-name  (:name %)}))}
+                                    (:name %))
+                            categories)))
+
+(q/defcomponent TransactionCategoryCell [{:keys [transaction categories ui-state] :as props} action-chan]
 
                 (let [on-click-category-fn (fn [event]
                                              (put! action-chan {:type           :edit-transaction-category-started
                                                                 :transaction-id (:id transaction)})
-                                             (.preventDefault event))
-                      potential-categories (fn []
-                                             (when (= (:is-editing-transaction-with-id ui-state)
-                                                      (:id transaction))
-                                               (map #(d/div {:className "category category-candidate fade-in"
-                                                             :onClick   (fn [] (put! action-chan {:type           :edit-transaction-category-finished
-                                                                                                  :transaction-id (:id transaction)
-                                                                                                  :category-name  (:name %)}))}
-                                                            (:name %))
-                                                    categories)))
-                      suggest-category (fn []
-                                         (when (not= (:is-editing-transaction-with-id ui-state)
-                                                     (:id transaction))
-                                           (let [matches (filter (fn [category] (some #(re-find (re-pattern (str "(?i)" %)) (:description transaction)) (:matches category)) ) categories)]
-                                             (map
-                                               (fn [match] (d/div {:className "category category-suggestion"
-                                                                   :onClick   (fn [] (put! action-chan {:type           :edit-transaction-category-finished
-                                                                                                        :transaction-id (:id transaction)
-                                                                                                        :category-name  (:name match)}))}
-                                                                  (str (:name match) "?"))
-                                                 ) matches))))
-
-                      ]
+                                             (.preventDefault event))]
 
                   (if (:category transaction)
                     (d/td {:className "wide50"}
                           (d/div {:onClick on-click-category-fn :className "category"}
                                  (:category transaction))
-                          (potential-categories))
+                          (when (transaction-being-edited? transaction ui-state)
+                            ;; Select category
+                            (CategoryForTransactionEditor
+                              (select-keys props [:categories :transaction :ui-state])
+                              action-chan)))
                     (d/td {:className "wide50"}
                           (d/div {:onClick on-click-category-fn :className "category category-missing"}
                                  "?")
-                          (suggest-category)
-                          (potential-categories)))))
+                          (if (transaction-being-edited? transaction ui-state)
+                            ;; Select category
+                            (CategoryForTransactionEditor
+                              (select-keys props [:categories :transaction :ui-state])
+                              action-chan)
+                            ;; Suggest a category
+                            (CategoryForTransactionSuggestion
+                              (select-keys props [:categories :transaction :ui-state])
+                              action-chan))))))
 
 (q/defcomponent TransactionRow [{:keys [transaction categories ui-state]} action-chan]
                 (let [amount-class (if (pos? (:amount transaction)) "positive" "negative")]
