@@ -62,8 +62,8 @@
                                                          (MatchesCell % action-chan)) categories)))))))
 
 (defn- transaction-being-edited? [transaction ui-state]
-  (= (:is-editing-transaction-with-id ui-state)
-        (:id transaction)))
+  (= (get-in ui-state [:transaction-page :is-editing-transaction-with-id])
+     (:id transaction)))
 
 (q/defcomponent CategoryForTransactionSuggestion [{:keys [transaction categories]} action-chan]
                 (let [matches (filter (fn [category] (some #(re-find (re-pattern (str "(?i)" %)) (:description transaction)) (:matches category))) categories)]
@@ -114,14 +114,37 @@
                               action-chan))))))
 
 (q/defcomponent TransactionRow [{:keys [transaction categories ui-state]} action-chan]
-                (let [amount-class (if (pos? (:amount transaction)) "positive" "negative")]
+                ;; Filter transactions based on UI-state
+                (when (or (and (:category transaction)
+                               (get-in ui-state [:transaction-page :show-transactions-with-categories]))
+                          (and (not (:category transaction))
+                               (get-in ui-state [:transaction-page :show-transactions-without-categories])))
+                  (let [amount-class (if (pos? (:amount transaction)) "positive" "negative")]
 
-                  (d/tr {}
-                        (d/td {} (:date transaction))
-                        (d/td {} (:code transaction))
-                        (d/td {} (:description transaction))
-                        (d/td {:className amount-class} (:amount transaction))
-                        (TransactionCategoryCell {:transaction transaction :categories categories :ui-state ui-state} action-chan))))
+                    (d/tr {}
+                          (d/td {} (:date transaction))
+                          (d/td {} (:code transaction))
+                          (d/td {} (:description transaction))
+                          (d/td {:className amount-class} (:amount transaction))
+                          (TransactionCategoryCell {:transaction transaction :categories categories :ui-state ui-state} action-chan)))))
+
+(q/defcomponent TransactionFilter [{:keys [ui-state]} action-chan]
+
+                (let [on-category-click (fn [event]
+                                          (put! action-chan {:type :transaction-page-toggle-show-category})
+                                          (.preventDefault event))
+                      on-no-category-click (fn [event]
+                                             (put! action-chan {:type :transaction-page-toggle-show-no-category})
+                                             (.preventDefault event))]
+
+                  (d/div {:className "bg-box padded"}
+                         (d/input {:type    "checkbox"
+                                   :checked (get-in ui-state [:transaction-page :show-transactions-with-categories])
+                                   :onClick on-category-click} "Category")
+
+                         (d/input {:type    "checkbox"
+                                   :checked (get-in ui-state [:transaction-page :show-transactions-without-categories])
+                                   :onClick on-no-category-click} "No Category"))))
 
 (q/defcomponent TransactionsTable [{:keys [transactions categories ui-state]} action-chan]
                 (d/div {:className "bg-box padded"}
@@ -167,6 +190,7 @@
            (Menu)
            (TimeFilter (select-keys store [:available-years :time-filter])
                        action-chan)
+           (TransactionFilter store action-chan)
            (TransactionsTable store action-chan))
     (.getElementById js/document "main")))
 

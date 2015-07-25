@@ -13,7 +13,9 @@
 (def store (atom {:categories      []
                   :available-years []
                   :time-filter     {}
-                  :transactions    []}))
+                  :transactions    []
+                  :ui-state        {:transaction-page {:show-transactions-with-categories    true
+                                                       :show-transactions-without-categories true}}}))
 
 (def action-chan (chan))
 
@@ -41,12 +43,16 @@
                                    (swap! store (fn [old] (assoc old :time-filter (:time-filter action))))
                                    (put! action-chan {:type :load-transactions}))
 
-             :edit-transaction-category-started (swap! store (fn [old] (assoc old :ui-state {:is-editing-transaction-with-id (:transaction-id action)})))
-             :edit-transaction-category-finished (do (swap! store (fn [old] (assoc old :ui-state {:is-editing-transaction-with-id nil})))
+             :edit-transaction-category-started (swap! store (fn [old] (assoc-in old [:ui-state :transaction-page :is-editing-transaction-with-id] (:transaction-id action))))
+             :edit-transaction-category-finished (do (swap! store (fn [old] (assoc-in old [:ui-state :transaction-page :is-editing-transaction-with-id] nil)))
                                                      (let [response (<! (http/post (str "/api/transactions/" (:transaction-id action))
                                                                                    {:json-params {:id       (:transaction-id action)
                                                                                                   :category (:category-name action)}}))]
-                                                       (put! action-chan {:type :load-transactions})))))
+                                                       (put! action-chan {:type :load-transactions})))
+
+             :transaction-page-toggle-show-category (do (swap! store (fn [old] (update-in old [:ui-state :transaction-page :show-transactions-with-categories] not))))
+             :transaction-page-toggle-show-no-category (do (swap! store (fn [old] (update-in old [:ui-state :transaction-page :show-transactions-without-categories] not))))
+             ))
 
          (recur))
 
