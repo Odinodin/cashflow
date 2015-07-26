@@ -4,7 +4,10 @@
             [cljs.core.async :refer [<! >! chan put!]]
             [secretary.core :as secretary :refer-macros [defroute]]
 
-            [cashflow.pages :as pages]))
+
+            [cashflow.category-page :as category-page]
+            [cashflow.transactions-page :as transactions-page]
+            [cashflow.graphs-page :as graphs-page]))
 
 #_((use 'figwheel-sidecar.repl-api))
 
@@ -71,16 +74,16 @@
   (str js/window.location.hash))
 
 (defroute home "/" []
-          (pages/renderCategories @store action-chan))
+          (category-page/render @store action-chan))
 
 (defroute categories "/categories" []
-          (pages/renderCategories @store action-chan))
+          (category-page/render @store action-chan))
 
 (defroute transactions "/transactions" []
-          (pages/renderTransactions @store action-chan))
+          (transactions-page/render @store action-chan))
 
 (defroute graphs "/graphs" []
-          (pages/renderGraphs @store action-chan))
+          (graphs-page/render @store action-chan))
 
 (defn render []
   #_(prn "rendering")
