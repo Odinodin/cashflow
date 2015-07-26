@@ -19,7 +19,8 @@
                   :transactions    []
                   :ui-state        {:transaction-page {:show-transactions-with-categories    true
                                                        :show-transactions-without-categories true
-                                                       :transaction-description-filter ""}}}))
+                                                       :transaction-description-filter ""}
+                                    :graphs-page {:show-graph :net-income-graph}}}))
 
 (def action-chan (chan))
 
@@ -57,6 +58,8 @@
              :transaction-page-update-transaction-desc-filter (do (swap! store (fn [old] (assoc-in old [:ui-state :transaction-page :transaction-description-filter] (:value action)))))
              :transaction-page-toggle-show-category (do (swap! store (fn [old] (update-in old [:ui-state :transaction-page :show-transactions-with-categories] not))))
              :transaction-page-toggle-show-no-category (do (swap! store (fn [old] (update-in old [:ui-state :transaction-page :show-transactions-without-categories] not))))
+             :show-graph (do (swap! store (fn [old] (assoc-in old [:ui-state :graphs-page :show-graph] (:graph-type action)))))
+
              ))
 
          (recur))

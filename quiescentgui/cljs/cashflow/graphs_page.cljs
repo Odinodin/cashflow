@@ -9,12 +9,20 @@
 
 (q/defcomponent GraphTypeSelector [{:keys [ui-state]} action-chan]
                 (let [on-button-click (fn [graph-type event]
-                                        (prn "dd" graph-type)
+                                        (put! action-chan {:type       :show-graph
+                                                           :graph-type graph-type})
                                         (.preventDefault event))]
 
                   (d/div {:className "bg-box padded"}
-                         (map #(d/button {:className "flat-button" :onClick (partial on-button-click %)} (name %)) graph-types)
-                         )))
+                         (map (fn [graph-type-kw]
+                                (let [css (if (= (get-in ui-state [:graphs-page :show-graph])
+                                                 graph-type-kw)
+                                              "flat-button selected"
+                                              "flat-button")]
+
+                                  (d/button {:className css
+                                             :onClick   (partial on-button-click graph-type-kw)} (name graph-type-kw))))
+                              graph-types))))
 
 (defn render [store action-chan]
   (q/render
@@ -22,8 +30,6 @@
            (common/Menu)
            (common/TimeFilter (select-keys store [:available-years :time-filter])
                               action-chan)
-           (GraphTypeSelector)
+           (GraphTypeSelector store action-chan)
            "graphs!")
-    (.getElementById js/document "main"))
-
-  )
+    (.getElementById js/document "main")))

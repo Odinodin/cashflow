@@ -232,3 +232,6 @@ button.delete:hover {
     border-color: #3c3c3c;
     transition: background-color 0.5s ease;
 }
+
+/* Avoid blue outline when clicking buttons */
+button:focus {outline:0;}
