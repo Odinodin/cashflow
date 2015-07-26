@@ -16,7 +16,7 @@
                   :transactions    []
                   :ui-state        {:transaction-page {:show-transactions-with-categories    true
                                                        :show-transactions-without-categories true
-                                                       :transaction-description-filter "Rem"}}}))
+                                                       :transaction-description-filter ""}}}))
 
 (def action-chan (chan))
 
@@ -78,6 +78,9 @@
 
 (defroute transactions "/transactions" []
           (pages/renderTransactions @store action-chan))
+
+(defroute graphs "/graphs" []
+          (pages/renderGraphs @store action-chan))
 
 (defn render []
   #_(prn "rendering")

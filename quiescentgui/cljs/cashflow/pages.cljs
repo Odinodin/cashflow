@@ -9,7 +9,7 @@
                       (d/li {:className "title"} "Cashflow")
                       (d/li {:className "nav-item"} (d/a {:href "#/categories"} "Categories"))
                       (d/li {:className "nav-item"} (d/a {:href "#/transactions"} "Transactions"))
-                      (d/li {:className "nav-item"} (d/a {} "Graphs"))))
+                      (d/li {:className "nav-item"} (d/a {:href "#/graphs"} "Graphs"))))
 
 (q/defcomponent CategoryEditor [action-chan]
                 (let [submit-fn (fn [event]
@@ -113,19 +113,22 @@
                               (select-keys props [:categories :transaction :ui-state])
                               action-chan))))))
 
-(q/defcomponent TransactionRow [{:keys [transaction categories ui-state]} action-chan]
+(q/defcomponent TransactionRow
+                ;; Each row needs a unique react key
+                :keyfn (fn [value] (-> value :transaction :id))
+                [{:keys [transaction categories ui-state]} action-chan]
                 ;; Filter transactions based on UI-state
                 ;; TODO clean this up
                 (when (and
                         ;; Category or no category filtering
                         (or (and (:category transaction)
-                                    (get-in ui-state [:transaction-page :show-transactions-with-categories]))
-                               (and (not (:category transaction))
-                                    (get-in ui-state [:transaction-page :show-transactions-without-categories])))
-                           ;; Transaction description search filter
-                           (let [desc-filter (get-in ui-state [:transaction-page :transaction-description-filter])]
-                             (or (clojure.string/blank? desc-filter )
-                                 (re-find (re-pattern (str "(?i)" desc-filter)) (:description transaction)))))
+                                 (get-in ui-state [:transaction-page :show-transactions-with-categories]))
+                            (and (not (:category transaction))
+                                 (get-in ui-state [:transaction-page :show-transactions-without-categories])))
+                        ;; Transaction description search filter
+                        (let [desc-filter (get-in ui-state [:transaction-page :transaction-description-filter])]
+                          (or (clojure.string/blank? desc-filter)
+                              (re-find (re-pattern (str "(?i)" desc-filter)) (:description transaction)))))
                   (let [amount-class (if (pos? (:amount transaction)) "positive" "negative")]
 
                     (d/tr {}
@@ -148,18 +151,18 @@
                                                           (.preventDefault event))]
 
                   (d/div {:className "bg-box padded"}
-                         (d/input {:type    "checkbox"
-                                   :checked (get-in ui-state [:transaction-page :show-transactions-with-categories])
-                                   :onClick on-category-click} "Category")
+                         (d/input {:type     "checkbox"
+                                   :checked  (get-in ui-state [:transaction-page :show-transactions-with-categories])
+                                   :onChange on-category-click} "Category")
 
-                         (d/input {:type    "checkbox"
-                                   :checked (get-in ui-state [:transaction-page :show-transactions-without-categories])
-                                   :onClick on-no-category-click} "No Category")
-                         (d/input {:type "text"
+                         (d/input {:type     "checkbox"
+                                   :checked  (get-in ui-state [:transaction-page :show-transactions-without-categories])
+                                   :onChange on-no-category-click} "No Category")
+                         (d/input {:type        "text"
                                    :placeholder "Transaction filter"
-                                   :className "form-control"
-                                   :value (get-in ui-state [:transaction-page :transaction-description-filter])
-                                   :onChange on-transaction-desc-filter-change}))))
+                                   :className   "form-control"
+                                   :value       (get-in ui-state [:transaction-page :transaction-description-filter])
+                                   :onChange    on-transaction-desc-filter-change}))))
 
 (q/defcomponent TransactionsTable [{:keys [transactions categories ui-state]} action-chan]
                 (d/div {:className "bg-box padded"}
@@ -172,14 +175,12 @@
                                                (d/th {} "Amount")
                                                (d/th {} "Category")))
 
-                                ;; Only show rows when there are transactions
-                                (when (seq transactions)
                                   (d/tbody {}
                                            (map #(TransactionRow {:transaction %
                                                                   :categories  categories
                                                                   :ui-state    ui-state}
                                                                  action-chan)
-                                                transactions))))))
+                                                transactions)))))
 
 
 (q/defcomponent TimeFilter [{:keys [available-years time-filter]} action-chan]
@@ -191,13 +192,25 @@
 
                   (d/div {:className "bg-box padded"}
                          (d/div {:className "container"}
-                                (map (fn [year] (d/div {:className "item"}
-                                                       (d/button {:className (year-class-fn year) :onClick (partial on-year-click year)} year)))
-                                     available-years))
+                                (map-indexed (fn [idx year]
+                                               (d/div {:key idx :className "item"}
+                                                      (d/button {:className (year-class-fn year) :onClick (partial on-year-click year)} year)))
+                                             available-years))
                          (d/div {:className "container"}
-                                (map (fn [[index name]] (d/div {:className "item"}
+                                (map (fn [[index name]] (d/div {:key index :className "item"}
                                                                (d/button {:className (month-class-fn index) :onClick (partial on-month-click index)} name)))
                                      month-map)))))
+
+(def graph-types [:net-income-graph :category-graph])
+
+(q/defcomponent GraphTypeSelector [{:keys [ui-state]} action-chan]
+                (let [on-button-click (fn [graph-type event]
+                                        (prn "dd" graph-type)
+                                        (.preventDefault event))]
+
+                  (d/div {:className "bg-box padded"}
+                         (map #(d/button {:className "flat-button" :onClick (partial on-button-click %)} (name %)) graph-types)
+                         )))
 
 (defn renderTransactions [store action-chan]
   (q/render
@@ -216,3 +229,16 @@
            (CategoryEditor action-chan)
            (CategoryTable (:categories store) action-chan))
     (.getElementById js/document "main")))
+
+
+(defn renderGraphs [store action-chan]
+  (q/render
+    (d/div {:id "main"}
+           (Menu)
+           (TimeFilter (select-keys store [:available-years :time-filter])
+                       action-chan)
+           (GraphTypeSelector)
+           "graphs!")
+    (.getElementById js/document "main"))
+
+  )
