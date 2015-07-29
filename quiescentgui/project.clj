@@ -41,7 +41,11 @@
                                                            :optimizations :none
                                                            :asset-path    "js/out"
                                                            :source-map    true
-                                                           :pretty-print  true}}]
+                                                           :pretty-print  true
+
+                                                           :foreign-libs  [{:file "lib/standalone-framework.src.js" :provides ["Standalone"]}
+                                                                           {:file "lib/highcharts.src.js" :provides ["Highcharts"] :requires ["Standalone"]}                                                                           ]
+                                                           }}]
                                   }
 
                    :figwheel     {
