@@ -76,24 +76,33 @@
                        (d/div {:className "graph"} "The target")))
 
 (q/defcomponent NetIncomeGraph
-                :on-mount (fn [dom-node component-value]
+                :on-render (fn [dom-node store]
                             ;; Need to pass the dom-node reference to :renderTo
 
-                            (new js/Highcharts.Chart
-                                 (clj->js
-                                   (deep-merge chart-theme
-                                               {
-                                                :chart
-                                                        {:type     "column"
-                                                         :renderTo (dom-child-with-class dom-node "graph")}
-                                                :series [{:name "Income'",
-                                                          :data (map (fn [item] [(:time item) (:income item)]) (:net-income component-value))
-                                                          },
-                                                         {:name "Expenses",
-                                                          :data (map (fn [item] [(:time item) (js/Math.abs (:expense item))]) (:net-income component-value))
-                                                          }]
-                                                :xAxis  {:type "category"}
-                                                }))))
+                            (let [income-by-month (fn [store]
+                                                    (->> (:net-income store)
+                                                         (filter (fn [item] (.startsWith (:time item) (get-in store [:time-filter :year]))))
+                                                         (map (fn [item] [(:time item) (:income item)]))))
+                                  expense-by-month (fn [store]
+                                                     (->> (:net-income store)
+                                                          (filter (fn [item] (.startsWith (:time item) (get-in store [:time-filter :year]))))
+                                                          (map (fn [item] [(:time item) (js/Math.abs (:expense item))]))))]
+
+                              (new js/Highcharts.Chart
+                                   (clj->js
+                                     (deep-merge chart-theme
+                                                 {
+                                                  :chart
+                                                          {:type     "column"
+                                                           :renderTo (dom-child-with-class dom-node "graph")}
+                                                  :series [{:name "Income'",
+                                                            :data (income-by-month store)
+                                                            },
+                                                           {:name "Expenses",
+                                                            :data (expense-by-month store)
+                                                            }]
+                                                  :xAxis  {:type "category"}
+                                                  })))))
 
                 [store action-chan]
                 ;; Target or chart renderTo
