@@ -29,3 +29,14 @@
                                 (map (fn [[index name]] (d/div {:key index :className "item"}
                                                                (d/button {:className (month-class-fn index) :onClick (partial on-month-click index)} name)))
                                      month-map)))))
+
+(q/defcomponent YearFilter [{:keys [available-years time-filter]} action-chan]
+                (let [year-class-fn (fn [year] (if (= year (:year time-filter)) "flat-button selected" "flat-button"))
+                      on-year-click (fn [year event] (put! action-chan {:type :update-time-filter :time-filter {:year year}}) (.preventDefault event))]
+
+                  (d/div {:className "bg-box padded"}
+                         (d/div {:className "container"}
+                                (map-indexed (fn [idx year]
+                                               (d/div {:key idx :className "item"}
+                                                      (d/button {:className (year-class-fn year) :onClick (partial on-year-click year)} year)))
+                                             available-years)))))

@@ -4,6 +4,8 @@
             [quiescent.core :as q]
             [quiescent.dom :as d]
             [cashflow.common :as common]
+
+            [Highcharts]
             ))
 
 (def graph-types [:net-income-graph :category-graph])
@@ -25,6 +27,11 @@
                                              :onClick   (partial on-button-click graph-type-kw)} (name graph-type-kw))))
                               graph-types))))
 
+
+(defn dom-child-with-class
+  "Search the dom elements children to find the first dom element that has the desired CSS class"
+  [element css-class]
+  (aget (.getElementsByClassName element css-class) 0))
 
 (defn deep-merge
   "Recursively merges maps. If keys are not maps, the last value wins."
@@ -53,7 +60,7 @@
                                    (deep-merge chart-theme
                                                {:chart
                                                         {:type     "column"
-                                                         :renderTo dom-node}
+                                                         :renderTo (dom-child-with-class dom-node "graph")}
                                                 :series [{
                                                           :name "Jane",
                                                           :data [1, 0, 4]
@@ -63,28 +70,38 @@
                                                               }]
                                                 }))))
                 [store action-chan]
-                (d/div {} "waiting for graph.."))
+                (d/div {}
+                       (common/TimeFilter (select-keys store [:available-years :time-filter])
+                                          action-chan)
+                       (d/div {:className "graph"} "The target")))
 
 (q/defcomponent NetIncomeGraph
                 :on-mount (fn [dom-node component-value]
                             ;; Need to pass the dom-node reference to :renderTo
+
                             (new js/Highcharts.Chart
                                  (clj->js
                                    (deep-merge chart-theme
-                                               {:chart
+                                               {
+                                                :chart
                                                         {:type     "column"
-                                                         :renderTo dom-node}
-                                                :series [{
-                                                          :name "arr",
-                                                          :data [1, 0, 4]
-                                                          }, {
-                                                              :name "John",
-                                                              :data [5, 7, 3]
-                                                              }]
+                                                         :renderTo (dom-child-with-class dom-node "graph")}
+                                                :series [{:name "Income'",
+                                                          :data (map (fn [item] [(:time item) (:income item)]) (:net-income component-value))
+                                                          },
+                                                         {:name "Expenses",
+                                                          :data (map (fn [item] [(:time item) (js/Math.abs (:expense item))]) (:net-income component-value))
+                                                          }]
+                                                :xAxis  {:type "category"}
                                                 }))))
 
                 [store action-chan]
-                (d/div {} "net income"))
+                ;; Target or chart renderTo
+
+                (d/div {}
+                       (common/YearFilter (select-keys store [:available-years :time-filter])
+                                          action-chan)
+                       (d/div {:className "graph"} "The target")))
 
 
 (q/defcomponent Graph [store action-chan]
@@ -97,8 +114,7 @@
   (q/render
     (d/div {:id "main"}
            (common/Menu)
-           (common/TimeFilter (select-keys store [:available-years :time-filter])
-                              action-chan)
+
            (GraphTypeSelector store action-chan)
            (Graph store action-chan))
     (.getElementById js/document "main")))

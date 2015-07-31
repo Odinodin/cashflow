@@ -17,6 +17,7 @@
                   :available-years []
                   :time-filter     {}
                   :transactions    []
+                  :net-income      []
                   :ui-state        {:transaction-page {:show-transactions-with-categories    true
                                                        :show-transactions-without-categories true
                                                        :transaction-description-filter ""}
@@ -39,6 +40,8 @@
                                   (swap! store (fn [old] (assoc old :transactions (:body response)))))
              :load-categories (let [response (<! (http/get "/api/categories"))]
                                 (swap! store (fn [old] (assoc old :categories (js->clj (:body response))))))
+             :load-net-income (let [response (<! (http/get "/api/transactions/net-income"))]
+                                (swap! store (fn [old] (assoc old :net-income (js->clj (:body response))))))
              :create-category (let [response (<! (http/post "api/categories"
                                                             {:json-params {:name (:category-name action) :matches (:matches action)}}))]
                                 (put! action-chan {:type :load-categories}))
@@ -68,6 +71,7 @@
 (put! action-chan {:type :load-categories})
 (put! action-chan {:type :load-available-years})
 (put! action-chan {:type :load-transactions})
+(put! action-chan {:type :load-net-income})
 
 ;; Routing
 (secretary/set-config! :prefix "#")
