@@ -72,7 +72,11 @@
                         ;; Transaction description search filter
                         (let [desc-filter (get-in ui-state [:transaction-page :transaction-description-filter])]
                           (or (clojure.string/blank? desc-filter)
-                              (re-find (re-pattern (str "(?i)" desc-filter)) (:description transaction)))))
+                              (re-find (re-pattern (str "(?i)" desc-filter)) (:description transaction))))
+                        ;; Transaction description search filter
+                        (let [category-filter (get-in ui-state [:transaction-page :category-filter])]
+                          (or (clojure.string/blank? category-filter)
+                              (re-find (re-pattern (str "(?i)" category-filter)) (or (:category transaction) "")))))
                   (let [amount-class (if (pos? (:amount transaction)) "positive" "negative")]
 
                     (d/tr {}
@@ -92,7 +96,10 @@
                                              (.preventDefault event))
                       on-transaction-desc-filter-change (fn [event]
                                                           (put! action-chan {:type :transaction-page-update-transaction-desc-filter :value (.-value (.-target event))})
-                                                          (.preventDefault event))]
+                                                          (.preventDefault event))
+                      on-category-filter-change (fn [event]
+                                                  (put! action-chan {:type :transaction-page-update-category-filter :value (.-value (.-target event))})
+                                                  (.preventDefault event))]
 
                   (d/div {:className "bg-box"}
                          (d/input {:type     "checkbox"
@@ -106,7 +113,12 @@
                                    :placeholder "Transaction filter"
                                    :className   "form-control"
                                    :value       (get-in ui-state [:transaction-page :transaction-description-filter])
-                                   :onChange    on-transaction-desc-filter-change}))))
+                                   :onChange    on-transaction-desc-filter-change})
+                         (d/input {:type        "text"
+                                   :placeholder "Category filter"
+                                   :className   "form-control"
+                                   :value       (get-in ui-state [:transaction-page :category-filter])
+                                   :onChange    on-category-filter-change}))))
 
 (q/defcomponent TransactionsTable [{:keys [transactions categories ui-state]} action-chan]
                 (d/div {:className "bg-box"}
