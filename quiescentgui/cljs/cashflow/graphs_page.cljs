@@ -16,7 +16,7 @@
                                                            :graph-type graph-type})
                                         (.preventDefault event))]
 
-                  (d/div {:className "bg-box padded"}
+                  (d/div {:className "bg-box"}
                          (map (fn [graph-type-kw]
                                 (let [css (if (= (get-in ui-state [:graphs-page :show-graph])
                                                  graph-type-kw)

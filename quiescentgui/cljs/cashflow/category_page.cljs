@@ -15,7 +15,7 @@
                                     (.preventDefault event)))]
 
                   (d/div {:className "bg-box"}
-                         (d/form {:className "padded" :onSubmit submit-fn}
+                         (d/form {:className "" :onSubmit submit-fn}
                                  (d/input {:name "category-name" :type "text" :placeholder "Category name" :className "form-control"})
                                  (d/input {:name "matches" :type "text" :placeholder "Matches" :className "form-control"})
                                  (d/button {:className "flat-button" :type "submit"} "Add category")))))
@@ -40,7 +40,7 @@
                                   (put! action-chan {:type          :delete-category
                                                      :category-name category-name})
                                   (.preventDefault event))]
-                  (d/div {:className "bg-box padded"}
+                  (d/div {:className "bg-box"}
                          (d/table {}
                                   (d/thead {}
                                            (d/th {} "")

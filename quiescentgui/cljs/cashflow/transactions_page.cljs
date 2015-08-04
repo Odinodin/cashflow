@@ -94,7 +94,7 @@
                                                           (put! action-chan {:type :transaction-page-update-transaction-desc-filter :value (.-value (.-target event))})
                                                           (.preventDefault event))]
 
-                  (d/div {:className "bg-box padded"}
+                  (d/div {:className "bg-box"}
                          (d/input {:type     "checkbox"
                                    :checked  (get-in ui-state [:transaction-page :show-transactions-with-categories])
                                    :onChange on-category-click} "Category")
@@ -109,7 +109,7 @@
                                    :onChange    on-transaction-desc-filter-change}))))
 
 (q/defcomponent TransactionsTable [{:keys [transactions categories ui-state]} action-chan]
-                (d/div {:className "bg-box padded"}
+                (d/div {:className "bg-box"}
                        (d/table {}
                                 (d/thead {}
                                          (d/tr {}
