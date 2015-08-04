@@ -31,22 +31,30 @@
 
            ;; TODO error handling
            (case (:type action)
+             ;; Loading data from backend
              :load-available-years (let [response (<! (http/get "/api/transactions/time/years"))
                                          available-years (:years (:body response))]
                                      (swap! store (fn [old] (-> old
                                                                 (assoc :available-years available-years)
                                                                 (assoc :time-filter {:year (last available-years)})))))
-             :load-transactions (let [response (<! (http/get (str "/api/transactions/time/" (get-in @store [:time-filter :year]))))]
+             :load-transactions (let [time-path (str "/api/transactions/time/"
+                                                     (get-in @store [:time-filter :year])
+                                                     (when-let [month (get-in @store [:time-filter :month])] (str "/" month)))
+                                      response (<! (http/get time-path))]
                                   (swap! store (fn [old] (assoc old :transactions (:body response)))))
              :load-categories (let [response (<! (http/get "/api/categories"))]
                                 (swap! store (fn [old] (assoc old :categories (js->clj (:body response))))))
              :load-net-income (let [response (<! (http/get "/api/transactions/net-income"))]
                                 (swap! store (fn [old] (assoc old :net-income (js->clj (:body response))))))
+
+             ;; Edit categories
              :create-category (let [response (<! (http/post "api/categories"
                                                             {:json-params {:name (:category-name action) :matches (:matches action)}}))]
                                 (put! action-chan {:type :load-categories}))
              :delete-category (let [response (<! (http/delete (str "/api/categories/" (:category-name action))))]
                                 (put! action-chan {:type :load-categories}))
+
+             ;; UI State
              :update-time-filter (do
                                    (swap! store (fn [old] (assoc old :time-filter (:time-filter action))))
                                    (put! action-chan {:type :load-transactions}))
@@ -61,9 +69,7 @@
              :transaction-page-update-transaction-desc-filter (do (swap! store (fn [old] (assoc-in old [:ui-state :transaction-page :transaction-description-filter] (:value action)))))
              :transaction-page-toggle-show-category (do (swap! store (fn [old] (update-in old [:ui-state :transaction-page :show-transactions-with-categories] not))))
              :transaction-page-toggle-show-no-category (do (swap! store (fn [old] (update-in old [:ui-state :transaction-page :show-transactions-without-categories] not))))
-             :show-graph (do (swap! store (fn [old] (assoc-in old [:ui-state :graphs-page :show-graph] (:graph-type action)))))
-
-             ))
+             :show-graph (do (swap! store (fn [old] (assoc-in old [:ui-state :graphs-page :show-graph] (:graph-type action)))))))
 
          (recur))
 
