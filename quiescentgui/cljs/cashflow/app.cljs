@@ -1,10 +1,19 @@
 (ns cashflow.app
+  (:import goog.History)
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [cljs-http.client :as http]
             [cljs.core.async :refer [<! >! chan put!]]
+
+            ;; DOM
+            [quiescent.core :as q]
+            [quiescent.dom :as d]
+
+            ;; Routing
             [secretary.core :as secretary :refer-macros [defroute]]
+            [goog.events :as events]
+            [goog.history.EventType :as EventType]
 
-
+            ;; Cashflow
             [cashflow.category-page :as category-page]
             [cashflow.transactions-page :as transactions-page]
             [cashflow.graphs-page :as graphs-page]))
@@ -13,7 +22,8 @@
 
 (enable-console-print!)
 
-(def store (atom {:categories      []
+(def store (atom {:route :category-page
+                  :categories      []
                   :available-years []
                   :time-filter     {}
                   :transactions    []
@@ -25,14 +35,14 @@
                                     :graphs-page {:show-graph :net-income-graph}}}))
 
 (def action-chan (chan))
+(def backend-chan (chan 10))
+
 
 (go-loop []
-         (let [action (<! action-chan)]
-           (prn "Action: " action)
-
-           ;; TODO error handling
+         (let [action (<! backend-chan)]
+           (prn "Backend action: " action)
            (case (:type action)
-             ;; Loading data from backend
+
              :load-available-years (let [response (<! (http/get "/api/transactions/time/years"))
                                          available-years (:years (:body response))]
                                      (swap! store (fn [old] (-> old
@@ -42,11 +52,28 @@
                                                      (get-in @store [:time-filter :year])
                                                      (when-let [month (get-in @store [:time-filter :month])] (str "/" month)))
                                       response (<! (http/get time-path))]
+                                  (prn "loading transactions ..")
                                   (swap! store (fn [old] (assoc old :transactions (:body response)))))
+
              :load-categories (let [response (<! (http/get "/api/categories"))]
                                 (swap! store (fn [old] (assoc old :categories (js->clj (:body response))))))
+
              :load-net-income (let [response (<! (http/get "/api/transactions/net-income"))]
                                 (swap! store (fn [old] (assoc old :net-income (js->clj (:body response))))))
+             ))
+         (recur))
+
+(go-loop []
+         (let [action (<! action-chan)]
+           (prn "Action: " action)
+
+           ;; TODO error handling
+           (case (:type action)
+             ;; Loading data from backend
+             :load-available-years (>! backend-chan action)
+             :load-transactions (>! backend-chan action)
+             :load-categories (>! backend-chan action)
+             :load-net-income (>! backend-chan action)
 
              ;; Edit categories
              :create-category (let [response (<! (http/post "api/categories"
@@ -89,26 +116,49 @@
   (str js/window.location.hash))
 
 (defroute home "/" []
-          (category-page/render @store action-chan))
+          (swap! store #(assoc % :route :category-page)))
 
 (defroute categories "/categories" []
-          (category-page/render @store action-chan))
+          (swap! store #(assoc % :route :category-page)))
 
 (defroute transactions "/transactions" []
-          (transactions-page/render @store action-chan))
+          (swap! store #(assoc % :route :transactions-page)))
 
 (defroute graphs "/graphs" []
-          (graphs-page/render @store action-chan))
+          (swap! store #(assoc % :route :graphs-page)))
+
+;; Root component that shows the current route in the store atom
+(q/defcomponent RootComp [store action-chan]
+            (case (:route store)
+                  :category-page
+                  (category-page/Page store action-chan)
+                  :transactions-page
+                  (transactions-page/Page store action-chan)
+                  :graphs-page
+                  (graphs-page/Page store action-chan)))
 
 (defn render []
-  #_(prn "rendering")
-  (secretary/dispatch! (get-hash-url)))
+  (prn "rendering")
+  (q/render
+    (d/div {:id "main"}
+           (RootComp @store action-chan))
+    (.getElementById js/document "main")))
 
-(defn mainloop
-  "Render the current state atom, and schedule a render on the next
-  frame"
-  []
-  (render)
-  (.requestAnimationFrame js/window mainloop))
 
-(mainloop)
+
+;; Listen for navigation changes
+(defonce y (let [history (History.)
+                 navigation EventType/NAVIGATE]
+             (goog.events/listen history
+                                 navigation
+                                 #(-> % .-token secretary/dispatch!))
+             (doto history (.setEnabled true))))
+
+;; Rerender every time the store changes
+(defonce x (add-watch store :watcher
+                      (fn [key atom old-state new-state]
+                        (prn "re-rendering!")
+                        (render))))
+
+;; Initialize route to current URL
+(secretary/dispatch! (get-hash-url))

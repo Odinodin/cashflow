@@ -3,6 +3,7 @@
   (:require [cljs.core.async :refer [put!]]
             [quiescent.core :as q]
             [quiescent.dom :as d]
+            [quiescent.dom.uncontrolled :as du]
             [cashflow.common :as common]))
 
 (defn- transaction-being-edited? [transaction ui-state]
@@ -11,21 +12,25 @@
 
 (q/defcomponent CategoryForTransactionSuggestion [{:keys [transaction categories]} action-chan]
                 (let [matches (filter (fn [category] (some #(re-find (re-pattern (str "(?i)" %)) (:description transaction)) (:matches category))) categories)]
-                  (d/div {} (map
-                              (fn [match] (d/div {:className "category category-suggestion"
-                                                  :onClick   (fn [] (put! action-chan {:type           :edit-transaction-category-finished
-                                                                                       :transaction-id (:id transaction)
-                                                                                       :category-name  (:name match)}))}
-                                                 (str (:name match) "?"))
+                  (d/div {} (map-indexed
+                              (fn [index match] (d/div {:key       index
+                                                        :className "category category-suggestion"
+                                                        :onClick   (fn [event] (put! action-chan {:type           :edit-transaction-category-finished
+                                                                                                  :transaction-id (:id transaction)
+                                                                                                  :category-name  (:name match)})
+                                                                     (.preventDefault event))}
+                                                       (str (:name match) "?"))
                                 ) matches))))
 
 (q/defcomponent CategoryForTransactionEditor [{:keys [transaction categories]} action-chan]
                 (d/div {}
-                       (map #(d/div {:className "category category-candidate fade-in"
-                                     :onClick   (fn [] (put! action-chan {:type           :edit-transaction-category-finished
-                                                                          :transaction-id (:id transaction)
-                                                                          :category-name  (:name %)}))}
-                                    (:name %))
+                       (map-indexed (fn [index category] (d/div {:key index
+                                                                 :className "category category-candidate fade-in"
+                                                                 :onClick   (fn [event] (put! action-chan {:type           :edit-transaction-category-finished
+                                                                                                           :transaction-id (:id transaction)
+                                                                                                           :category-name  (:name category)})
+                                                                              (.preventDefault event))}
+                                                                (:name category)))
                             categories)))
 
 (q/defcomponent TransactionCategoryCell [{:keys [transaction categories ui-state] :as props} action-chan]
@@ -102,20 +107,20 @@
                                                   (.preventDefault event))]
 
                   (d/div {:className "bg-box"}
-                         (d/input {:type     "checkbox"
+                         (du/input {:type     "checkbox"
                                    :checked  (get-in ui-state [:transaction-page :show-transactions-with-categories])
                                    :onChange on-category-click} "Category")
 
-                         (d/input {:type     "checkbox"
+                         (du/input {:type     "checkbox"
                                    :checked  (get-in ui-state [:transaction-page :show-transactions-without-categories])
                                    :onChange on-no-category-click} "No Category")
-                         (d/input {:type        "text"
+                         (du/input {:type        "text"
                                    :placeholder "Transaction filter"
                                    :className   "form-control"
                                    :value       (get-in ui-state [:transaction-page :transaction-description-filter])
                                    :onChange    on-transaction-desc-filter-change})
-                         (d/input {:type        "text"
-                                   :placeholder "Category filter"
+                         (du/input {:type        "text"
+                                   :placeholder "Categorsy filter"
                                    :className   "form-control"
                                    :value       (get-in ui-state [:transaction-page :category-filter])
                                    :onChange    on-category-filter-change}))))
@@ -138,13 +143,13 @@
                                                                action-chan)
                                               transactions)))))
 
-(defn render [store action-chan]
-  (q/render
-    (d/div {:id "main"}
-           (common/Menu)
-           (common/TimeFilter (select-keys store [:available-years :time-filter])
-                              action-chan)
-           (TransactionFilter store action-chan)
-           (TransactionsTable store action-chan))
-    (.getElementById js/document "main")))
+
+(q/defcomponent Page [store action-chan]
+                (d/div {}
+                       (common/Menu)
+                       (common/TimeFilter (select-keys store [:available-years :time-filter])
+                                          action-chan)
+                       (TransactionFilter store action-chan)
+                       (TransactionsTable store action-chan))                )
+
 

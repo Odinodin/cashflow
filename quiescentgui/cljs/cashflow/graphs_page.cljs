@@ -5,8 +5,7 @@
             [quiescent.dom :as d]
             [cashflow.common :as common]
 
-            [Highcharts]
-            ))
+            [Highcharts]))
 
 (def graph-types [:net-income-graph :category-graph])
 
@@ -119,11 +118,9 @@
                     :net-income-graph (NetIncomeGraph store action-chan)
                     :category-graph (CategoryGraph store action-chan))))
 
-(defn render [store action-chan]
-  (q/render
-    (d/div {:id "main"}
-           (common/Menu)
 
-           (GraphTypeSelector store action-chan)
-           (Graph store action-chan))
-    (.getElementById js/document "main")))
+(q/defcomponent Page [store action-chan]
+                (d/div {}
+                       (common/Menu)
+                       (GraphTypeSelector store action-chan)
+                       (Graph store action-chan)))

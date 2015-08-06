@@ -56,10 +56,8 @@
                                                          (MatchesCell % action-chan)) categories)))))))
 
 
-(defn render [store action-chan]
-  (q/render
-    (d/div {:id "main"}
-           (common/Menu)
-           (CategoryEditor action-chan)
-           (CategoryTable (:categories store) action-chan))
-    (.getElementById js/document "main")))
+(q/defcomponent Page [store action-chan]
+                (d/div {}
+                       (common/Menu)
+                       (CategoryEditor action-chan)
+                       (CategoryTable (:categories store) action-chan)))

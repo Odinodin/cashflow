@@ -26,8 +26,8 @@
                                                       (d/button {:className (year-class-fn year) :onClick (partial on-year-click year)} year)))
                                              available-years))
                          (d/div {:className "container"}
-                                (map (fn [[index name]] (d/div {:key index :className "item"}
-                                                               (d/button {:className (month-class-fn index) :onClick (partial on-month-click index)} name)))
+                                (map (fn [[month-idx name]] (d/div {:key month-idx :className "item"}
+                                                               (d/button {:className (month-class-fn month-idx) :onClick (partial on-month-click month-idx)} name)))
                                      month-map)))))
 
 (q/defcomponent YearFilter [{:keys [available-years time-filter]} action-chan]
