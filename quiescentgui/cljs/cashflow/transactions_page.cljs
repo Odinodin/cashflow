@@ -143,7 +143,6 @@
                                                                action-chan)
                                               transactions)))))
 
-
 (q/defcomponent Page [store action-chan]
                 (d/div {}
                        (common/Menu)

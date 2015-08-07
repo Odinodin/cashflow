@@ -140,7 +140,7 @@
 (defn render []
   (prn "rendering")
   (q/render
-    (d/div {:id "main"}
+    (d/div {}
            (RootComp @store action-chan))
     (.getElementById js/document "main")))
 
