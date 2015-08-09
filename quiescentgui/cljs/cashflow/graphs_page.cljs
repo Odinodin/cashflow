@@ -48,26 +48,34 @@
 
 
                   :legend   {:itemStyle      {:color "#c0c0c0"},
-                             :itemHoverStyle {:color "gray"}
-                             }})
+                             :itemHoverStyle {:color "gray"}}})
+
+(defn sum-by-category-month [sum-by-category year month]
+  (->> (get sum-by-category year)
+       (filter #(= month (:month %)))
+       first
+       :categories
+       (map (fn [item] [(:category item) (js/Math.abs (:sum item))]))))
+
 
 (q/defcomponent CategoryGraph
-                :on-mount (fn [dom-node component-value]
+                :on-render (fn [dom-node component-value]
                             ;; Need to pass the dom-node reference to :renderTo
-                            (new js/Highcharts.Chart
-                                 (clj->js
-                                   (deep-merge chart-theme
-                                               {:chart
-                                                        {:type     "column"
-                                                         :renderTo (dom-child-with-class dom-node "graph")}
-                                                :series [{
-                                                          :name "Jane",
-                                                          :data [1, 0, 4]
-                                                          }, {
-                                                              :name "John",
-                                                              :data [5, 7, 3]
-                                                              }]
-                                                }))))
+                            (let [sum-by-category (:sum-by-category component-value)
+                                  data (sum-by-category-month sum-by-category
+                                                              (get-in component-value [:time-filter :year])
+                                                              (get-in component-value [:time-filter :month]))]
+
+                              (new js/Highcharts.Chart
+                                   (clj->js
+                                     (deep-merge chart-theme
+                                                 {:chart
+                                                          {:type     "column"
+                                                           :renderTo (dom-child-with-class dom-node "graph")}
+                                                  :series [{:name "Categories"
+                                                            :data data}]
+                                                  :xAxis  {:type "category"}
+                                                  })))))
                 [store action-chan]
                 (d/div {}
                        (common/TimeFilter (select-keys store [:available-years :time-filter])

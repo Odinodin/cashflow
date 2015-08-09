@@ -28,6 +28,7 @@
                   :time-filter     {}
                   :transactions    []
                   :net-income      []
+                  :sum-by-category {}
                   :ui-state        {:transaction-page {:show-transactions-with-categories    true
                                                        :show-transactions-without-categories true
                                                        :transaction-description-filter ""
@@ -60,7 +61,11 @@
 
              :load-net-income (let [response (<! (http/get "/api/transactions/net-income"))]
                                 (swap! store (fn [old] (assoc old :net-income (js->clj (:body response))))))
-             ))
+
+             :load-sum-by-category (let [response (<! (http/get (str "/api/transactions/sum-by-category/" (:year action))))]
+                                     (swap! store (fn [old] (assoc-in old [:sum-by-category (:year action)] (js->clj (:sum-by-category (:body response)))))))
+
+             :load-data-for-chart (when (= (:graph-type action) :category-graph) (put! backend-chan {:type :load-sum-by-category :year (-> @store :time-filter :year)}))))
          (recur))
 
 (go-loop []
@@ -98,7 +103,10 @@
              :transaction-page-update-category-filter (do (swap! store (fn [old] (assoc-in old [:ui-state :transaction-page :category-filter] (:value action)))))
              :transaction-page-toggle-show-category (do (swap! store (fn [old] (update-in old [:ui-state :transaction-page :show-transactions-with-categories] not))))
              :transaction-page-toggle-show-no-category (do (swap! store (fn [old] (update-in old [:ui-state :transaction-page :show-transactions-without-categories] not))))
-             :show-graph (do (swap! store (fn [old] (assoc-in old [:ui-state :graphs-page :show-graph] (:graph-type action)))))))
+             :show-graph (do (swap! store (fn [old] (assoc-in old [:ui-state :graphs-page :show-graph] (:graph-type action))))
+                             (>! backend-chan {:type :load-data-for-chart :graph-type (:graph-type action)}))
+
+             ))
 
          (recur))
 
@@ -143,7 +151,6 @@
     (d/div {}
            (RootComp @store action-chan))
     (.getElementById js/document "main")))
-
 
 
 ;; Listen for navigation changes

@@ -58,7 +58,8 @@
              {:body (net-income-by-month uri)})
 
            (GET "/transactions/sum-by-category/:year" [year :as {{{:keys [uri]} :database} :system}]
-             {:body {:sum-by-category (for [month-idx (range 1 13)]
+             {:body {:year year
+                     :sum-by-category (for [month-idx (range 1 13)]
                                         (let [trans-in-month (transactions-in-month uri year (str month-idx))]
                                           {:month      month-idx
                                            :categories (trans/sum-transactions-pr-category trans-in-month)}))}})
