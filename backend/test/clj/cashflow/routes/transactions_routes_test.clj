@@ -94,6 +94,25 @@
         (->> response :body (into #{})) => #{{:category "coffee" :sum 2}
                                              {:category "store" :sum 5}}))
 
+(fact "can list sum of transactions by category per month in a year"
+      (test-db/create-empty-in-memory-db db-uri)
+      (tmodel/add-transactions
+        (d/connect db-uri)
+        [{:transaction/date (t/date-time 2010 1 1) :transaction/category "store" :transaction/amount 1M}
+         {:transaction/date (t/date-time 2012 5 1) :transaction/category "coffee" :transaction/amount 2M}
+         {:transaction/date (t/date-time 2012 5 1) :transaction/category "store" :transaction/amount 2M}
+         {:transaction/date (t/date-time 2012 5 2) :transaction/category "store" :transaction/amount 3M}])
+
+      (let [response (->
+                       (cashflow/test-app-handler {:database {:uri db-uri}}
+                                                  (ring-mock/request :get "/api/transactions/sum-by-category/2012"))
+                       json-util/json-parse-body)]
+
+        response => (contains {:body anything :headers anything :status 200})
+        (->> response :body :sum-by-category count ) => 12
+        (->> response :body :sum-by-category (filter #(= (:month %) 5)) first :categories) => [{:category "coffee" :sum 2} {:category "store" :sum 5
+                                                                                                                           }]))
+
 (fact "can list sum of transactions by category per year"
       (test-db/create-empty-in-memory-db db-uri)
       (tmodel/add-transactions

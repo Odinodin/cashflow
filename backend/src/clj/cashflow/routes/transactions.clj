@@ -37,27 +37,33 @@
 
 (defroutes transactions-routes
            (GET "/transactions/time/years" {{{:keys [uri]} :database} :system}
-                {:body {:years (trans/dfind-unique-years-in-transactions
-                                 (d/db (d/connect uri)))}})
+             {:body {:years (trans/dfind-unique-years-in-transactions
+                              (d/db (d/connect uri)))}})
 
            (GET "/transactions/time/:year" [year :as {{{:keys [uri]} :database} :system}]
-                {:body (->> (transactions-by-year uri year) (map to-public-keys))})
+             {:body (->> (transactions-by-year uri year) (map to-public-keys))})
 
            (GET "/transactions/time/:year/:month" [year month :as {{{:keys [uri]} :database} :system}]
-                {:body (->> (transactions-in-month uri year month) (map to-public-keys))})
+             {:body (->> (transactions-in-month uri year month) (map to-public-keys))})
 
            (GET "/transactions/sum/:year/:month" [year month :as {{{:keys [uri]} :database} :system}]
-                (let [trans-in-month (transactions-in-month uri year month)]
-                  {:body (trans/sum-transactions-pr-category trans-in-month)}))
+             (let [trans-in-month (transactions-in-month uri year month)]
+               {:body (trans/sum-transactions-pr-category trans-in-month)}))
 
            (GET "/transactions/sum/:year" [year :as {{{:keys [uri]} :database} :system}]
-                (let [trans-in-year (transactions-by-year uri year)]
-                  {:body (trans/sum-transactions-pr-category trans-in-year)}))
+             (let [trans-in-year (transactions-by-year uri year)]
+               {:body (trans/sum-transactions-pr-category trans-in-year)}))
 
            (GET "/transactions/net-income" {{{:keys [uri]} :database} :system}
-                {:body (net-income-by-month uri)})
+             {:body (net-income-by-month uri)})
+
+           (GET "/transactions/sum-by-category/:year" [year :as {{{:keys [uri]} :database} :system}]
+             {:body {:sum-by-category (for [month-idx (range 1 13)]
+                                        (let [trans-in-month (transactions-in-month uri year (str month-idx))]
+                                          {:month      month-idx
+                                           :categories (trans/sum-transactions-pr-category trans-in-month)}))}})
 
            (POST ["/transactions/:id"] [id :as {{{:keys [uri]} :database} :system
                                                 body-params               :body-params}]
-                 (trans/update-transaction (d/connect uri) (-> body-params from-public-keys))
-                 {:body (->> (trans/d-find-transaction-by-id (d/db (d/connect uri)) id) to-public-keys)}))
+             (trans/update-transaction (d/connect uri) (-> body-params from-public-keys))
+             {:body (->> (trans/d-find-transaction-by-id (d/db (d/connect uri)) id) to-public-keys)}))
