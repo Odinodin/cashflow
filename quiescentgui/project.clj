@@ -1,7 +1,7 @@
 (defproject quiescentgui "0.0.1"
   :description "Cashflow quiscent gui"
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "0.0-3308"]
+                 [org.clojure/clojurescript "1.7.48"]
 
                  ;; Backend
                  [compojure "1.1.6"]
