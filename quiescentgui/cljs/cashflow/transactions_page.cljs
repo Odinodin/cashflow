@@ -7,8 +7,9 @@
             [cashflow.common :as common]))
 
 (defn- transaction-being-edited? [transaction ui-state]
-  (= (get-in ui-state [:transaction-page :is-editing-transaction-with-id])
-     (:id transaction)))
+  (and (some? (:id transaction))
+       (= (get-in ui-state [:transaction-page :is-editing-transaction-with-id])
+          (:id transaction))))
 
 (q/defcomponent CategoryForTransactionSuggestion [{:keys [transaction categories]} action-chan]
                 (let [matches (filter (fn [category] (some #(re-find (re-pattern (str "(?i)" %)) (:description transaction)) (:matches category))) categories)]

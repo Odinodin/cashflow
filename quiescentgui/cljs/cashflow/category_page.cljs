@@ -47,8 +47,8 @@
                                            (d/th {} "Category")
                                            (d/th {} "Matches"))
 
-                                  (when (seq categories)
-                                    (d/tbody {}
+                                  (d/tbody {}
+                                           (when (seq categories)
                                              (map #(d/tr {}
                                                          (d/td {}
                                                                (d/button {:className "delete" :onClick (partial delete-fn (:name %))} "\u2716"))

@@ -31,9 +31,9 @@
                   :sum-by-category {}
                   :ui-state        {:transaction-page {:show-transactions-with-categories    true
                                                        :show-transactions-without-categories true
-                                                       :transaction-description-filter ""
-                                                       :category-filter ""}
-                                    :graphs-page {:show-graph :net-income-graph}}}))
+                                                       :transaction-description-filter       ""
+                                                       :category-filter                      ""}
+                                    :graphs-page      {:show-graph :net-income-graph}}}))
 
 (def action-chan (chan))
 (def backend-chan (chan 10))
@@ -46,24 +46,29 @@
 
              :load-available-years (let [response (<! (http/get "/api/transactions/time/years"))
                                          available-years (:years (:body response))]
-                                     (swap! store (fn [old] (-> old
-                                                                (assoc :available-years available-years)
-                                                                (assoc :time-filter {:year (last available-years)})))))
+                                     (when (= (:status response) 200)
+                                       (swap! store (fn [old] (-> old
+                                                                  (assoc :available-years available-years)
+                                                                  (assoc :time-filter {:year (last available-years)}))))))
              :load-transactions (let [time-path (str "/api/transactions/time/"
                                                      (get-in @store [:time-filter :year])
                                                      (when-let [month (get-in @store [:time-filter :month])] (str "/" month)))
                                       response (<! (http/get time-path))]
                                   (prn "loading transactions ..")
-                                  (swap! store (fn [old] (assoc old :transactions (:body response)))))
+                                  (when (= (:status response) 200)
+                                    (swap! store (fn [old] (assoc old :transactions (:body response))))))
 
              :load-categories (let [response (<! (http/get "/api/categories"))]
-                                (swap! store (fn [old] (assoc old :categories (js->clj (:body response))))))
+                                (when (= (:status response) 200)
+                                  (swap! store (fn [old] (assoc old :categories (js->clj (:body response)))))))
 
              :load-net-income (let [response (<! (http/get "/api/transactions/net-income"))]
-                                (swap! store (fn [old] (assoc old :net-income (js->clj (:body response))))))
+                                (when (= (:status response) 200)
+                                  (swap! store (fn [old] (assoc old :net-income (js->clj (:body response)))))))
 
              :load-sum-by-category (let [response (<! (http/get (str "/api/transactions/sum-by-category/" (:year action))))]
-                                     (swap! store (fn [old] (assoc-in old [:sum-by-category (:year action)] (js->clj (:sum-by-category (:body response)))))))
+                                     (when (= (:status response) 200)
+                                       (swap! store (fn [old] (assoc-in old [:sum-by-category (:year action)] (js->clj (:sum-by-category (:body response))))))))
 
              :load-data-for-chart (when (= (:graph-type action) :category-graph) (put! backend-chan {:type :load-sum-by-category :year (-> @store :time-filter :year)}))))
          (recur))
@@ -137,7 +142,7 @@
 
 ;; Root component that shows the current route in the store atom
 (q/defcomponent RootComp [store action-chan]
-            (case (:route store)
+                (case (:route store)
                   :category-page
                   (category-page/Page store action-chan)
                   :transactions-page
