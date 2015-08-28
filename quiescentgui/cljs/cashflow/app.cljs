@@ -70,14 +70,14 @@
                                      (when (= (:status response) 200)
                                        (swap! store (fn [old] (assoc-in old [:sum-by-category (:year action)] (js->clj (:sum-by-category (:body response))))))))
 
-             :load-data-for-chart (when (= (:graph-type action) :category-graph) (put! backend-chan {:type :load-sum-by-category :year (-> @store :time-filter :year)}))))
+             :load-data-for-chart (when (= (get-in @store [:ui-state :graphs-page :show-graph] @store) :category-graph) (put! backend-chan {:type :load-sum-by-category :year (-> @store :time-filter :year)}))))
          (recur))
 
 (go-loop []
          (let [action (<! action-chan)]
            (prn "Action: " action)
 
-           ;; TODO error handling
+           ;; TODO error handling for network related actions
            (case (:type action)
              ;; Loading data from backend
              :load-available-years (>! backend-chan action)
@@ -95,7 +95,10 @@
              ;; UI State
              :update-time-filter (do
                                    (swap! store (fn [old] (assoc old :time-filter (:time-filter action))))
-                                   (put! action-chan {:type :load-transactions}))
+                                   (cond (= (:route @store) :transactions-page)
+                                         (put! action-chan {:type :load-transactions})
+                                         (= (:route @store) :graphs-page)
+                                         (put! backend-chan {:type :load-data-for-chart})))
 
              :edit-transaction-category-started (swap! store (fn [old] (assoc-in old [:ui-state :transaction-page :is-editing-transaction-with-id] (:transaction-id action))))
              :edit-transaction-category-finished (do (swap! store (fn [old] (assoc-in old [:ui-state :transaction-page :is-editing-transaction-with-id] nil)))
@@ -109,9 +112,7 @@
              :transaction-page-toggle-show-category (do (swap! store (fn [old] (update-in old [:ui-state :transaction-page :show-transactions-with-categories] not))))
              :transaction-page-toggle-show-no-category (do (swap! store (fn [old] (update-in old [:ui-state :transaction-page :show-transactions-without-categories] not))))
              :show-graph (do (swap! store (fn [old] (assoc-in old [:ui-state :graphs-page :show-graph] (:graph-type action))))
-                             (>! backend-chan {:type :load-data-for-chart :graph-type (:graph-type action)}))
-
-             ))
+                             (>! backend-chan {:type :load-data-for-chart :graph-type (:graph-type action)}))))
 
          (recur))
 

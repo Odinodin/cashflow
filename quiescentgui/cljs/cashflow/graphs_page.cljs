@@ -51,11 +51,16 @@
                              :itemHoverStyle {:color "gray"}}})
 
 (defn sum-by-category-month [sum-by-category year month]
-  (->> (get sum-by-category year)
-       (filter #(= month (:month %)))
-       first
-       :categories
-       (map (fn [item] [(:category item) (js/Math.abs (:sum item))]))))
+  (if month
+    (->> (get sum-by-category year)
+         (filter #(= month (:month %)))
+         first
+         :categories
+         (map (fn [item] [(:category item) (js/Math.abs (:sum item))])))
+    (->> (get sum-by-category year)
+         first
+         :categories
+         (map (fn [item] [(:category item) (js/Math.abs (:sum item))])))))
 
 
 (q/defcomponent CategoryGraph
@@ -65,17 +70,21 @@
                                   data (sum-by-category-month sum-by-category
                                                               (get-in component-value [:time-filter :year])
                                                               (get-in component-value [:time-filter :month]))]
-
+                              (prn "DATA" sum-by-category)
                               (new js/Highcharts.Chart
                                    (clj->js
                                      (deep-merge chart-theme
                                                  {:chart
-                                                          {:type     "column"
-                                                           :renderTo (dom-child-with-class dom-node "graph")}
-                                                  :series [{:name "Categories"
-                                                            :data data}]
-                                                  :xAxis  {:type "category"}
-                                                  })))))
+                                                               {:type     "pie"
+                                                                :renderTo (dom-child-with-class dom-node "graph")}
+                                                  :plotOptions {
+                                                                :pie {:allowPointSelect true
+                                                                      :cursor           "pointer"
+                                                                      :dataLabels       {:enabled true
+                                                                                         :format  "{point.name} : {point.y}"}}}
+                                                  :series      [{:name "Categories"
+                                                                 :type "pie"
+                                                                 :data data}]})))))
                 [store action-chan]
                 (d/div {}
                        (common/TimeFilter (select-keys store [:available-years :time-filter])
