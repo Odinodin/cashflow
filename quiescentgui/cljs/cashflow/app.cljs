@@ -70,7 +70,10 @@
                                      (when (= (:status response) 200)
                                        (swap! store (fn [old] (assoc-in old [:sum-by-category (:year action)] (js->clj (:sum-by-category (:body response))))))))
 
-             :load-data-for-chart (when (= (get-in @store [:ui-state :graphs-page :show-graph] @store) :category-graph) (put! backend-chan {:type :load-sum-by-category :year (-> @store :time-filter :year)}))))
+             :load-data-for-chart (when (or (= :category-graph (get-in @store [:ui-state :graphs-page :show-graph] @store))
+                                            (= :category-by-year-graph (get-in @store [:ui-state :graphs-page :show-graph] @store))
+                                            )
+                                    (put! backend-chan {:type :load-sum-by-category :year (-> @store :time-filter :year)}))))
          (recur))
 
 (go-loop []

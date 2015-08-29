@@ -5,25 +5,32 @@
             [quiescent.dom :as d]
             [cashflow.common :as common]
 
+            [cljs.pprint :refer [pprint print-table]]
+
             [Highcharts]))
 
-(def graph-types [:net-income-graph :category-graph])
+(def graph-types [{:id   :net-income-graph
+                   :name "Net income"}
+                  {:id   :category-graph
+                   :name "Categories"}
+                  {:id   :category-by-year-graph
+                   :name "Categories by year"}])
 
 (q/defcomponent GraphTypeSelector [{:keys [ui-state]} action-chan]
                 (let [on-button-click (fn [graph-type event]
                                         (put! action-chan {:type       :show-graph
-                                                           :graph-type graph-type})
+                                                           :graph-type (:id graph-type)})
                                         (.preventDefault event))]
 
                   (d/div {:className "bg-box"}
-                         (map (fn [graph-type-kw]
+                         (map (fn [graph-type]
                                 (let [css (if (= (get-in ui-state [:graphs-page :show-graph])
-                                                 graph-type-kw)
+                                                 (:id graph-type))
                                             "flat-button selected"
                                             "flat-button")]
 
                                   (d/button {:className css
-                                             :onClick   (partial on-button-click graph-type-kw)} (name graph-type-kw))))
+                                             :onClick   (partial on-button-click graph-type)} (:name graph-type))))
                               graph-types))))
 
 
@@ -63,62 +70,104 @@
          (map (fn [item] [(:category item) (js/Math.abs (:sum item))])))))
 
 
+
+
+
+(defn value-of-category-in [data-for-year category-name month-index]
+  (let [month-map (first (filter #(= (:month %) month-index) data-for-year))
+        category-in-month (first (filter #(= (:category %) category-name) (:categories month-map)))]
+    ;; Return 0 if category data does not exist in that month
+    (or (js/Math.abs (:sum category-in-month)) 0)))
+
+(defn datum [sum-by-category year]
+  (let [data-for-year (get sum-by-category year)
+        unique-categories (->> (mapcat #(:categories %) data-for-year) (map :category) (remove nil?) (into #{}))]
+    (-> (for [category unique-categories]
+          {:name    category
+           :visible false
+           :data    (mapv (fn [month-index] (value-of-category-in data-for-year category month-index)) (range 1 13))}))))
+
 (q/defcomponent CategoryGraph
                 :on-render (fn [dom-node component-value]
-                            ;; Need to pass the dom-node reference to :renderTo
-                            (let [sum-by-category (:sum-by-category component-value)
-                                  data (sum-by-category-month sum-by-category
-                                                              (get-in component-value [:time-filter :year])
-                                                              (get-in component-value [:time-filter :month]))]
-                              (prn "DATA" sum-by-category)
-                              (new js/Highcharts.Chart
-                                   (clj->js
-                                     (deep-merge chart-theme
-                                                 {:chart
-                                                               {:type     "pie"
-                                                                :renderTo (dom-child-with-class dom-node "graph")}
-                                                  :plotOptions {
-                                                                :pie {:allowPointSelect true
-                                                                      :cursor           "pointer"
-                                                                      :dataLabels       {:enabled true
-                                                                                         :format  "{point.name} : {point.y}"}}}
-                                                  :series      [{:name "Categories"
-                                                                 :type "pie"
-                                                                 :data data}]})))))
+                             ;; Need to pass the dom-node reference to :renderTo
+                             (let [sum-by-category (:sum-by-category component-value)
+                                   data (sum-by-category-month sum-by-category
+                                                               (get-in component-value [:time-filter :year])
+                                                               (get-in component-value [:time-filter :month]))]
+                               (new js/Highcharts.Chart
+                                    (clj->js
+                                      (deep-merge chart-theme
+                                                  {:chart
+                                                                {:type     "pie"
+                                                                 :renderTo (dom-child-with-class dom-node "graph")}
+                                                   :plotOptions {
+                                                                 :pie {:allowPointSelect true
+                                                                       :cursor           "pointer"
+                                                                       :dataLabels       {:enabled true
+                                                                                          :format  "{point.name} : {point.y}"}}}
+                                                   :xAxis       {:categories ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "July"]}
+                                                   :series      [{:name "Categories"
+                                                                  :type "pie"
+                                                                  :data data}]})))))
                 [store action-chan]
                 (d/div {}
                        (common/TimeFilter (select-keys store [:available-years :time-filter])
                                           action-chan)
                        (d/div {:className "graph"} "The target")))
 
+(q/defcomponent CategoryByYearGraph
+                :on-render (fn [dom-node component-value]
+                             ;; Need to pass the dom-node reference to :renderTo
+                             (let [sum-by-category (:sum-by-category component-value)
+                                   data (datum sum-by-category (get-in component-value [:time-filter :year]))]
+
+                               (pprint sum-by-category)
+                               (print-table data)
+                               #_(when-not (empty? sum-by-category) (prn (datum sum-by-category (get-in component-value [:time-filter :year]))))
+
+                               (new js/Highcharts.Chart
+                                    (clj->js
+                                      (deep-merge chart-theme
+                                                  {:chart
+                                                           {:type     "line"
+                                                            :renderTo (dom-child-with-class dom-node "graph")}
+
+                                                   :series data})))))
+                [store action-chan]
+                (d/div {}
+                       (common/YearFilter (select-keys store [:available-years :time-filter])
+                                          action-chan)
+                       (d/div {:className "graph"} "The target")))
+
+
 (q/defcomponent NetIncomeGraph
                 :on-render (fn [dom-node store]
-                            ;; Need to pass the dom-node reference to :renderTo
+                             ;; Need to pass the dom-node reference to :renderTo
 
-                            (let [income-by-month (fn [store]
-                                                    (->> (:net-income store)
-                                                         (filter (fn [item] (.startsWith (:time item) (get-in store [:time-filter :year]))))
-                                                         (map (fn [item] [(:time item) (:income item)]))))
-                                  expense-by-month (fn [store]
+                             (let [income-by-month (fn [store]
                                                      (->> (:net-income store)
                                                           (filter (fn [item] (.startsWith (:time item) (get-in store [:time-filter :year]))))
-                                                          (map (fn [item] [(:time item) (js/Math.abs (:expense item))]))))]
+                                                          (map (fn [item] [(:time item) (:income item)]))))
+                                   expense-by-month (fn [store]
+                                                      (->> (:net-income store)
+                                                           (filter (fn [item] (.startsWith (:time item) (get-in store [:time-filter :year]))))
+                                                           (map (fn [item] [(:time item) (js/Math.abs (:expense item))]))))]
 
-                              (new js/Highcharts.Chart
-                                   (clj->js
-                                     (deep-merge chart-theme
-                                                 {
-                                                  :chart
-                                                          {:type     "column"
-                                                           :renderTo (dom-child-with-class dom-node "graph")}
-                                                  :series [{:name "Income'",
-                                                            :data (income-by-month store)
-                                                            },
-                                                           {:name "Expenses",
-                                                            :data (expense-by-month store)
-                                                            }]
-                                                  :xAxis  {:type "category"}
-                                                  })))))
+                               (new js/Highcharts.Chart
+                                    (clj->js
+                                      (deep-merge chart-theme
+                                                  {
+                                                   :chart
+                                                           {:type     "column"
+                                                            :renderTo (dom-child-with-class dom-node "graph")}
+                                                   :series [{:name "Income'",
+                                                             :data (income-by-month store)
+                                                             },
+                                                            {:name "Expenses",
+                                                             :data (expense-by-month store)
+                                                             }]
+                                                   :xAxis  {:type "category"}
+                                                   })))))
 
                 [store action-chan]
                 ;; Target or chart renderTo
@@ -133,7 +182,9 @@
                 (let [selected-graph-type (get-in store [:ui-state :graphs-page :show-graph])]
                   (case selected-graph-type
                     :net-income-graph (NetIncomeGraph store action-chan)
-                    :category-graph (CategoryGraph store action-chan))))
+                    :category-graph (CategoryGraph store action-chan)
+                    :category-by-year-graph (CategoryByYearGraph store action-chan)
+                    )))
 
 
 (q/defcomponent Page [store action-chan]
