@@ -187,7 +187,7 @@
   (->>
     lines
     lines->transactions
-    (remove (comp #{"OVFNETTB" "MOB.B.OVF"} :transaction/code))))
+    (remove (comp #{"OVFNETTB" "MOB.B.OVF" "AVTALE"} :transaction/code))))
 
 (defn add-transactions-in-file! [db-conn file]
   (->> (parse-file file)

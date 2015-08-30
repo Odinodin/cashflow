@@ -33,9 +33,10 @@
 
 (fact "Internal transfers are filtered out when adding transactions"
       (to-transactions [["06.05.2009" "06.05.2009" "VARER" "NARVESEN" "-119,00" "17017470066"]
-                                 ["06.05.2009" "06.05.2009" "OVFNETTB" "Internal transfer, filter me" "-159,20" "17017532866"]
-                                 ["06.05.2009" "06.05.2009" "VARER" "REMA 1000" "-159,20" "17017532866"]
-                                 ["06.05.2009" "06.05.2009" "MOB.B.OVF" "Internal transfer, filter me" "-159,20" "17017532866"]])
+                        ["06.05.2009" "06.05.2009" "OVFNETTB" "Internal transfer, filter me" "-159,20" "17017532866"]
+                        ["06.05.2009" "06.05.2009" "VARER" "REMA 1000" "-159,20" "17017532866"]
+                        ["06.05.2009" "06.05.2009" "AVTALE" "Transfer" "200,0" "17017532868"]
+                        ["06.05.2009" "06.05.2009" "MOB.B.OVF" "Internal transfer, filter me" "-159,20" "17017532866"]])
       => [{:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
           {:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
 
