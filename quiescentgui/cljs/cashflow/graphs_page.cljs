@@ -132,6 +132,7 @@
                                                            {:type     "line"
                                                             :renderTo (dom-child-with-class dom-node "graph")}
 
+                                                   :yAxis {:min 0}
                                                    :series data})))))
                 [store action-chan]
                 (d/div {}
