@@ -1,6 +1,7 @@
 backend/target/
 target/
 .idea/
+*.iml
 /lib
 /classes
 /checkouts

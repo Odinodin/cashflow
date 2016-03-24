@@ -3,17 +3,17 @@
   :url "http://example.com/FIXME"
   :source-paths ["src/clj"]
   :test-paths ["test/clj"]
-  :dependencies [[org.clojure/clojure "1.7.0"]
-                 [clj-time "0.10.0"]
+  :dependencies [[org.clojure/clojure "1.8.0"]
+                 [clj-time "0.11.0"]
                  [cheshire "5.5.0"]
-                 [compojure "1.3.4"]
+                 [compojure "1.5.0"]
                  [hiccup "1.0.5"]
                  [ring-middleware-format "0.5.0"]
                  [ring "1.4.0"]
 
                  [prismatic/schema "0.4.3"]
 
-                 [com.datomic/datomic-pro "0.9.5198" :exclusions [joda-time]]
+                 [com.datomic/datomic-free "0.9.5350" :exclusions [joda-time]]
 
                  ;; GUI
                  [selmer "0.8.2"]
