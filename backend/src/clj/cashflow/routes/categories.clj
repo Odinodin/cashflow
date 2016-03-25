@@ -2,8 +2,7 @@
   (:require
     [cashflow.models.categories :as categories]
     [ring.handler.dump :refer [handle-dump]]
-    [compojure.core :refer :all]
-    [datomic.api :as d]))
+    [compojure.core :refer :all]))
 
 (defn- map-keys [f m]
   (zipmap (map f (keys m))
@@ -20,32 +19,28 @@
 
 ;; TODO Check for duplicates
 (defn- create-category [request]
-  (let [db-conn (-> request :system :database :uri d/connect)
-        new-category (-> request :body-params from-public-keys)
-        category-map (-> (categories/dt-add-category! db-conn new-category) to-public-keys)]
+  (let [new-category (-> request :body-params from-public-keys)
+        category-map (-> (categories/dt-add-category! new-category) to-public-keys)]
     {:status 201
      :body category-map}))
 
-(defn- list-categories [request]
-  (let [db-conn (-> request :system :database :uri d/connect)
-        public-categories (->> (categories/dt-list-categories db-conn) (map to-public-keys))]
+(defn- list-categories []
+  (let [public-categories (->> (categories/dt-list-categories) (map to-public-keys))]
     {:status 200
      :body public-categories}))
 
-(defn- delete-category [request category-name]
-  (let [db-conn (-> request :system :database :uri d/connect)]
-    (categories/dt-remove-category! db-conn category-name))
+(defn- delete-category [category-name]
+  (categories/dt-remove-category! category-name)
     {:status 200
      :body nil})
 
-(defn- find-category [request category-name]
-  (let [db (-> request :system :database :uri d/connect d/db)]
-    {:status 200
-     :body (-> (categories/dt-find-category db category-name) to-public-keys)}))
+(defn- find-category [category-name]
+  {:status 200
+   :body (-> (categories/find-category category-name) to-public-keys)})
 
 (defroutes category-routes
-           (GET "/categories" [] list-categories)
+           (GET "/categories" [] (list-categories))
            (POST "/categories" [] create-category)
-           (GET "/categories/:category-name" [category-name :as req] (find-category req category-name))
-           (DELETE "/categories/:category-name" [category-name :as req] (delete-category req category-name))
+           (GET "/categories/:category-name" [category-name] (find-category category-name))
+           (DELETE "/categories/:category-name" [category-name] (delete-category category-name))
            (ANY "/ring-dump" [] handle-dump))               ;; For debugging

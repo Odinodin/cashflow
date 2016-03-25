@@ -5,9 +5,14 @@
             [clj-time.core :as t]
             [clj-time.coerce :as tc]
             [datomic.api :as d]
-            [cashflow.models.transactions :as trans]))
+            [mount.core :as mount]
+            [cashflow.models.transactions :as trans]
+            [cashflow.models.db :as cdb]))
 
-(def db-uri "datomic:mem://cashflow-db")
+(background (before :facts (do
+                             (test-db/create-empty-in-memory-db)
+                             (mount/start-with-states {#'cdb/db-conn #'test-db/test-db})))
+            (after :facts mount/stop))
 
 (def test-file (.getFile (clojure.java.io/resource "test-transactions.csv")))
 
@@ -27,9 +32,8 @@
           {:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
 
 (fact "Can add transactions in file"
-      (test-db/create-empty-in-memory-db db-uri)
-      (add-transactions-in-file! (d/connect db-uri) test-file)
-      (count (trans/d-all-transactions (d/db (d/connect db-uri)))) => 56)
+      (add-transactions-in-file! test-file)
+      (count (trans/d-all-transactions (d/db cdb/db-conn))) => 56)
 
 (fact "Internal transfers are filtered out when adding transactions"
       (to-transactions [["06.05.2009" "06.05.2009" "VARER" "NARVESEN" "-119,00" "17017470066"]
@@ -78,10 +82,8 @@
        {:time "2014-5" :income 3 :expense -30}])
 
 (fact "Can add transaction to database"
-      (test-db/create-empty-in-memory-db db-uri)
       (->
-        (add-transactions (d/connect db-uri)
-                          [{:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
+        (add-transactions [{:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
                            {:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
         :tempids
         vals
@@ -89,16 +91,14 @@
       => 2)
 
 (fact "Can find transaction by id in database"
-      (test-db/create-empty-in-memory-db db-uri)
-      (let [new-trans-datom (add-transactions (d/connect db-uri)
-                                              [{:transaction/date        (t/date-time 2009 05 06)
+      (let [new-trans-datom (add-transactions [{:transaction/date        (t/date-time 2009 05 06)
                                                 :transaction/code        "VARER"
                                                 :transaction/description "NARVESEN"
                                                 :transaction/amount      -119.00M}])
             transaction (test-db/datom->entity new-trans-datom)
             transaction-id (:transaction/id transaction)]
 
-        (d-find-transaction-by-id (d/db (d/connect db-uri)) transaction-id)
+        (d-find-transaction-by-id (d/db cdb/db-conn) transaction-id)
 
         => {:transaction/id          transaction-id
             :transaction/date        (t/date-time 2009 05 06)
@@ -107,9 +107,7 @@
             :transaction/amount      -119.00M}))
 
 (fact "Can find transactions by year"
-      (test-db/create-empty-in-memory-db db-uri)
-      (add-transactions (d/connect db-uri)
-                        [{:transaction/date        (t/date-time 2009 05 06)
+      (add-transactions [{:transaction/date        (t/date-time 2009 05 06)
                           :transaction/code        "VARER"
                           :transaction/description "NARVESEN"
                           :transaction/amount      -119.00M}
@@ -118,7 +116,7 @@
                           :transaction/description "REMA 1000"
                           :transaction/amount      -159.20M}])
       (->>
-        (dfind-transactions-by-year (d/connect db-uri) 2009)
+        (dfind-transactions-by-year (d/db cdb/db-conn) 2009)
         (map #(dissoc % :transaction/id)))
       =>
       [{:transaction/date        (t/date-time 2009 05 06)
@@ -130,22 +128,18 @@
         :transaction/description "REMA 1000" :transaction/amount -159.20M}])
 
 (fact "Can find transactions by month"
-      (test-db/create-empty-in-memory-db db-uri)
-      (add-transactions (d/connect db-uri)
-                        [{:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
+      (add-transactions [{:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
                          {:transaction/date (t/date-time 2009 06 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
       (->>
-        (dfind-transactions-by-month (d/connect db-uri) 2009 6)
+        (dfind-transactions-by-month cdb/db-conn 2009 6)
         (map #(dissoc % :transaction/id)))
       =>
       [{:transaction/date (t/date-time 2009 06 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
 
 (fact "Can find the list of unique years of transactions"
-      (test-db/create-empty-in-memory-db db-uri)
-      (add-transactions (d/connect db-uri)
-                        [{:transaction/date (t/date-time 2008 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
+      (add-transactions [{:transaction/date (t/date-time 2008 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
                          {:transaction/date (t/date-time 2008 05 06) :transaction/code "VARER" :transaction/description "NARVESEN" :transaction/amount -119.00M}
                          {:transaction/date (t/date-time 2009 05 06) :transaction/code "VARER" :transaction/description "REMA 1000" :transaction/amount -159.20M}])
-      (dfind-unique-years-in-transactions (d/db (d/connect db-uri)))
+      (dfind-unique-years-in-transactions (d/db cdb/db-conn))
       =>
       [2008 2009])

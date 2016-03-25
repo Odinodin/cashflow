@@ -1,6 +1,7 @@
 (ns cashflow.models.categories
   (:import (java.util.regex Pattern))
-  (:require [datomic.api :as d]))
+  (:require [datomic.api :as d]
+            [cashflow.models.db :as cdb]))
 
 (defn- category-matches-text?
   [category text]
@@ -50,14 +51,14 @@
     flatten
     (map #(db-id->entity-map (d/db db-conn) %))))
 
-(defn dt-list-categories [db-conn]
+(defn dt-list-categories []
   (->>
     (d/q
       '[:find ?e
         :where
         [?e :category/name]]
-      (d/db db-conn))
-    (db-ids->entity-maps db-conn)))
+      (d/db cdb/db-conn))
+    (db-ids->entity-maps cdb/db-conn)))
 
 (defn dt-find-category-id [db category-name]
   (->> (d/q
@@ -73,12 +74,15 @@
   (->> (dt-find-category-id db category-name)
        (db-id->entity-map db)))
 
+(defn find-category [category-name]
+  (dt-find-category (d/db cdb/db-conn) category-name))
+
 (defn- create-new-category!
-  [db-conn category]
+  [category]
   (let [tempid (d/tempid :db.part/user)
         category-with-db-id (assoc category :db/id tempid)]
     (->
-      @(d/transact db-conn
+      @(d/transact cdb/db-conn
                    [category-with-db-id])
       (hydrate-entity tempid))))
 
@@ -89,29 +93,29 @@
     (-> (get newmap key) set)))
 
 (defn- update-category!
-  [db-conn prev-cat-db-id new-cat]
+  [prev-cat-db-id new-cat]
   (let [new-cat (assoc new-cat :db/id #db/id [:db.part/user])
-        prev-cat (db-id->entity-map (d/db db-conn) prev-cat-db-id)
+        prev-cat (db-id->entity-map (d/db cdb/db-conn) prev-cat-db-id)
         retracts-vals (values-to-retract :category/matches prev-cat new-cat)
         retract-statements (for [match retracts-vals]
                              [:db/retract prev-cat-db-id :category/matches match])]
 
-      @(d/transact db-conn (conj retract-statements new-cat))
-      (dt-find-category (d/db db-conn) (:category/name new-cat))))
+      @(d/transact cdb/db-conn (conj retract-statements new-cat))
+      (dt-find-category (d/db cdb/db-conn) (:category/name new-cat))))
 
 
-(defn dt-add-category! [db-conn category]
-  (if-let [prev-cat-db-id (dt-find-category-id (d/db db-conn) (:category/name category))]
-    (update-category! db-conn prev-cat-db-id category)
-    (create-new-category! db-conn category)))
+(defn dt-add-category! [category]
+  (if-let [prev-cat-db-id (dt-find-category-id (d/db cdb/db-conn) (:category/name category))]
+    (update-category! prev-cat-db-id category)
+    (create-new-category! category)))
 
-(defn dt-remove-category! [db-conn category-name]
+(defn dt-remove-category! [category-name]
   (let [category-id (->> (d/q
                            '[:find ?e
                              :in $ ?category-name
                              :where
                              [?e :category/name ?category-name]]
-                           (d/db db-conn)
+                           (d/db cdb/db-conn)
                            category-name)
                          ffirst)]
-    (d/transact db-conn [[:db.fn/retractEntity category-id]])))
+    (d/transact cdb/db-conn [[:db.fn/retractEntity category-id]])))

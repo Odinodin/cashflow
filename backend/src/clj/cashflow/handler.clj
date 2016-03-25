@@ -10,7 +10,8 @@
             [ring.middleware.format :as middleware]
             [cashflow.encoding :as encoding]
             [cashflow.routes.transactions :refer [transactions-routes]]
-            [cashflow.routes.categories :refer [category-routes]]))
+            [cashflow.routes.categories :refer [category-routes]]
+            [ring.middleware.file :as ring]))
 
 (encoding/add-common-json-encoders!)
 
@@ -37,12 +38,14 @@
       app-routes)
     (handler/site)
     (middleware/wrap-restful-format :formats [:json-kw])
+    (ring/wrap-file "resources")
+    wrap-file-info
     (prone/wrap-exceptions)))
 
 ;; TODO Validate the system map
 (defn test-app-handler
-  [testsystem request]
-  (app (assoc request :system testsystem)))
+  [request]
+  (app request))
 
 (defn lein-app-handler
   [request]

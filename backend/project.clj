@@ -10,6 +10,7 @@
                  [hiccup "1.0.5"]
                  [ring-middleware-format "0.5.0"]
                  [ring "1.4.0"]
+                 [mount "0.1.10"]
 
                  [prismatic/schema "0.4.3"]
 
@@ -21,6 +22,8 @@
                  ;; Support
                  [prone "0.8.2"]
                  [org.clojure/tools.nrepl "0.2.10"]]
+  :repl-options {:init-ns repl}
+
   :ring {:handler cashflow.handler/lein-app-handler
          :init cashflow.handler/init
          :destroy cashflow.handler/destroy}

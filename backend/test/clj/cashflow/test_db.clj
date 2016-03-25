@@ -1,10 +1,14 @@
 (ns cashflow.test-db
-  (:require [datomic.api :as d]))
+  (:require [datomic.api :as d]
+            [cashflow.models.db :as cdb]
+            [mount.core :refer [defstate]]))
 
-(defn create-empty-in-memory-db [uri]
-  (d/delete-database uri)
-  (d/create-database uri)
-  (let [conn (d/connect uri)
+(def test-db-uri "datomic:mem://cashflow-db")
+
+(defn create-empty-in-memory-db []
+  (d/delete-database test-db-uri)
+  (d/create-database test-db-uri)
+  (let [conn (d/connect test-db-uri)
         schema (load-file (.getFile (clojure.java.io/resource "schema.edn")))]
     (d/transact conn schema)
     conn))
@@ -20,3 +24,5 @@
     first
     (d/entity (:db-after datom))
     d/touch))
+
+(defstate test-db :start (cdb/create-conn test-db-uri))

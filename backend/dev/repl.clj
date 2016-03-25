@@ -9,11 +9,12 @@
             [clojure.pprint :refer [pprint]]
             [clojure.tools.namespace.repl :refer [refresh]]
             [datomic.api :as d]
+
+            [mount.core :refer [defstate] :as mount]
+            [cashflow.server :as server]
             [cashflow.handler :as handler]
             [cashflow.models.transactions :as trans]
             [cashflow.models.categories :as categories]))
-
-(defonce server (atom nil))
 
 (defn get-handler []
   ;; #'app expands to (var app) so that when we reload our code,
@@ -26,30 +27,11 @@
       ; Content-Type, Content-Length, and Last Modified headers for files in body7
       (wrap-file-info)))
 
-(defn start-server
-  "used for starting the server in development mode from REPL"
-  [& [port]]
-  (let [port (if port (Integer/parseInt port) 8080)]
-    (reset! server
-            (run-jetty (get-handler)
-                   {:port         port
-                    :configurator init
-                    :auto-reload? true
-                    :open-browser? false
-                    :destroy      destroy
-                    :join?         false}))
-    (println (str "You can view the site at http://localhost:" port))))
-
-(defn stop-server []
-  (.stop @server)
-  (reset! server nil))
-
 (defn bootstrap-testdata []
-  (let [db-uri "datomic:mem://cashflow-db"]
-    (trans/add-transactions-in-file! (d/connect db-uri) (.getFile (clojure.java.io/resource "test-transactions.csv")))
-    (cashflow.models.categories/dt-add-category! (d/connect db-uri) {:category/name "Butikk" :category/matches ["Rema" "Kiwi"]})
+  (trans/add-transactions-in-file! (.getFile (clojure.java.io/resource "test-transactions.csv")))
+  (cashflow.models.categories/dt-add-category! {:category/name "Butikk" :category/matches ["Rema" "Kiwi"]})
 
-    #_(comment
+  #_(comment
       (categories/add-category! categories {:name "Butikk" :regexes [#"Rema" #"Kiwi" #"Rimi" #"KIWI" #"Coop" #"REMA"]})
       (categories/add-category! categories {:name "Reise" :regexes [#"NSB" #"Jet"]})
       (categories/add-category! categories {:name "Barnehage" :regexes [#"Barnehage"]})
@@ -58,7 +40,7 @@
       (categories/add-category! categories {:name "Lommepenger" :regexes [#"Kantine" #"Narvesen" #"Botanisk" #"Baker"]})
       (categories/add-category! categories {:name "Mobil" :regexes [#"Mobil"]})
       (categories/add-category! categories {:name "Lønn" :regexes [#"Megacorp"]})
-      (categories/tag-and-update-transactions! transactions categories))))
+      (categories/tag-and-update-transactions! transactions categories)))
 
 (defn create-empty-in-memory-db [uri]
   (d/delete-database uri)
@@ -68,7 +50,11 @@
     (d/transact conn schema)
     conn))
 
-(defn start-and-bootstrap []
-  (start-server)
+(defn run []
   (create-empty-in-memory-db "datomic:mem://cashflow-db")
+  (mount/start)
   (bootstrap-testdata))
+
+(defn reset []
+  (mount/stop)
+  (mount/start))

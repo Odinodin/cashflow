@@ -2,46 +2,42 @@
   (:require [cashflow.models.categories :refer :all]
             [cashflow.test-db :as test-db]
             [datomic.api :as d]
-            [midje.sweet :refer :all]))
+            [midje.sweet :refer :all]
+            [mount.core :as mount]
+            [cashflow.models.db :as cdb]))
 
-;; Datomic
-(def db-uri "datomic:mem://cashflow-db")
-
-(defn db [db-uri] (-> db-uri d/connect d/db))
-(defn conn [db-uri] (-> db-uri d/connect))
+(background (before :facts (do
+                             (test-db/create-empty-in-memory-db)
+                             (mount/start-with-states {#'cdb/db-conn #'test-db/test-db})))
+            (after :facts mount/stop))
 
 (fact "Can add category to db"
-      (test-db/create-empty-in-memory-db db-uri)
-      (dt-add-category! (conn db-uri) {:category/name "store" :category/matches ["Kiwi" "Rimi"]})
-      (dt-add-category! (conn db-uri) {:category/name "car" :category/matches ["BMW" "Peugeot"]})
-      (dt-list-categories (conn db-uri))
+      (dt-add-category! {:category/name "store" :category/matches ["Kiwi" "Rimi"]})
+      (dt-add-category! {:category/name "car" :category/matches ["BMW" "Peugeot"]})
+      (dt-list-categories)
 
       => [{:category/name "store" :category/matches #{"Kiwi" "Rimi"}}
           {:category/name "car" :category/matches #{"BMW" "Peugeot"}}])
 
 (fact "Can find category by name"
-      (test-db/create-empty-in-memory-db db-uri)
-      (dt-add-category! (conn db-uri) {:category/name "store" :category/matches ["Kiwi" "Rimi"]})
-      (dt-find-category (db db-uri) "store")
+      (dt-add-category! {:category/name "store" :category/matches ["Kiwi" "Rimi"]})
+      (dt-find-category (d/db cdb/db-conn) "store")
 
       => {:category/name "store" :category/matches #{"Kiwi" "Rimi"}})
 
 (fact "Can remove category from db"
-      (test-db/create-empty-in-memory-db db-uri)
-      (dt-add-category! (conn db-uri) {:category/name "store" :category/matches ["Kiwi" "Rimi"]})
-      (dt-remove-category! (conn db-uri) "store")
-      (dt-list-categories (conn db-uri))
+      (dt-add-category! {:category/name "store" :category/matches ["Kiwi" "Rimi"]})
+      (dt-remove-category! "store")
+      (dt-list-categories)
 
       => [])
 
 (fact "Can update category"
-      (test-db/create-empty-in-memory-db db-uri)
-      (dt-add-category! (conn db-uri) {:category/name "store" :category/matches ["Kiwi" "Rimi"]})
-      (dt-add-category! (conn db-uri) {:category/name "store" :category/matches ["Rema"]})
-      (dt-list-categories (conn db-uri))
+      (dt-add-category! {:category/name "store" :category/matches ["Kiwi" "Rimi"]})
+      (dt-add-category! {:category/name "store" :category/matches ["Rema"]})
+      (dt-list-categories)
 
       => [{:category/name "store" :category/matches #{"Rema"}}])
-
 
 (fact "Can suggest categories based on transaction description"
       (suggest-categories nil nil) => #{}

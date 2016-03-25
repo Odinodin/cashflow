@@ -3,7 +3,8 @@
             [clj-time.core :as t]
             [clj-time.coerce :as tc]
             [datomic.api :as d]
-            [cashflow.time :as ct])
+            [cashflow.time :as ct]
+            [cashflow.models.db :as cdb])
   (:import [java.io BufferedReader FileReader]))
 
 
@@ -75,13 +76,13 @@
        transaction-list))
 
 
-(defn add-transactions [db-conn transactions]
+(defn add-transactions [transactions]
   (let [transactions-with-db-id (map #(->
                                        %1
                                        (update-in [:transaction/date] tc/to-date)
                                        (assoc :db/id (d/tempid :db.part/user))
                                        (assoc :transaction/id (str (java.util.UUID/randomUUID)))) transactions)]
-    @(d/transact db-conn
+    @(d/transact cdb/db-conn
                  transactions-with-db-id)))
 
 (defn update-transaction
@@ -116,8 +117,7 @@
     date->datetime
     first))
 
-;; TODO take db as param, not db-conn
-(defn dfind-transactions-by-year [db-conn year]
+(defn dfind-transactions-by-year [db year]
   (->>
     (d/q
       '[:find ?e
@@ -126,9 +126,9 @@
         [?e :transaction/date ?date]
         [((fn [dt] (+ (.getYear dt) 1900)) ?date) ?tyear]
         [(= ?q-year ?tyear)]]
-      (d/db db-conn)
+      db
       year)
-    (db-ids->entity-maps (d/db db-conn))
+    (db-ids->entity-maps db)
     date->datetime
     (sort-by :transaction/date)))
 
@@ -189,7 +189,7 @@
     lines->transactions
     (remove (comp #{"OVFNETTB" "MOB.B.OVF" "AVTALE"} :transaction/code))))
 
-(defn add-transactions-in-file! [db-conn file]
+(defn add-transactions-in-file! [file]
   (->> (parse-file file)
        to-transactions
-       (add-transactions db-conn)))
+       (add-transactions)))
