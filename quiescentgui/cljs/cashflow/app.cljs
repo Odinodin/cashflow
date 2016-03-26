@@ -18,8 +18,6 @@
             [cashflow.transactions-page :as transactions-page]
             [cashflow.graphs-page :as graphs-page]))
 
-#_((use 'figwheel-sidecar.repl-api))
-
 (enable-console-print!)
 
 (def store (atom {:route :category-page
