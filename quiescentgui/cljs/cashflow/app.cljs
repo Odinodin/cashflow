@@ -3,17 +3,11 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [cljs-http.client :as http]
             [cljs.core.async :refer [<! >! chan put!]]
-
-            ;; DOM
             [quiescent.core :as q]
             [quiescent.dom :as d]
-
-            ;; Routing
             [secretary.core :as secretary :refer-macros [defroute]]
             [goog.events :as events]
             [goog.history.EventType :as EventType]
-
-            ;; Cashflow
             [cashflow.category-page :as category-page]
             [cashflow.transactions-page :as transactions-page]
             [cashflow.graphs-page :as graphs-page]))
