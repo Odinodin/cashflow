@@ -153,20 +153,20 @@
            (RootComp @store action-chan))
     (.getElementById js/document "main")))
 
+(defn ^:export main []
+  ;; Listen for navigation changes
+  (let [history (History.)
+        navigation EventType/NAVIGATE]
+    (goog.events/listen history
+      navigation
+      #(-> % .-token secretary/dispatch!))
+    (doto history (.setEnabled true)))
 
-;; Listen for navigation changes
-(defonce y (let [history (History.)
-                 navigation EventType/NAVIGATE]
-             (goog.events/listen history
-                                 navigation
-                                 #(-> % .-token secretary/dispatch!))
-             (doto history (.setEnabled true))))
+  ;; Rerender every time the store changes
+  (add-watch store :watcher
+    (fn [key atom old-state new-state]
+      (prn "re-rendering!")
+      (render)))
 
-;; Rerender every time the store changes
-(defonce x (add-watch store :watcher
-                      (fn [key atom old-state new-state]
-                        (prn "re-rendering!")
-                        (render))))
-
-;; Initialize route to current URL
-(secretary/dispatch! (get-hash-url))
+  ;; Initialize route to current URL
+  (secretary/dispatch! (get-hash-url)))

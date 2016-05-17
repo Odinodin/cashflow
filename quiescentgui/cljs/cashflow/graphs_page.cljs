@@ -4,9 +4,7 @@
             [quiescent.core :as q]
             [quiescent.dom :as d]
             [cashflow.common :as common]
-
             [cljs.pprint :refer [pprint print-table]]
-
             [Highcharts]))
 
 (def graph-types [{:id   :net-income-graph
