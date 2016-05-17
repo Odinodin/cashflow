@@ -1,7 +1,27 @@
 (ns cashflow.repl
   (:use cashflow.handler
         ring.server.standalone
+        [figwheel-sidecar.repl-api :as fig]
         [ring.middleware file-info file]))
+
+(defn start-figwheel []
+  (fig/start-figwheel!
+    {:figwheel-options {:css-dirs ["resources/public/css"]}
+     :build-ids ["dev"]
+     :all-builds [{:id "dev"
+                   :source-paths ["cljs"]
+                   :figwheel true
+
+                   :compiler {:main "cashflow.app"
+                              :output-to "resources/public/js/app.js"
+                              :output-dir "resources/public/js/out"
+                              :optimizations :none
+                              :asset-path "js/out"
+                              :source-map-timestamp true
+
+                              :foreign-libs [{:file "lib/standalone-framework.src.js" :provides ["Standalone"]}
+                                             {:file "lib/highcharts.src.js" :provides ["Highcharts"] :requires ["Standalone"]}]
+                              }}]}))
 
 (defonce server (atom nil))
 
@@ -32,4 +52,6 @@
   (.stop @server)
   (reset! server nil))
 
-#_(stop-server)
+(defn start []
+  (start-figwheel)
+  (start-server))

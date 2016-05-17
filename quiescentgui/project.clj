@@ -18,6 +18,9 @@
                  [cljs-http "0.1.39"]
                  [secretary "1.2.3"]]
 
+
+  :clean-targets ^{:protect false} ["resources/public/js" "target"]
+
   ;; Start backend
   :ring {:handler cashflow.handler/app}
 
@@ -25,25 +28,5 @@
 
   :plugins [[lein-ring "0.8.10"]]
 
-  :profiles {:dev {:plugins [[lein-cljsbuild "1.1.3"]
-                             [lein-figwheel "0.5.1"]]
-                   :dependencies [[figwheel-sidecar "0.5.1"]]
-                   :cljsbuild {
-                               :builds [{:id "dev"
-                                         :source-paths ["cljs"]
-                                         :figwheel true
-
-                                         :compiler {:main "cashflow.app"
-                                                    :output-to "resources/public/js/app.js"
-                                                    :output-dir "resources/public/js/out"
-                                                    :optimizations :none
-                                                    :asset-path "js/out"
-                                                    :source-map-timestamp true
-
-                                                    :foreign-libs [{:file "lib/standalone-framework.src.js" :provides ["Standalone"]}
-                                                                   {:file "lib/highcharts.src.js" :provides ["Highcharts"] :requires ["Standalone"]}]
-                                                    }}]}
-
-                   :figwheel {:http-server-root "public"
-                              :server-port 3448
-                              :css-dirs ["resources/public/css"]}}})
+  :profiles {:dev {:plugins [[lein-cljsbuild "1.1.3"]]
+                   :dependencies [[figwheel-sidecar "0.5.3-1"]]}})
