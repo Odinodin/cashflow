@@ -9,7 +9,6 @@
             [clojure.pprint :refer [pprint]]
             [clojure.tools.namespace.repl :refer [refresh]]
             [datomic.api :as d]
-
             [mount.core :refer [defstate] :as mount]
             [cashflow.server :as server]
             [cashflow.handler :as handler]

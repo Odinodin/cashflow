@@ -1,27 +1,25 @@
 (defproject cashflow-backend "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
+  :description "Cashflowing"
   :url "http://example.com/FIXME"
   :source-paths ["src/clj"]
   :test-paths ["test/clj"]
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [clj-time "0.11.0"]
                  [cheshire "5.5.0"]
-                 [compojure "1.5.0"]
+                 [compojure "1.5.1"]
                  [hiccup "1.0.5"]
                  [ring-middleware-format "0.5.0"]
-                 [ring "1.4.0"]
-                 [mount "0.1.10"]
+                 [ring "1.5.0"]
+                 [mount "0.1.11"]
 
-                 [prismatic/schema "0.4.3"]
-
-                 [com.datomic/datomic-free "0.9.5350" :exclusions [joda-time]]
+                 [com.datomic/datomic-free "0.9.5544" :exclusions [joda-time]]
 
                  ;; GUI
                  [selmer "0.8.2"]
 
                  ;; Support
                  [prone "0.8.2"]
-                 [org.clojure/tools.nrepl "0.2.10"]]
+                 [org.clojure/tools.nrepl "0.2.12"]]
   :repl-options {:init-ns repl}
 
   :ring {:handler cashflow.handler/lein-app-handler
