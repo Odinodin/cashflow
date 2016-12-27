@@ -110,18 +110,18 @@
                   (d/div {:className "bg-box"}
                          (du/input {:type     "checkbox"
                                    :checked  (get-in ui-state [:transaction-page :show-transactions-with-categories])
-                                   :onChange on-category-click} "Category")
+                                   :onChange on-category-click})
 
                          (du/input {:type     "checkbox"
                                    :checked  (get-in ui-state [:transaction-page :show-transactions-without-categories])
-                                   :onChange on-no-category-click} "No Category")
+                                   :onChange on-no-category-click})
                          (du/input {:type        "text"
                                    :placeholder "Transaction filter"
                                    :className   "form-control"
                                    :value       (get-in ui-state [:transaction-page :transaction-description-filter])
                                    :onChange    on-transaction-desc-filter-change})
                          (du/input {:type        "text"
-                                   :placeholder "Categorsy filter"
+                                   :placeholder "Category filter"
                                    :className   "form-control"
                                    :value       (get-in ui-state [:transaction-page :category-filter])
                                    :onChange    on-category-filter-change}))))
