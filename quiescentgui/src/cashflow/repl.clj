@@ -10,7 +10,7 @@
      :build-ids ["dev"]
      :all-builds [{:id "dev"
                    :source-paths ["cljs"]
-                   :figwheel true
+                   :figwheel {:on-jsload "cashflow.app/force-rerender"}
 
                    :compiler {:main "cashflow.app"
                               :output-to "resources/public/js/app.js"

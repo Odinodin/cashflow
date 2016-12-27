@@ -14,18 +14,19 @@
 
 (enable-console-print!)
 
-(def store (atom {:route :category-page
-                  :categories      []
-                  :available-years []
-                  :time-filter     {}
-                  :transactions    []
-                  :net-income      []
-                  :sum-by-category {}
-                  :ui-state        {:transaction-page {:show-transactions-with-categories    true
-                                                       :show-transactions-without-categories true
-                                                       :transaction-description-filter       ""
-                                                       :category-filter                      ""}
-                                    :graphs-page      {:show-graph :net-income-graph}}}))
+(defonce store (atom {:route :category-page
+                      :render-count 0
+                      :categories []
+                      :available-years []
+                      :time-filter {}
+                      :transactions []
+                      :net-income []
+                      :sum-by-category {}
+                      :ui-state {:transaction-page {:show-transactions-with-categories true
+                                                    :show-transactions-without-categories true
+                                                    :transaction-description-filter ""
+                                                    :category-filter ""}
+                                 :graphs-page {:show-graph :net-income-graph}}}))
 
 (def action-chan (chan))
 (def backend-chan (chan 10))
@@ -170,3 +171,6 @@
 
   ;; Initialize route to current URL
   (secretary/dispatch! (get-hash-url)))
+
+(defn force-rerender []
+  (swap! store update :render-count inc))
