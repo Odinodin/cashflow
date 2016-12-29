@@ -26,6 +26,15 @@
       ; Content-Type, Content-Length, and Last Modified headers for files in body7
       (wrap-file-info)))
 
+(defn import-all-files [files]
+  (doseq [f files]
+    (trans/add-transactions-in-file! f)))
+
+(defn import-transactions [absolute-path]
+  (-> (clojure.java.io/file absolute-path)
+      (.listFiles)
+      (import-all-files)))
+
 (defn bootstrap-testdata []
   (trans/add-transactions-in-file! (.getFile (clojure.java.io/resource "test-transactions.csv")))
   (cashflow.models.categories/dt-add-category! {:category/name "Butikk" :category/matches ["Rema" "Kiwi"]})

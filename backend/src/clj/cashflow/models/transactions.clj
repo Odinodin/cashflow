@@ -5,7 +5,7 @@
             [datomic.api :as d]
             [cashflow.time :as ct]
             [cashflow.models.db :as cdb])
-  (:import [java.io BufferedReader FileReader]))
+  (:import [java.io BufferedReader FileReader FileInputStream InputStreamReader]))
 
 
 ;; Operations over transactions
@@ -177,8 +177,9 @@
                                   bigdec)}))
 (defn parse-file [file]
   {:pre [(not (nil? file))]}
-  (with-open [rdr (BufferedReader.
-                    (FileReader. file))]
+  (with-open [rdr (BufferedReader. (InputStreamReader.
+                                    (FileInputStream. file)
+                                     "windows-1252"))]
     (let [lines (doall (line-seq rdr))]
       (for [line (rest lines)]
         (clojure.string/split line #"\t")))))
