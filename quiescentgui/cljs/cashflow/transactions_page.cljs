@@ -108,10 +108,11 @@
                                                   (.preventDefault event))]
 
                   (d/div {:className "bg-box"}
+                         (d/label {} "Category")
                          (du/input {:type     "checkbox"
                                    :checked  (get-in ui-state [:transaction-page :show-transactions-with-categories])
                                    :onChange on-category-click})
-
+                         (d/label {} "No Category")
                          (du/input {:type     "checkbox"
                                    :checked  (get-in ui-state [:transaction-page :show-transactions-without-categories])
                                    :onChange on-no-category-click})
