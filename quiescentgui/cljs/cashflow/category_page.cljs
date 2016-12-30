@@ -42,17 +42,17 @@
                   (d/div {:className "bg-box"}
                          (d/table {}
                                   (d/thead {}
-                                           (d/th {} "")
-                                           (d/th {} "Category")
-                                           (d/th {} "Matches"))
-
+                                    (d/tr {}
+                                      (d/th {} "")
+                                      (d/th {} "Category")
+                                      (d/th {} "Matches")))
                                   (d/tbody {}
                                            (when (seq categories)
-                                             (map #(d/tr {}
-                                                         (d/td {}
-                                                               (d/button {:className "delete" :onClick (partial delete-fn (:name %))} "\u2716"))
-                                                         (d/td {:className "category"} (:name %))
-                                                         (MatchesCell %)) categories)))))))
+                                             (map-indexed (fn [idx category]
+                                                            (d/tr {:key idx}
+                                                              (d/td {} (d/button {:className "delete" :onClick (partial delete-fn (:name category))} "\u2716"))
+                                                              (d/td {:className "category"} (:name category))
+                                                              (MatchesCell category))) categories)))))))
 
 (q/defcomponent Page [store]
                 (d/div {}
