@@ -1,11 +1,10 @@
 (ns cashflow.graphs-page
-  (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [cljs.core.async :refer [put!]]
-            [quiescent.core :as q]
+  (:require [quiescent.core :as q]
             [quiescent.dom :as d]
             [cashflow.common :as common]
             [cljs.pprint :refer [pprint print-table]]
-            [Highcharts]))
+            [Highcharts]
+            [cashflow.event-bus :as bus]))
 
 (def graph-types [{:id   :net-income-graph
                    :name "Net income"}
@@ -14,10 +13,9 @@
                   {:id   :category-by-year-graph
                    :name "Categories by year"}])
 
-(q/defcomponent GraphTypeSelector [{:keys [ui-state]} action-chan]
+(q/defcomponent GraphTypeSelector [{:keys [ui-state]}]
                 (let [on-button-click (fn [graph-type event]
-                                        (put! action-chan {:type       :show-graph
-                                                           :graph-type (:id graph-type)})
+                                        (bus/publish :show-graph {:graph-type (:id graph-type)})
                                         (.preventDefault event))]
 
                   (d/div {:className "bg-box"}
@@ -107,10 +105,9 @@
                                                    :series      [{:name "Categories"
                                                                   :type "pie"
                                                                   :data data}]})))))
-                [store action-chan]
+                [store]
                 (d/div {}
-                       (common/TimeFilter (select-keys store [:available-years :time-filter])
-                                          action-chan)
+                       (common/TimeFilter (select-keys store [:available-years :time-filter]))
                        (d/div {:className "graph"} "The target")))
 
 (q/defcomponent CategoryByYearGraph
@@ -132,10 +129,9 @@
 
                                                    :yAxis {:min 0}
                                                    :series data})))))
-                [store action-chan]
+                [store]
                 (d/div {}
-                       (common/YearFilter (select-keys store [:available-years :time-filter])
-                                          action-chan)
+                       (common/YearFilter (select-keys store [:available-years :time-filter]))
                        (d/div {:className "graph"} "The target")))
 
 
@@ -168,26 +164,24 @@
                                                    :xAxis  {:type "category"}
                                                    })))))
 
-                [store action-chan]
+                [store]
                 ;; Target or chart renderTo
 
                 (d/div {}
-                       (common/YearFilter (select-keys store [:available-years :time-filter])
-                                          action-chan)
+                       (common/YearFilter (select-keys store [:available-years :time-filter]))
                        (d/div {:className "graph"} "The target")))
 
 
-(q/defcomponent Graph [store action-chan]
+(q/defcomponent Graph [store]
                 (let [selected-graph-type (get-in store [:ui-state :graphs-page :show-graph])]
                   (case selected-graph-type
-                    :net-income-graph (NetIncomeGraph store action-chan)
-                    :category-graph (CategoryGraph store action-chan)
-                    :category-by-year-graph (CategoryByYearGraph store action-chan)
-                    )))
+                    :net-income-graph (NetIncomeGraph store)
+                    :category-graph (CategoryGraph store)
+                    :category-by-year-graph (CategoryByYearGraph store))))
 
 
-(q/defcomponent Page [store action-chan]
+(q/defcomponent Page [store]
                 (d/div {}
                        (common/Menu)
-                       (GraphTypeSelector store action-chan)
-                       (Graph store action-chan)))
+                       (GraphTypeSelector store)
+                       (Graph store)))

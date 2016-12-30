@@ -15,17 +15,6 @@
             [cashflow.models.transactions :as trans]
             [cashflow.models.categories :as categories]))
 
-(defn get-handler []
-  ;; #'app expands to (var app) so that when we reload our code,
-  ;; the server is forced to re-resolve the symbol in the var
-  ;; rather than having its own copy. When the root binding
-  ;; changes, the server picks it up without having to restart.
-  (-> #'lein-app-handler
-      ; Makes static assets in $PROJECT_DIR/resources/public/ available.
-      (wrap-file "resources")
-      ; Content-Type, Content-Length, and Last Modified headers for files in body7
-      (wrap-file-info)))
-
 (defn import-all-files [files]
   (doseq [f files]
     (trans/add-transactions-in-file! f)))
@@ -38,7 +27,10 @@
 (defn bootstrap-testdata []
   (trans/add-transactions-in-file! (.getFile (clojure.java.io/resource "test-transactions.csv")))
   (cashflow.models.categories/dt-add-category! {:category/name "Butikk" :category/matches ["Rema" "Kiwi"]})
-
+  (cashflow.models.categories/dt-add-category! {:category/name "Klær" :category/matches ["Carlings"]})
+  (cashflow.models.categories/dt-add-category! {:category/name "Bil" :category/matches ["Q-park" "parkering"]})
+  (cashflow.models.categories/dt-add-category! {:category/name "Helse" :category/matches ["apotek"]})
+  (cashflow.models.categories/dt-add-category! {:category/name "Kafe" :category/matches ["cafe"]})
   #_(comment
       (categories/add-category! categories {:name "Butikk" :regexes [#"Rema" #"Kiwi" #"Rimi" #"KIWI" #"Coop" #"REMA"]})
       (categories/add-category! categories {:name "Reise" :regexes [#"NSB" #"Jet"]})

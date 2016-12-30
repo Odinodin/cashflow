@@ -1,9 +1,7 @@
 (ns cashflow.common
-  (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [cljs.core.async :refer [put!]]
-            [quiescent.core :as q]
-            [quiescent.dom :as d]))
-
+  (:require [quiescent.core :as q]
+            [quiescent.dom :as d]
+            [cashflow.event-bus :as bus]))
 
 (q/defcomponent Menu []
                 (d/ul {:className "horizontal-left-list v-spaced"}
@@ -12,12 +10,14 @@
                       (d/li {:className "nav-item"} (d/a {:className "navbar-link" :href "#/transactions"} "Transactions"))
                       (d/li {:className "nav-item"} (d/a {:className "navbar-link" :href "#/graphs"} "Graphs"))))
 
-(q/defcomponent TimeFilter [{:keys [available-years time-filter]} action-chan]
+(q/defcomponent TimeFilter [{:keys [available-years time-filter]}]
                 (let [month-map (zipmap (range 1 13) ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"])
                       year-class-fn (fn [year] (if (= year (:year time-filter)) "flat-button selected" "flat-button"))
                       month-class-fn (fn [month-index] (if (= month-index (:month time-filter)) "flat-button selected" "flat-button"))
-                      on-year-click (fn [year event] (put! action-chan {:type :update-time-filter :time-filter {:year year}}) (.preventDefault event))
-                      on-month-click (fn [month event] (put! action-chan {:type :update-time-filter :time-filter (assoc time-filter :month month)}) (.preventDefault event))]
+                      on-year-click (fn [year event]
+                                      (bus/publish :update-time-filter {:time-filter {:year year}}))
+                      on-month-click (fn [month event]
+                                       (bus/publish :update-time-filter {:time-filter (assoc time-filter :month month)}))]
 
                   (d/div {:className "bg-box"}
                          (d/div {:className "container"}
@@ -30,9 +30,10 @@
                                                                (d/button {:className (month-class-fn month-idx) :onClick (partial on-month-click month-idx)} name)))
                                      month-map)))))
 
-(q/defcomponent YearFilter [{:keys [available-years time-filter]} action-chan]
+(q/defcomponent YearFilter [{:keys [available-years time-filter]}]
                 (let [year-class-fn (fn [year] (if (= year (:year time-filter)) "flat-button selected" "flat-button"))
-                      on-year-click (fn [year event] (put! action-chan {:type :update-time-filter :time-filter {:year year}}) (.preventDefault event))]
+                      on-year-click (fn [year event]
+                                      (bus/publish :update-time-filter {:time-filter {:year year}}))]
 
                   (d/div {:className "bg-box"}
                          (d/div {:className "container"}
