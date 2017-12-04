@@ -12,16 +12,13 @@
                    :source-paths ["cljs"]
                    :figwheel {:on-jsload "cashflow.app/force-rerender"}
 
-                   :compiler {:main "cashflow.app"
+                   :compiler {:main 'cashflow.app
+                              :asset-path "/js/out"
                               :output-to "resources/public/js/app.js"
                               :output-dir "resources/public/js/out"
-                              :optimizations :none
-                              :asset-path "js/out"
                               :source-map-timestamp true
-
                               :foreign-libs [{:file "lib/standalone-framework.src.js" :provides ["Standalone"]}
-                                             {:file "lib/highcharts.src.js" :provides ["Highcharts"] :requires ["Standalone"]}]
-                              }}]}))
+                                             {:file "lib/highcharts.src.js" :provides ["Highcharts"] :requires ["Standalone"]}]}}]}))
 
 (defonce server (atom nil))
 
@@ -45,7 +42,7 @@
                    {:port         port
                     :auto-reload? true
                     :destroy      destroy
-                    :join         true}))
+                    :join         false}))
     (println (str "You can view the site at http://localhost:" port))))
 
 (defn stop-server []
@@ -53,5 +50,5 @@
   (reset! server nil))
 
 (defn start []
-  (start-figwheel)
-  (start-server))
+  (start-server)
+  (start-figwheel))
