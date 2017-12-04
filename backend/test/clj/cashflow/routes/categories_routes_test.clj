@@ -1,18 +1,20 @@
 (ns cashflow.routes.categories_routes_test
   (:import (java.io ByteArrayInputStream))
-  (:require [ring.mock.request :as ring-mock]
-            [midje.sweet :refer :all]
-            [mount.core :as mount]
-            [cheshire.core :as json]
-            [cashflow.handler :as cashflow]
+  (:require [cashflow.handler :as cashflow]
             [cashflow.models.db :as cdb]
             [cashflow.json-util :as json-util]
-            [cashflow.test-db :as test-db]))
+            [cashflow.test-db :as test-db]
+            [cheshire.core :as json]
+            [clojure.test :refer [deftest is testing use-fixtures]]
+            [mount.core :as mount]
+            [ring.mock.request :as ring-mock]))
 
-(background (before :facts (do
-                             (test-db/create-empty-in-memory-db)
-                             (mount/start-with-states {#'cdb/db-conn #'test-db/test-db})))
-            (after :facts mount/stop))
+(use-fixtures :each
+  (fn [test]
+    (test-db/create-empty-in-memory-db)
+    (mount/start-with-states {#'cdb/db-conn {:start #(cdb/create-conn test-db/test-db-uri)}})
+    (test)
+    (mount/stop)))
 
 (defn- create-category [category-map]
   (->
@@ -31,44 +33,31 @@
     (cashflow/test-app-handler (ring-mock/request :get "/api/categories"))
     json-util/json-parse-body))
 
-(fact "can create category"
-      (let [response (create-category {:name "test" :matches ["a" "b"]})]
+(deftest can-create-category
+  (is (= (:status (create-category {:name "test" :matches ["a" "b"]}) 201))))
 
-        response => (contains {:body anything :headers anything :status 201})))
 
-(fact "can update category"
-      (create-category {:name "test" :matches ["a" "b"]})
-      (let [update-resp (create-category {:name "test" :matches ["c"]})]
+(deftest can-update-category
+  (create-category {:name "test" :matches ["a" "b"]})
+  (is (= (:status (create-category {:name "test" :matches ["c"]})) 201)))
 
-        update-resp => (contains {:body anything :headers anything :status 201})))
+(deftest can-list-categories
+  (create-category {:name "store" :matches ["x"]})
+  (let [response (list-categories)]
+    (is (= (:status response) 200))
+    (is (= (:body response) [{:name "store" :matches ["x"]}]))))
 
-(fact "can list categories"
+(deftest can-get-category
       (create-category {:name "store" :matches ["x"]})
-      (let [response (list-categories)]
+      (let [response (-> (cashflow/test-app-handler (ring-mock/request :get "/api/categories/store"))
+                         json-util/json-parse-body)]
+        (is (= (:status response) 200))
+        (is (= (:body response) {:name "store" :matches ["x"]}))))
 
-        response => (contains {:body anything :headers anything :status 200})
-        (:body response)
-        => [{:name "store" :matches ["x"]}]))
+(deftest can-delete-category
+  (create-category {:name "power" :matches ["x"]})
+  (let [delete-response (cashflow/test-app-handler (ring-mock/request :delete "/api/categories/power"))
+        list-response (list-categories)]
 
-(fact "can get category"
-      (create-category {:name "store" :matches ["x"]})
-      (let [response (->
-                       (cashflow/test-app-handler (ring-mock/request :get "/api/categories/store"))
-                       json-util/json-parse-body)]
-
-        response => (contains {:body anything :headers anything :status 200})
-        (:body response) => {:name "store" :matches ["x"]}))
-
-;; TODO Failed when upgrading deps, fix it
-#_(fact "can delete category"
-      (test-db/create-empty-in-memory-db db-uri)
-      (create-category {:database {:uri db-uri}}
-                       {:name "power" :matches ["x"]})
-      (let [delete-response (->
-                              (cashflow/test-app-handler {:database {:uri db-uri}}
-                                                         (ring-mock/request :delete "/api/categories/power"))
-                              json-util/json-parse-body)
-            list-response (list-categories {:database {:uri db-uri}})]
-
-        delete-response => (contains {:body anything :headers anything :status 200})
-        (-> list-response :body count) => 0))
+    (is (= (:status delete-response) 200))
+    (is (= (:body (list-categories) [])))))
