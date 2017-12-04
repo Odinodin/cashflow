@@ -13,29 +13,29 @@
           (:id transaction))))
 
 (q/defcomponent CategoryForTransactionSuggestion [{:keys [transaction categories]}]
-                (let [matches (filter (fn [category] (some #(re-find (re-pattern (str "(?i)" %)) (:description transaction)) (:matches category))) categories)]
-                  (d/div {} (map-indexed
-                              (fn [index match] (d/div {:key index
-                                                        :className "category category-suggestion"
-                                                        :onClick (fn [event]
-                                                                   (bus/publish :edit-transaction-category-finished
-                                                                     {
-                                                                      :transaction-id (:id transaction)
-                                                                      :category-name (:name match)})
-                                                                   (.preventDefault event))}
-                                                       (str (:name match) "?"))) matches))))
+  (let [matches (filter (fn [category] (some #(re-find (re-pattern (str "(?i)" %)) (:description transaction)) (:matches category))) categories)]
+    (d/div {} (map-indexed
+                (fn [index match] (d/div {:key index
+                                          :className "category category-suggestion"
+                                          :onClick (fn [event]
+                                                     (bus/publish :edit-transaction-category-finished
+                                                       {
+                                                        :transaction-id (:id transaction)
+                                                        :category-name (:name match)})
+                                                     (.preventDefault event))}
+                                    (str (:name match) "?"))) matches))))
 
 (q/defcomponent CategoryForTransactionEditor [{:keys [transaction categories]}]
-                (d/div {}
-                       (map-indexed (fn [index category] (d/div {:key index
-                                                                 :className "category category-candidate fade-in"
-                                                                 :onClick (fn [event]
-                                                                            (bus/publish :edit-transaction-category-finished
-                                                                              {:transaction-id (:id transaction)
-                                                                               :category-name (:name category)})
-                                                                            (.preventDefault event))}
-                                                                (:name category)))
-                            categories)))
+  (d/div {}
+    (map-indexed (fn [index category] (d/div {:key index
+                                              :className "category category-candidate fade-in"
+                                              :onClick (fn [event]
+                                                         (bus/publish :edit-transaction-category-finished
+                                                           {:transaction-id (:id transaction)
+                                                            :category-name (:name category)})
+                                                         (.preventDefault event))}
+                                        (:name category)))
+      categories)))
 
 (q/defcomponent TransactionCategoryCell [{:keys [transaction categories ui-state] :as props}]
   (let [on-click-category-fn (fn [event]
@@ -87,39 +87,36 @@
        (TransactionCategoryCell {:transaction transaction :categories categories :ui-state ui-state})])))
 
 (q/defcomponent TransactionFilter [{:keys [ui-state]}]
+  (let [on-category-click (fn [event]
+                            (bus/publish :transaction-page-toggle-show-category))
+        on-no-category-click (fn [event]
+                               (bus/publish :transaction-page-toggle-show-no-category))
+        on-transaction-desc-filter-change (fn [event]
+                                            (bus/publish :transaction-page-update-transaction-desc-filter {:value (.-value (.-target event))})
+                                            (.preventDefault event))
+        on-category-filter-change (fn [event]
+                                    (bus/publish :transaction-page-update-category-filter {:value (.-value (.-target event))})
+                                    (.preventDefault event))]
 
-                (let [on-category-click (fn [event]
-                                          (bus/publish :transaction-page-toggle-show-category)
-                                          (.preventDefault event))
-                      on-no-category-click (fn [event]
-                                             (bus/publish :transaction-page-toggle-show-no-category)
-                                             (.preventDefault event))
-                      on-transaction-desc-filter-change (fn [event]
-                                                          (bus/publish :transaction-page-update-transaction-desc-filter {:value (.-value (.-target event))})
-                                                          (.preventDefault event))
-                      on-category-filter-change (fn [event]
-                                                  (bus/publish :transaction-page-update-category-filter {:value (.-value (.-target event))})
-                                                  (.preventDefault event))]
-
-                  (d/div {:className "bg-box"}
-                         (d/label {} "Category")
-                         (du/input {:type     "checkbox"
-                                   :checked  (get-in ui-state [:transaction-page :show-transactions-with-categories])
-                                   :onChange on-category-click})
-                         (d/label {} "No Category")
-                         (du/input {:type     "checkbox"
-                                   :checked  (get-in ui-state [:transaction-page :show-transactions-without-categories])
-                                   :onChange on-no-category-click})
-                         (du/input {:type        "text"
-                                   :placeholder "Transaction filter"
-                                   :className   "form-control"
-                                   :value       (get-in ui-state [:transaction-page :transaction-description-filter])
-                                   :onChange    on-transaction-desc-filter-change})
-                         (du/input {:type        "text"
-                                   :placeholder "Category filter"
-                                   :className   "form-control"
-                                   :value       (get-in ui-state [:transaction-page :category-filter])
-                                   :onChange    on-category-filter-change}))))
+    (d/div {:className "bg-box"}
+      (d/label {} "Category")
+      (du/input {:type "checkbox"
+                 :checked (get-in ui-state [:transaction-page :show-transactions-with-categories])
+                 :onChange on-category-click})
+      (d/label {} "No Category")
+      (du/input {:type "checkbox"
+                 :checked (get-in ui-state [:transaction-page :show-transactions-without-categories])
+                 :onChange on-no-category-click})
+      (du/input {:type "text"
+                 :placeholder "Transaction filter"
+                 :className "form-control"
+                 :value (get-in ui-state [:transaction-page :transaction-description-filter])
+                 :onChange on-transaction-desc-filter-change})
+      (du/input {:type "text"
+                 :placeholder "Category filter"
+                 :className "form-control"
+                 :value (get-in ui-state [:transaction-page :category-filter])
+                 :onChange on-category-filter-change}))))
 
 (q/defcomponent TransactionsTable [{:keys [transactions categories ui-state]}]
   (d/div {:className "bg-box"}
@@ -129,8 +126,8 @@
                                                           :ui-state ui-state})) transactions)})))
 
 (q/defcomponent Page [store]
-                (d/div {}
-                       (common/Menu)
-                       (common/TimeFilter (select-keys store [:available-years :time-filter]))
-                       (TransactionFilter store)
-                       (TransactionsTable store)))
+  (d/div {}
+    (common/Menu)
+    (common/TimeFilter (select-keys store [:available-years :time-filter]))
+    (TransactionFilter store)
+    (TransactionsTable store)))
