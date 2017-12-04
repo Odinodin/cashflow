@@ -57,4 +57,10 @@
 
 (defn reset []
   (mount/stop)
-  (mount/start))
+  (create-empty-in-memory-db "datomic:mem://cashflow-db")
+  (mount/start)
+  (bootstrap-testdata))
+
+(comment
+  (run)
+  )

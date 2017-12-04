@@ -3,23 +3,20 @@
   :url "http://example.com/FIXME"
   :source-paths ["src/clj"]
   :test-paths ["test/clj"]
-  :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
-                 [clj-time "0.11.0"]
-                 [cheshire "5.5.0"]
-                 [compojure "1.5.1"]
+  :dependencies [[org.clojure/clojure "1.9.0-RC2"]
+                 [clj-time "0.14.2"]
+                 [cheshire "5.8.0"]
+                 [compojure "1.6.0"]
                  [hiccup "1.0.5"]
-                 [ring-middleware-format "0.5.0"]
-                 [ring "1.5.0"]
+                 [ring-middleware-format "0.7.2"]
+                 [ring "1.6.3"]
                  [mount "0.1.11"]
 
-                 [com.datomic/datomic-free "0.9.5544" :exclusions [joda-time]]
-
-                 ;; GUI
-                 [selmer "0.8.2"]
+                 [com.datomic/datomic-free "0.9.5651" :exclusions [joda-time]]
 
                  ;; Support
-                 [prone "0.8.2"]
-                 [org.clojure/tools.nrepl "0.2.12"]]
+                 [prone "1.1.4"]
+                 [org.clojure/tools.nrepl "0.2.13"]]
   :repl-options {:init-ns repl}
 
   :ring {:handler cashflow.handler/lein-app-handler
@@ -31,8 +28,8 @@
   {:production {:ring
                 {:open-browser? false, :stacktraces? false, :auto-reload? false}}
    :dev {:source-paths ["dev"]
-         :dependencies [[ring/ring-mock "0.2.0"]
-                        [ring/ring-devel "1.4.0"]
+         :dependencies [[ring/ring-mock "0.3.2"]
+                        [ring/ring-devel "1.6.3"]
                         [midje "1.7.0"]
                         [print-foo "1.0.2"]
                         [org.clojure/tools.namespace "0.2.10"]]
