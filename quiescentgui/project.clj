@@ -18,15 +18,9 @@
                  [cljs-http "0.1.42"]
                  [secretary "1.2.3"]]
 
-
   :clean-targets ^{:protect false} ["resources/public/js" "target"]
 
-  ;; Start backend
-  :ring {:handler cashflow.handler/app}
-
   :repl-options {:init-ns cashflow.repl}
-
-  :plugins [[lein-ring "0.10.0"]]
 
   :profiles {:dev {:plugins [[lein-cljsbuild "1.1.5"]]
                    :dependencies [[figwheel-sidecar "0.5.8"]]}})
