@@ -8,7 +8,7 @@
                       :render-count 0
                       :categories []
                       :available-years []
-                      :time-filter {}
+                      :time-filter {:year 2017}
                       :transactions []
                       :net-income []
                       :sum-by-category {}

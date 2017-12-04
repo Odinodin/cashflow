@@ -42,7 +42,6 @@
                   (graphs-page/Page store)))
 
 (defn render [state]
-  (prn "rendering")
   (q/render
     (d/div {}
            (RootComp state))
@@ -62,7 +61,6 @@
   ;; Rerender every time the store changes
   (add-watch effects/store :watcher
     (fn [key atom old-state new-state]
-      (prn "re-rendering!")
       (render new-state)))
 
   ;; Initialize route to current URL

@@ -25,7 +25,8 @@
                                             "flat-button selected"
                                             "flat-button")]
 
-                                  (d/button {:className css
+                                  (d/button {:key (:id graph-type)
+                                             :className css
                                              :onClick   (partial on-button-click graph-type)} (:name graph-type))))
                               graph-types))))
 
@@ -61,13 +62,8 @@
          :categories
          (map (fn [item] [(:category item) (js/Math.abs (:sum item))])))
     (->> (get sum-by-category year)
-         first
-         :categories
+         (mapcat :categories)
          (map (fn [item] [(:category item) (js/Math.abs (:sum item))])))))
-
-
-
-
 
 (defn value-of-category-in [data-for-year category-name month-index]
   (let [month-map (first (filter #(= (:month %) month-index) data-for-year))
@@ -93,18 +89,17 @@
                                (new js/Highcharts.Chart
                                     (clj->js
                                       (deep-merge chart-theme
-                                                  {:chart
-                                                                {:type     "pie"
-                                                                 :renderTo (dom-child-with-class dom-node "graph")}
-                                                   :plotOptions {
-                                                                 :pie {:allowPointSelect true
-                                                                       :cursor           "pointer"
-                                                                       :dataLabels       {:enabled true
-                                                                                          :format  "{point.name} : {point.y}"}}}
-                                                   :xAxis       {:categories ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "July"]}
-                                                   :series      [{:name "Categories"
-                                                                  :type "pie"
-                                                                  :data data}]})))))
+                                        {:chart
+                                         {:type "pie"
+                                          :renderTo (dom-child-with-class dom-node "graph")}
+                                         :plotOptions {:pie {:allowPointSelect true
+                                                             :cursor "pointer"
+                                                             :dataLabels {:enabled true
+                                                                          :format "{point.name} : {point.y}"}}}
+                                         :xAxis {:categories ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "July"]}
+                                         :series [{:name "Categories"
+                                                   :type "pie"
+                                                   :data data}]})))))
                 [store]
                 (d/div {}
                        (common/TimeFilter (select-keys store [:available-years :time-filter]))
@@ -123,12 +118,12 @@
                                (new js/Highcharts.Chart
                                     (clj->js
                                       (deep-merge chart-theme
-                                                  {:chart
-                                                           {:type     "line"
-                                                            :renderTo (dom-child-with-class dom-node "graph")}
+                                        {:chart
+                                         {:type "line"
+                                          :renderTo (dom-child-with-class dom-node "graph")}
 
-                                                   :yAxis {:min 0}
-                                                   :series data})))))
+                                         :yAxis {:min 0}
+                                         :series data})))))
                 [store]
                 (d/div {}
                        (common/YearFilter (select-keys store [:available-years :time-filter]))
